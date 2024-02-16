@@ -1,0 +1,33 @@
+$NavHeight: 60px;
+$ContentHeight: calc(100% - $NavHeight);
+
+.blankSpace {
+  background-color: transparent;
+  flex: 1;
+}
+
+.clipHistoryBoard {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 400px;
+  background-color: rgba($color: #2d3436, $alpha: 0.9);
+
+  .navBar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: $NavHeight;
+  }
+
+  .contents {
+    display: flex;
+    width: 100%;
+    position: relative;
+    height: $ContentHeight;
+    align-items: center;
+    overflow-y: auto;
+  }
+}
