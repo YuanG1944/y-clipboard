@@ -31,6 +31,7 @@ const ClipCard: FC<ICardProps> = ({ context, currId, id, onClick, onDoubleClick 
       className={classnames(styles.clipCard, highlightStyles)}
       onClick={onClick}
       onDoubleClick={onDoubleClick}
+      hoverable
     >
       <div className={styles.clipCardCtx}>
         <Contents />
