@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react';
 import { resolve } from 'path';
 
 export default defineConfig({
-  base: '/',
+  base: './',
   resolve: {
     alias: {
       '@images': resolve(__dirname, './src/assets/images'),

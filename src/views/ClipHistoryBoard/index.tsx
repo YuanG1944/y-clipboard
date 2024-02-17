@@ -7,8 +7,15 @@ import ClipCard from '@/components/ClipCard';
 import { useClipHistoryBoard } from './index.hooks';
 
 const ClipHistoryBoard: FC = () => {
-  const { handleFocus, handleClick, handleDoubleClick, handleBlankSpace, currId, historyCtx } =
-    useClipHistoryBoard();
+  const {
+    handleFocus,
+    handleClick,
+    handleDoubleClick,
+    handleBlankSpace,
+    currId,
+    historyCtx,
+    currIndex,
+  } = useClipHistoryBoard();
 
   return (
     <>

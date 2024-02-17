@@ -4,8 +4,10 @@ import ClipHistoryBoard from '@/views/ClipHistoryBoard';
 
 const Layout: FC = () => {
   return (
-    <div className={styles.layout}>
-      <ClipHistoryBoard />
+    <div id='root'>
+      <div className={styles.layout}>
+        <ClipHistoryBoard />
+      </div>
     </div>
   );
 };
