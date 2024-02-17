@@ -1,8 +1,9 @@
-import { FC } from 'react';
+import { FC, KeyboardEventHandler } from 'react';
+import { Input } from 'antd';
 import styles from './index.module.scss';
-import { Button, Typography, Input } from 'antd';
+import { SearchProps } from 'antd/es/input';
 
-const { Text } = Typography;
+const { Search } = Input;
 
 export interface INavBarProps {
   checkFocus?: (isFocus: boolean) => void;
@@ -17,10 +18,28 @@ const NavBar: FC<INavBarProps> = ({ checkFocus }) => {
     checkFocus && checkFocus(false);
   };
 
+  const handleSearch: SearchProps['onSearch'] = (value, event, info) => {
+    console.info('onSearch--->', info?.source, value);
+  };
+
+  const handleKeyDownSearch: KeyboardEventHandler<HTMLInputElement> = event => {
+    if (event.key === 'Enter') {
+      handleSearch(event.currentTarget.value, event);
+    }
+    console.info('event', event);
+  };
+
   return (
-    <>
-      <Input value={'xxxxx'} style={{ width: 200 }} onFocus={handleFocus} onBlur={handleBlur} />
-    </>
+    <Search
+      allowClear
+      size='small'
+      placeholder='Y-Clips'
+      onFocus={handleFocus}
+      onBlur={handleBlur}
+      onSearch={handleSearch}
+      onKeyDown={handleKeyDownSearch}
+      style={{ width: 280 }}
+    />
   );
 };
 export default NavBar;

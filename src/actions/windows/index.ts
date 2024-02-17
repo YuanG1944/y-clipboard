@@ -1,4 +1,4 @@
-import { BrowserWindow, screen, ipcMain, ipcRenderer } from 'electron';
+import { BrowserWindow, screen, ipcMain, ipcRenderer, globalShortcut } from 'electron';
 import { runAppleScript } from 'run-applescript';
 import Store from 'electron-store';
 import path from 'path';
@@ -80,5 +80,7 @@ export const createWindow = () => {
   registerShortcut(mainWindow);
   registerWindowActions(mainWindow);
 
-  mainWindow.webContents.openDevTools();
+  globalShortcut.register('Alt+CommandOrControl+Shift+D', () => {
+    mainWindow.webContents.openDevTools();
+  });
 };

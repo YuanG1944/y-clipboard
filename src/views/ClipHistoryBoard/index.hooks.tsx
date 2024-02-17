@@ -48,13 +48,13 @@ export const useClipHistoryBoard = () => {
     if (!focus) {
       window?.eBridge?.writeSelected(currId);
       window?.eBridge?.paste();
-      window?.eBridge?.setStoreValue(historyCtx);
+      window?.eBridge?.setStoreValue([]);
     }
   };
 
   const hideWindow = () => {
     window?.eBridge?.hideWindow();
-    window?.eBridge?.setStoreValue(historyCtx);
+    window?.eBridge?.setStoreValue([]);
   };
 
   const sendingExit = () => {
@@ -109,7 +109,7 @@ export const useClipHistoryBoard = () => {
         if (num > 0) {
           return num - 1;
         }
-        return num;
+        return 1;
       });
     }
   });

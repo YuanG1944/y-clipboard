@@ -17,6 +17,13 @@ const ClipCard: FC<ICardProps> = ({ context, currId, id, onClick, onDoubleClick 
     return currId === context.id ? styles.highlight : '';
   }, [currId]);
 
+  const Contents = () => {
+    if (context.html) {
+      return <div dangerouslySetInnerHTML={{ __html: context.html }}></div>;
+    }
+    return context.text;
+  };
+
   return (
     <Card
       id={id}
@@ -25,7 +32,9 @@ const ClipCard: FC<ICardProps> = ({ context, currId, id, onClick, onDoubleClick 
       onClick={onClick}
       onDoubleClick={onDoubleClick}
     >
-      <div className={styles.clipCardCtx}>{String(context.value)}</div>
+      <div className={styles.clipCardCtx}>
+        <Contents />
+      </div>
     </Card>
   );
 };
