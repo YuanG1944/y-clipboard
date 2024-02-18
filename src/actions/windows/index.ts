@@ -1,13 +1,11 @@
 import { BrowserWindow, screen, ipcMain, ipcRenderer, globalShortcut } from 'electron';
 import { runAppleScript } from 'run-applescript';
-import Store from 'electron-store';
 import path from 'path';
 
 import { registerShortcut } from '@/actions/shortcut';
 import { StoreEnum, WinActEnum } from './type';
 import { pasteForMac } from '@/script/apple/paste';
-
-const store = new Store();
+import { store } from '@/store';
 
 const applescript = async () => {
   await runAppleScript(pasteForMac);
@@ -27,7 +25,9 @@ export const showWindow = () => {
 
 export const registerWindowActions = (win: BrowserWindow) => {
   win.on('blur', () => {
-    win.hide();
+    setTimeout(() => {
+      win.hide();
+    }, 400);
   });
 
   ipcMain.on(WinActEnum.PASTE, () => {
@@ -35,7 +35,9 @@ export const registerWindowActions = (win: BrowserWindow) => {
   });
 
   ipcMain.on(WinActEnum.HIDE_WIN, () => {
-    win.hide();
+    setTimeout(() => {
+      win.hide();
+    }, 400);
   });
 
   ipcMain.on(StoreEnum.SET_STORE, (_, key, value) => {
@@ -80,7 +82,7 @@ export const createWindow = () => {
   registerShortcut(mainWindow);
   registerWindowActions(mainWindow);
 
-  globalShortcut.register('Alt+CommandOrControl+Shift+D', () => {
-    mainWindow.webContents.openDevTools();
-  });
+  // globalShortcut.register('Alt+CommandOrControl+Shift+D', () => {
+  mainWindow.webContents.openDevTools();
+  // });
 };

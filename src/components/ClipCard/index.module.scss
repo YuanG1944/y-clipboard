@@ -1,4 +1,5 @@
 .clipCard {
+  box-sizing: content-box;
   cursor: pointer;
   width: 320px;
   height: 95%;
@@ -11,6 +12,8 @@
   }
 
   &Ctx {
+    word-break: break-all;
+    font-size: 16px;
     width: 100%;
     height: 180px;
     overflow-y: auto;
@@ -20,4 +23,12 @@
 
 .highlight {
   border: 3px solid #1677ff;
+  margin-right: 7px;
+}
+
+.title {
+  display: flex;
+  .text {
+    flex: 1;
+  }
 }
