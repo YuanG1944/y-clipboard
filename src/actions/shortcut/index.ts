@@ -5,9 +5,7 @@ const actShortcut = 'CmdOrCtrl+shift+B';
 
 export const registerShortcut = (win: BrowserWindow) => {
   globalShortcut.register(actShortcut, () => {
-    if (win.isVisible()) {
-      win.hide();
-    } else {
+    if (!win.isVisible()) {
       reopenWindowActions(win);
       // address window flicker problem
       win.setOpacity(0);

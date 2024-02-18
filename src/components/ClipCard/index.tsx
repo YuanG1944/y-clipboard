@@ -1,41 +1,89 @@
-import { FC, useMemo } from 'react';
-import { Card } from 'antd';
+import { FC, useMemo, useState } from 'react';
+import { Button, Card } from 'antd';
 import styles from './index.module.scss';
-import { StorageItem } from '@/actions/clipboard/type';
+import { ActiveEnum, StorageItem } from '@/actions/clipboard/type';
 import classnames from 'classnames';
+import CardTitle from './CardTitle';
 
 export interface ICardProps {
   id: string;
   currId: string;
   context: StorageItem;
+  navFocus: boolean;
   onClick?: React.MouseEventHandler<HTMLDivElement>;
   onDoubleClick?: React.MouseEventHandler<HTMLDivElement>;
+  onActiveChange?: (act: ActiveEnum) => void;
 }
 
-const ClipCard: FC<ICardProps> = ({ context, currId, id, onClick, onDoubleClick }) => {
+const ClipCard: FC<ICardProps> = ({
+  context,
+  currId,
+  navFocus,
+  id,
+  onClick,
+  onDoubleClick,
+  onActiveChange,
+}) => {
+  const [active, setActive] = useState(ActiveEnum.Text);
+
+  const focus = useMemo(() => currId === context.id, [currId]);
+
+  const renderUrl = () => {
+    const urlRegex = /img src="([^"]+)"/;
+    const urls = context.html.match(urlRegex);
+    return urls?.length === 2 ? (
+      <a href={urls[1]}>{urls[1]}</a>
+    ) : (
+      <div
+        style={{ wordBreak: 'break-word' }}
+        dangerouslySetInnerHTML={{ __html: context.html }}
+      ></div>
+    );
+  };
+
   const highlightStyles = useMemo(() => {
-    return currId === context.id ? styles.highlight : '';
+    return focus ? styles.highlight : '';
   }, [currId]);
 
-  const Contents = () => {
-    if (context.html) {
-      return <div dangerouslySetInnerHTML={{ __html: context.html }}></div>;
+  const contents = useMemo(() => {
+    switch (active) {
+      case ActiveEnum.Text:
+        return <div>{context.text}</div>;
+      case ActiveEnum.Html:
+        return renderUrl();
+      case ActiveEnum.Image:
+        return <img width='100%' src={context.image} alt='' />;
+      case ActiveEnum.File:
+        return <div>File</div>;
+      default:
+        return <></>;
     }
-    return context.text;
+  }, [active]);
+
+  const handleActiveChange = (act: ActiveEnum) => {
+    setActive(act);
+    onActiveChange(act);
   };
 
   return (
     <Card
       id={id}
-      title={context.formats?.[0]}
+      title={
+        <CardTitle
+          id={id}
+          context={context}
+          currId={currId}
+          onActiveChange={handleActiveChange}
+          focus={focus}
+          navFocus={navFocus}
+        />
+      }
       className={classnames(styles.clipCard, highlightStyles)}
       onClick={onClick}
       onDoubleClick={onDoubleClick}
-      hoverable
+      hoverable={!focus}
     >
-      <div className={styles.clipCardCtx}>
-        <Contents />
-      </div>
+      <div className={styles.clipCardCtx}>{contents}</div>
     </Card>
   );
 };

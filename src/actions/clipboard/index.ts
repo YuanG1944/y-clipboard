@@ -1,15 +1,33 @@
 import { clipboard, ipcRenderer } from 'electron';
-import { ArrChangeCallback, BUFF_FORMAT, StorageItem, TempItem } from './type';
+import { ActiveEnum, ActiveMapping, ArrChangeCallback, StorageItem } from './type';
 import { v4 as uuid } from 'uuid';
 import { StoreEnum, CLIP_HISTORY } from '@/actions/windows/type';
 
 let timer: NodeJS.Timeout = null;
-const clipHistory: StorageItem[] = [];
+let clipHistory: StorageItem[] = [];
 
-const formatToString = (format: string[]) => format.join(',');
+export const defaultFormat = (format: string[]) => {
+  const num = format.reduce((pre, item) => {
+    return pre + (ActiveMapping?.[item as ActiveEnum] || 0);
+  }, 0);
+  if (num >> 3) {
+    return ActiveEnum.File;
+  }
+  if (num >> 2) {
+    return ActiveEnum.Image;
+  }
+  if (num >> 1) {
+    return ActiveEnum.Text;
+  }
+  if (num) {
+    return ActiveEnum.Html;
+  }
+  return ActiveEnum.Text;
+};
 
 const setStoreValue = (value: StorageItem[]) => {
-  ipcRenderer.send(StoreEnum.SET_STORE, CLIP_HISTORY, value);
+  clipHistory = value;
+  // ipcRenderer.send(StoreEnum.SET_STORE, CLIP_HISTORY, value);
 };
 
 const getStoreValue = () => ipcRenderer.sendSync(StoreEnum.GET_STORE, CLIP_HISTORY);
@@ -23,11 +41,9 @@ const queryById = (id: string) => {
 };
 
 const isSameElements = (pre: StorageItem, curr: StorageItem) => {
+  if (!(curr?.text || '').trim() || !(curr?.html || '').trim()) return true;
   if (!pre?.text && !pre?.html) return false;
-  if (!(curr?.text || '').trim() && !(curr?.html || '').trim()) return true;
-  if (formatToString(curr.formats).includes('image')) {
-    // console.info('pre', pre.html);
-    // console.info('pre', curr.html);
+  if (curr.formats.includes(ActiveEnum.Image)) {
     if (pre?.html === curr?.html) return true;
   }
   if (pre?.text === curr?.text) return true;
@@ -35,24 +51,29 @@ const isSameElements = (pre: StorageItem, curr: StorageItem) => {
 };
 
 const assembleCopyItem = (): StorageItem => {
+  const formats = clipboard.availableFormats();
+  const defaultActive = defaultFormat(formats);
+
   const value: StorageItem = {
     id: uuid(),
     text: clipboard?.readText(),
     rtf: clipboard?.readRTF(),
     html: clipboard?.readHTML(),
     bookmark: clipboard?.readBookmark(),
-    formats: clipboard.availableFormats(),
+    formats,
+    defaultActive,
     timeStamp: new Date().getTime(),
   };
 
+  // console.info('formats', clipboard.availableFormats());
+
   const image = clipboard.readImage();
-  if (formatToString(value.formats).includes('image') && !image.isEmpty()) {
+  if (value.formats.includes(ActiveEnum.Image) && !image.isEmpty()) {
     value.image = image.toDataURL();
   }
-  if (formatToString(value.formats).includes('uri')) {
+  if (value.formats.includes(ActiveEnum.File)) {
     value.text = clipboard.readBuffer('public.file-url').toString();
   }
-  // console.info('value-->', value);
 
   return value;
 };
@@ -60,8 +81,6 @@ const assembleCopyItem = (): StorageItem => {
 const clipboardOb = (cb: ArrChangeCallback) => () => {
   const preCopy = getPreCopy();
   const curr = assembleCopyItem();
-
-  // console.info(isSameElements(preCopy, curr));
 
   if (isSameElements(preCopy, curr)) {
     return;
@@ -85,16 +104,14 @@ const stop = () => {
 
 const writeSelected = (id: string) => {
   const curr = queryById(id);
+  const active = curr.defaultActive;
   // if (curr.image && !curr.image.isEmpty()) {
   //   return clipboard.writeImage(curr.image);
   // }
-  if (curr.text) {
+  if (active === ActiveEnum.Text) {
     return clipboard.writeText(curr.text);
   }
-  if (curr.rtf) {
-    return clipboard.writeRTF(curr.rtf);
-  }
-  if (curr.html) {
+  if (active === ActiveEnum.Html) {
     return clipboard.writeHTML(curr.html);
   }
 };

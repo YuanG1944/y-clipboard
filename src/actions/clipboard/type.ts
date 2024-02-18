@@ -14,6 +14,7 @@ export interface StorageItem {
   image?: string;
   formats: string[];
   timeStamp: number;
+  defaultActive: ActiveEnum;
 }
 
 export interface TempItem {
@@ -21,3 +22,24 @@ export interface TempItem {
   html: string;
   formats: string[];
 }
+
+export enum ActiveEnum {
+  Text = 'text/plain',
+  Html = 'text/html',
+  Image = 'image/png',
+  File = 'text/uri-list',
+}
+
+export const ActiveTitle = {
+  [ActiveEnum.Text]: 'Text',
+  [ActiveEnum.Html]: 'Format',
+  [ActiveEnum.Image]: 'Image',
+  [ActiveEnum.File]: 'File',
+};
+
+export const ActiveMapping = {
+  [ActiveEnum.File]: 0b1000,
+  [ActiveEnum.Image]: 0b0100,
+  [ActiveEnum.Text]: 0b0010,
+  [ActiveEnum.Html]: 0b0001,
+};
