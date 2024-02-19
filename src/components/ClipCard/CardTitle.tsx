@@ -2,16 +2,17 @@ import { FC, useEffect, useState } from 'react';
 import { Button } from 'antd';
 
 import styles from './index.module.scss';
-import { ActiveEnum, ActiveMapping, ActiveTitle, StorageItem } from '@/actions/clipboard/type';
+import { ActiveEnum, ActiveTitle, StorageItem } from '@/actions/clipboard/type';
 import { useKeyPress } from 'ahooks';
 
 export interface ICardTitle {
   id: string;
   currId: string;
   context: StorageItem;
-  onActiveChange: (act: ActiveEnum) => void;
   focus: boolean;
   navFocus: boolean;
+  onActiveChange?: (act: ActiveEnum) => void;
+  onSwitchChange?: () => void;
 }
 
 export interface ITitleActive {
@@ -20,7 +21,14 @@ export interface ITitleActive {
   tag: ActiveEnum;
 }
 
-const CardTitle: FC<ICardTitle> = ({ context, focus, currId, navFocus, onActiveChange }) => {
+const CardTitle: FC<ICardTitle> = ({
+  context,
+  focus,
+  currId,
+  navFocus,
+  onActiveChange,
+  onSwitchChange,
+}) => {
   const [titleList, setTitleList] = useState<ITitleActive[]>([]);
   const [activeEnum, setActiveEnum] = useState(ActiveEnum.Text);
 
@@ -95,6 +103,7 @@ const CardTitle: FC<ICardTitle> = ({ context, focus, currId, navFocus, onActiveC
           ];
         }, [])
       );
+      onSwitchChange();
     }
   };
 
@@ -117,6 +126,7 @@ const CardTitle: FC<ICardTitle> = ({ context, focus, currId, navFocus, onActiveC
         };
       });
       setTitleList(nextList);
+      onSwitchChange();
     }
   };
 

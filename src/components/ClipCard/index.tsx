@@ -1,9 +1,10 @@
 import { FC, useMemo, useState } from 'react';
-import { Button, Card } from 'antd';
+import { Card } from 'antd';
 import styles from './index.module.scss';
 import { ActiveEnum, StorageItem } from '@/actions/clipboard/type';
 import classnames from 'classnames';
 import CardTitle from './CardTitle';
+import QueueAnim from 'rc-queue-anim';
 
 export interface ICardProps {
   id: string;
@@ -25,6 +26,7 @@ const ClipCard: FC<ICardProps> = ({
   onActiveChange,
 }) => {
   const [active, setActive] = useState(ActiveEnum.Text);
+  const [show, setShow] = useState(true);
 
   const focus = useMemo(() => currId === context.id, [currId]);
 
@@ -65,6 +67,17 @@ const ClipCard: FC<ICardProps> = ({
     onActiveChange(act);
   };
 
+  const handleSwitchChange = () => {
+    handleOnSwitch();
+  };
+
+  const handleOnSwitch = () => {
+    setShow(false);
+    setTimeout(() => {
+      setShow(true);
+    }, 300);
+  };
+
   return (
     <Card
       id={id}
@@ -73,9 +86,10 @@ const ClipCard: FC<ICardProps> = ({
           id={id}
           context={context}
           currId={currId}
-          onActiveChange={handleActiveChange}
           focus={focus}
           navFocus={navFocus}
+          onActiveChange={handleActiveChange}
+          onSwitchChange={handleSwitchChange}
         />
       }
       className={classnames(styles.clipCard, highlightStyles)}
@@ -83,7 +97,13 @@ const ClipCard: FC<ICardProps> = ({
       onDoubleClick={onDoubleClick}
       hoverable={!focus}
     >
-      <div className={styles.clipCardCtx}>{contents}</div>
+      <QueueAnim type={'left'} ease={'easeInOutQuart'} key='ani'>
+        {show ? (
+          <div className={styles.clipCardCtx} key={'num2'}>
+            {contents}
+          </div>
+        ) : null}
+      </QueueAnim>
     </Card>
   );
 };

@@ -1,4 +1,4 @@
-import { clipboard, ipcRenderer } from 'electron';
+import { clipboard, ipcRenderer, nativeImage } from 'electron';
 import { ActiveEnum, ActiveMapping, ArrChangeCallback, StorageItem } from './type';
 import { v4 as uuid } from 'uuid';
 import { StoreEnum, CLIP_HISTORY } from '@/actions/windows/type';
@@ -41,11 +41,12 @@ const queryById = (id: string) => {
 };
 
 const isSameElements = (pre: StorageItem, curr: StorageItem) => {
-  if (!(curr?.text || '').trim() || !(curr?.html || '').trim()) return true;
-  if (!pre?.text && !pre?.html) return false;
   if (curr.formats.includes(ActiveEnum.Image)) {
     if (pre?.html === curr?.html) return true;
+    return false;
   }
+  if (!(curr?.text || '').trim() || !(curr?.html || '').trim()) return true;
+  if (!pre?.text && !pre?.html) return false;
   if (pre?.text === curr?.text) return true;
   return false;
 };
@@ -65,12 +66,16 @@ const assembleCopyItem = (): StorageItem => {
     timeStamp: new Date().getTime(),
   };
 
-  // console.info('formats', clipboard.availableFormats());
-
   const image = clipboard.readImage();
+
   if (value.formats.includes(ActiveEnum.Image) && !image.isEmpty()) {
+    const urlRegex = /img src="([^"]+)"/;
+    const urls = value.html.match(urlRegex);
+    value.formats = [...value.formats.filter(item => item !== ActiveEnum.Html), ActiveEnum.Text];
+    value.text = urls?.length === 2 ? urls[1] : '';
     value.image = image.toDataURL();
   }
+
   if (value.formats.includes(ActiveEnum.File)) {
     value.text = clipboard.readBuffer('public.file-url').toString();
   }
@@ -104,15 +109,22 @@ const stop = () => {
 
 const writeSelected = (id: string) => {
   const curr = queryById(id);
-  const active = curr.defaultActive;
-  // if (curr.image && !curr.image.isEmpty()) {
-  //   return clipboard.writeImage(curr.image);
-  // }
+  const active = curr?.defaultActive;
   if (active === ActiveEnum.Text) {
-    return clipboard.writeText(curr.text);
+    clipboard.writeText(curr.text);
+    return;
   }
   if (active === ActiveEnum.Html) {
-    return clipboard.writeHTML(curr.html);
+    clipboard.writeHTML(curr.html);
+    return;
+  }
+  if (active === ActiveEnum.Image) {
+    clipboard.writeHTML(curr.html);
+    return;
+  }
+  if (active === ActiveEnum.File) {
+    clipboard.writeBuffer('public.file-url', Buffer.from(curr.text, 'utf-8'));
+    return;
   }
 };
 
