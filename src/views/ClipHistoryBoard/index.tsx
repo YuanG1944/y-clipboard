@@ -58,7 +58,7 @@ const ClipHistoryBoard: FC = () => {
   };
 
   const handleClick = (currId: string) => () => {
-    const idx = historyCtx.findIndex(ctx => ctx.id === currId);
+    const idx = historyCtx.findIndex((ctx) => ctx.id === currId);
     if (idx !== -1) {
       setCurrIndex(setCurrIndexChange(idx));
     }
@@ -98,7 +98,7 @@ const ClipHistoryBoard: FC = () => {
   };
 
   const handleActiveChange = (act: ActiveEnum) => {
-    const ctx = historyCtx.map(it => {
+    const ctx = historyCtx.map((it) => {
       if (it.id === currId) {
         return {
           ...it,
@@ -111,7 +111,7 @@ const ClipHistoryBoard: FC = () => {
   };
 
   useKeyPress('rightarrow', () => {
-    setCurrIndex(num => {
+    setCurrIndex((num) => {
       if (!focus && Number(num) < historyCtx.length - 1) {
         return Number(num) + 1;
       }
@@ -120,7 +120,7 @@ const ClipHistoryBoard: FC = () => {
   });
 
   useKeyPress('leftarrow', () => {
-    setCurrIndex(num => {
+    setCurrIndex((num) => {
       if (!focus && Number(num) > 0) {
         return Number(num) - 1;
       }
@@ -138,9 +138,9 @@ const ClipHistoryBoard: FC = () => {
 
   useKeyPress('backspace', () => {
     if (!focus) {
-      setPreviewHistoryCtx(arr => [...arr, historyCtx]);
-      setHistoryCtx(ctx => ctx.filter(item => currId !== item.id));
-      setCurrIndex(num => {
+      setPreviewHistoryCtx((arr) => [...arr, historyCtx]);
+      setHistoryCtx((ctx) => ctx.filter((item) => currId !== item.id));
+      setCurrIndex((num) => {
         if (Number(num) > 0) {
           return Number(num) - 1;
         }
@@ -153,7 +153,7 @@ const ClipHistoryBoard: FC = () => {
     if (!focus) {
       if (!preHistoryCtx.length) return;
       setHistoryCtx(preHistoryCtx.slice(-1)[0]);
-      setPreviewHistoryCtx(arr => arr.slice(0, -1));
+      setPreviewHistoryCtx((arr) => arr.slice(0, -1));
     }
   });
 
@@ -173,13 +173,13 @@ const ClipHistoryBoard: FC = () => {
   return (
     <>
       <div className={styles.blankSpace} onClick={handleBlankSpace}></div>
-      <QueueAnim className={styles.animateLayout} type={'bottom'} ease={'easeInOutQuart'} key='ani'>
+      <QueueAnim className={styles.animateLayout} type={'bottom'} ease={'easeInOutQuart'} key="ani">
         {show ? (
-          <div className={styles.clipHistoryBoard} key='aniBar'>
+          <div className={styles.clipHistoryBoard} key="aniBar">
             <div className={styles.navBar}>
               <NavBar checkFocus={handleFocus} />
             </div>
-            <div className={styles.contents} key='aniCard'>
+            <div className={styles.contents} key="aniCard">
               {historyCtx.map((ctx, idx) => (
                 <ClipCard
                   currId={currId}
