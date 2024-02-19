@@ -1,1 +1,3 @@
-export const pasteForMac = ``;
+export const pasteForWindows = ``;
+
+export const winscript = async () => {};

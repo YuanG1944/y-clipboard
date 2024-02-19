@@ -1,15 +1,10 @@
-import { BrowserWindow, screen, ipcMain, ipcRenderer, globalShortcut } from 'electron';
-import { runAppleScript } from 'run-applescript';
+import { BrowserWindow, screen, ipcMain, ipcRenderer } from 'electron';
 import path from 'path';
 
 import { registerShortcut } from '@/actions/shortcut';
 import { StoreEnum, WinActEnum } from './type';
-import { pasteForMac } from '@/script/apple/paste';
 import { store } from '@/store';
-
-const applescript = async () => {
-  await runAppleScript(pasteForMac);
-};
+import { pastescript } from '@/script/paste.script';
 
 export const hideWindow = () => {
   ipcRenderer.send(WinActEnum.HIDE_WIN);
@@ -31,7 +26,7 @@ export const registerWindowActions = (win: BrowserWindow) => {
   });
 
   ipcMain.on(WinActEnum.PASTE, () => {
-    applescript();
+    pastescript();
   });
 
   ipcMain.on(WinActEnum.HIDE_WIN, () => {
