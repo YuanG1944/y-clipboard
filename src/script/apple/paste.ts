@@ -1,3 +1,5 @@
+import { runAppleScript } from 'run-applescript';
+
 export const pasteForMac = `
 tell application "System Events"
   key down control
@@ -10,3 +12,7 @@ tell application "System Events"
   key up command
 end tell
 `;
+
+export const applescript = async () => {
+  await runAppleScript(pasteForMac);
+};
