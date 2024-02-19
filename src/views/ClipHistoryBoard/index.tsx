@@ -11,10 +11,24 @@ import { ActiveEnum, StorageItem } from '@/actions/clipboard/type';
 const ClipHistoryBoard: FC = () => {
   const [historyCtx, setHistoryCtx] = useState<StorageItem[]>([]);
   const [preHistoryCtx, setPreviewHistoryCtx] = useState<StorageItem[][]>([]);
-  const [currIndex, setCurrIndex] = useState(-1);
+  const [currIndex, setCurrIndex] = useState<number | string>(-1);
   const [currId, setCurrId] = useState<string>('');
   const [focus, setFocus] = useState(false);
   const [show, setShow] = useState(false);
+
+  /**
+   * Make sure currIndex change to rerender dom
+   * @param num
+   * @returns num | string
+   */
+  const setCurrIndexChange = (num: number | string) => {
+    if (typeof currIndex === 'number') {
+      return String(num);
+    }
+    if (typeof num === 'string') {
+      return Number(num);
+    }
+  };
 
   const handleAnchor = (id: string) => {
     if (id) {
@@ -29,7 +43,7 @@ const ClipHistoryBoard: FC = () => {
     if (arr?.length) {
       setHistoryCtx(arr);
       setTimeout(() => {
-        setCurrIndex(0);
+        setCurrIndex(setCurrIndexChange('0'));
       }, 100);
     }
   };
@@ -46,7 +60,7 @@ const ClipHistoryBoard: FC = () => {
   const handleClick = (currId: string) => () => {
     const idx = historyCtx.findIndex(ctx => ctx.id === currId);
     if (idx !== -1) {
-      setCurrIndex(idx);
+      setCurrIndex(setCurrIndexChange(idx));
     }
   };
 
@@ -98,19 +112,19 @@ const ClipHistoryBoard: FC = () => {
 
   useKeyPress('rightarrow', () => {
     setCurrIndex(num => {
-      if (!focus && num < historyCtx.length - 1) {
-        return num + 1;
+      if (!focus && Number(num) < historyCtx.length - 1) {
+        return Number(num) + 1;
       }
-      return num;
+      return setCurrIndexChange(num);
     });
   });
 
   useKeyPress('leftarrow', () => {
     setCurrIndex(num => {
-      if (!focus && num > 0) {
-        return num - 1;
+      if (!focus && Number(num) > 0) {
+        return Number(num) - 1;
       }
-      return num;
+      return setCurrIndexChange(num);
     });
   });
 
@@ -127,10 +141,10 @@ const ClipHistoryBoard: FC = () => {
       setPreviewHistoryCtx(arr => [...arr, historyCtx]);
       setHistoryCtx(ctx => ctx.filter(item => currId !== item.id));
       setCurrIndex(num => {
-        if (num > 0) {
-          return num - 1;
+        if (Number(num) > 0) {
+          return Number(num) - 1;
         }
-        return 1;
+        return setCurrIndexChange(num);
       });
     }
   });
@@ -144,7 +158,7 @@ const ClipHistoryBoard: FC = () => {
   });
 
   useEffect(() => {
-    const id = historyCtx?.[currIndex]?.id || '';
+    const id = historyCtx?.[Number(currIndex)]?.id || '';
     handleAnchor(`clip-${currIndex}`);
     setCurrId(id);
   }, [currIndex]);

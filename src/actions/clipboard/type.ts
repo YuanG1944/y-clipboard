@@ -12,6 +12,10 @@ export interface StorageItem {
   bookmark?: ReadBookmark;
   buffer?: Buffer;
   image?: string;
+  size?: {
+    height: number;
+    width: number;
+  };
   formats: string[];
   timeStamp: number;
   defaultActive: ActiveEnum;
