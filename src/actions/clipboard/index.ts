@@ -37,7 +37,7 @@ const getClipHistory = () => clipHistory;
 const getPreCopy = () => clipHistory?.[0] ?? null;
 
 const queryById = (id: string) => {
-  return clipHistory.find(item => item.id === id);
+  return clipHistory.find((item) => item.id === id);
 };
 
 const isSameElements = (pre: StorageItem, curr: StorageItem) => {
@@ -71,7 +71,7 @@ const assembleCopyItem = (): StorageItem => {
   if (value.formats.includes(ActiveEnum.Image) && !image.isEmpty()) {
     const urlRegex = /img src="([^"]+)"/;
     const urls = value.html.match(urlRegex);
-    value.formats = [...value.formats.filter(item => item !== ActiveEnum.Html), ActiveEnum.Text];
+    value.formats = [...value.formats.filter((item) => item !== ActiveEnum.Html), ActiveEnum.Text];
     value.text = urls?.length === 2 ? urls[1] : '';
     value.image = image.toDataURL();
   }
