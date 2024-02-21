@@ -6,10 +6,23 @@ import { StoreEnum, CLIP_HISTORY } from '@/actions/windows/type';
 let timer: NodeJS.Timeout = null;
 let clipHistory: StorageItem[] = [];
 
+const moveToFirst = (storageArr: StorageItem[], id: string) => {
+  const tempArr = storageArr;
+  if (!id) return tempArr;
+  const index = tempArr.findIndex((item) => item.id === id);
+  if (index > -1) {
+    const item = tempArr.splice(index, 1)[0];
+    tempArr.unshift(item);
+  }
+  return tempArr;
+};
+
 export const defaultFormat = (format: string[]) => {
   const num = format.reduce((pre, item) => {
     return pre + (ActiveMapping?.[item as ActiveEnum] || 0);
   }, 0);
+  // console.info('format-->', format);
+  // console.info('num-->', num);
   if (num >> 3) {
     return ActiveEnum.File;
   }
@@ -25,8 +38,8 @@ export const defaultFormat = (format: string[]) => {
   return ActiveEnum.Text;
 };
 
-const setStoreValue = (value: StorageItem[]) => {
-  clipHistory = value;
+const setStoreValue = (value: StorageItem[], currId: string = '') => {
+  clipHistory = moveToFirst(value, currId);
   // ipcRenderer.send(StoreEnum.SET_STORE, CLIP_HISTORY, value);
 };
 
@@ -64,6 +77,7 @@ const assembleCopyItem = (): StorageItem => {
     formats,
     defaultActive,
     timeStamp: new Date().getTime(),
+    collect: false,
   };
 
   const image = clipboard.readImage();
@@ -90,6 +104,8 @@ const clipboardOb = (cb: ArrChangeCallback) => () => {
   if (isSameElements(preCopy, curr)) {
     return;
   }
+  console.info('preCopy-->', preCopy);
+  console.info('curr-->', curr);
 
   clipHistory.unshift(curr);
   cb(clipHistory);

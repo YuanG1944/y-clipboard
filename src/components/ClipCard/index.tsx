@@ -54,7 +54,7 @@ const ClipCard: FC<ICardProps> = ({
       case ActiveEnum.Html:
         return renderUrl();
       case ActiveEnum.Image:
-        return <img width='100%' src={context.image} alt='' />;
+        return <img width="100%" src={context.image} alt="" />;
       case ActiveEnum.File:
         return <div>File</div>;
       default:
@@ -97,7 +97,7 @@ const ClipCard: FC<ICardProps> = ({
       onDoubleClick={onDoubleClick}
       hoverable={!focus}
     >
-      <QueueAnim type={'left'} ease={'easeInOutQuart'} key='ani'>
+      <QueueAnim type={'left'} ease={'easeInOutQuart'} key="ani">
         {show ? (
           <div className={styles.clipCardCtx} key={'num2'}>
             {contents}

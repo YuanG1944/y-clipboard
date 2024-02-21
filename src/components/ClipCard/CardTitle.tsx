@@ -34,6 +34,7 @@ const CardTitle: FC<ICardTitle> = ({
 
   const initDefaultTitle = () => {
     setActiveEnum(context.defaultActive);
+    console.info('context--->', context);
     const arr = context.formats.reduce((pre, item) => {
       const active = context.defaultActive === item;
       switch (item) {
@@ -83,7 +84,7 @@ const CardTitle: FC<ICardTitle> = ({
   const handleTitleChange = (value: ITitleActive) => () => {
     if (focus) {
       setActiveEnum(value.tag);
-      setTitleList(val =>
+      setTitleList((val) =>
         val.reduce((pre, item) => {
           if (item.tag === value.tag) {
             return [
@@ -101,7 +102,7 @@ const CardTitle: FC<ICardTitle> = ({
               active: false,
             },
           ];
-        }, [])
+        }, []),
       );
       onSwitchChange();
     }
@@ -110,7 +111,7 @@ const CardTitle: FC<ICardTitle> = ({
   const handleArrowActive = (op: 'up' | 'down') => {
     if (context.id === currId) {
       const n = titleList.length;
-      const idx = titleList.findIndex(item => item.active);
+      const idx = titleList.findIndex((item) => item.active);
       const pre = op === 'up' ? (idx - 1 + n) % n : (idx + 1) % n;
       const nextList = titleList.map((item, index) => {
         if (index === pre) {
@@ -148,15 +149,15 @@ const CardTitle: FC<ICardTitle> = ({
 
   return (
     <div className={styles.title}>
-      <div className={styles.text}>{titleList.filter(item => item.active)?.[0]?.title}</div>
+      <div className={styles.text}>{titleList.filter((item) => item.active)?.[0]?.title}</div>
       <div>
         {titleList
-          .filter(item => !item.active)
+          .filter((item) => !item.active)
           .map((item, index) => {
             return (
               <Button
                 disabled={!focus}
-                type='text'
+                type="text"
                 key={`${item.title}-${index}`}
                 onClick={handleTitleChange(item)}
               >

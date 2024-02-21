@@ -1,7 +1,9 @@
 import { execSync } from 'child_process';
 
-export const pasteForWindows = `$wshell = New-Object -ComObject wscript.shell;
-$wshell.SendKeys("^(c)")`;
+export const pasteForWindows = `
+  $wshell = New-Object -ComObject wscript.shell;
+  $wshell.SendKeys("^(c)")
+`;
 
 export const winscript = async () => {
   try {

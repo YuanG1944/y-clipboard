@@ -19,6 +19,7 @@ export interface StorageItem {
   formats: string[];
   timeStamp: number;
   defaultActive: ActiveEnum;
+  collect?: boolean;
 }
 
 export interface TempItem {

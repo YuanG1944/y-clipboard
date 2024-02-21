@@ -6,7 +6,7 @@ import styles from './index.module.scss';
 import ClipCard from '@/components/ClipCard';
 import QueueAnim from 'rc-queue-anim';
 import { useKeyPress } from 'ahooks';
-import { ActiveEnum, StorageItem } from '@/actions/clipboard/type';
+import { StorageItem } from '@/actions/clipboard/type';
 
 const ClipHistoryBoard: FC = () => {
   const [historyCtx, setHistoryCtx] = useState<StorageItem[]>([]);
@@ -66,7 +66,7 @@ const ClipHistoryBoard: FC = () => {
 
   const sendingPaste = () => {
     if (!focus) {
-      window?.eBridge?.setStoreValue(historyCtx);
+      window?.eBridge?.setStoreValue(historyCtx, currId);
       window?.eBridge?.writeSelected(currId);
       window?.eBridge?.paste();
       setShow(false);
@@ -97,18 +97,18 @@ const ClipHistoryBoard: FC = () => {
     hideWindow();
   };
 
-  const handleActiveChange = (act: ActiveEnum) => {
-    const ctx = historyCtx.map((it) => {
-      if (it.id === currId) {
-        return {
-          ...it,
-          defaultActive: act,
-        };
-      }
-      return it;
-    });
-    setHistoryCtx(ctx);
-  };
+  // const handleActiveChange = (act: ActiveEnum) => {
+  //   const ctx = historyCtx.map((it) => {
+  //     if (it.id === currId) {
+  //       return {
+  //         ...it,
+  //         defaultActive: act,
+  //       };
+  //     }
+  //     return it;
+  //   });
+  //   setHistoryCtx(ctx);
+  // };
 
   useKeyPress('rightarrow', () => {
     setCurrIndex((num) => {
@@ -189,7 +189,6 @@ const ClipHistoryBoard: FC = () => {
                   navFocus={focus}
                   onClick={handleClick(ctx.id)}
                   onDoubleClick={handleDoubleClick}
-                  onActiveChange={handleActiveChange}
                 />
               ))}
             </div>
