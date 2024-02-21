@@ -1,9 +1,9 @@
-import { clipboard, ipcRenderer, nativeImage } from 'electron';
+// import { clipboard, ipcRenderer, nativeImage } from 'electron';
 import { ActiveEnum, ActiveMapping, ArrChangeCallback, StorageItem } from './type';
 import { v4 as uuid } from 'uuid';
 import { StoreEnum, CLIP_HISTORY } from '@/actions/windows/type';
 
-let timer: NodeJS.Timeout = null;
+let timer: number | null = null;
 let clipHistory: StorageItem[] = [];
 
 const moveToFirst = (storageArr: StorageItem[], id: string) => {
@@ -43,7 +43,7 @@ const setStoreValue = (value: StorageItem[], currId: string = '') => {
   // ipcRenderer.send(StoreEnum.SET_STORE, CLIP_HISTORY, value);
 };
 
-const getStoreValue = () => ipcRenderer.sendSync(StoreEnum.GET_STORE, CLIP_HISTORY);
+const getStoreValue = () => {};
 
 const getClipHistory = () => clipHistory;
 
@@ -54,47 +54,42 @@ const queryById = (id: string) => {
 };
 
 const isSameElements = (pre: StorageItem, curr: StorageItem) => {
-  if (curr.formats.includes(ActiveEnum.Image)) {
-    if (pre?.html === curr?.html) return true;
-    return false;
-  }
-  if (!(curr?.text || '').trim() || !(curr?.html || '').trim()) return true;
-  if (!pre?.text && !pre?.html) return false;
-  if (pre?.text === curr?.text) return true;
+  // if (curr.formats.includes(ActiveEnum.Image)) {
+  //   if (pre?.html === curr?.html) return true;
+  //   return false;
+  // }
+  // if (!(curr?.text || '').trim() || !(curr?.html || '').trim()) return true;
+  // if (!pre?.text && !pre?.html) return false;
+  // if (pre?.text === curr?.text) return true;
   return false;
 };
 
 const assembleCopyItem = (): StorageItem => {
-  const formats = clipboard.availableFormats();
-  const defaultActive = defaultFormat(formats);
-
-  const value: StorageItem = {
-    id: uuid(),
-    text: clipboard?.readText(),
-    rtf: clipboard?.readRTF(),
-    html: clipboard?.readHTML(),
-    bookmark: clipboard?.readBookmark(),
-    formats,
-    defaultActive,
-    timeStamp: new Date().getTime(),
-    collect: false,
-  };
-
-  const image = clipboard.readImage();
-
-  if (value.formats.includes(ActiveEnum.Image) && !image.isEmpty()) {
-    const urlRegex = /img src="([^"]+)"/;
-    const urls = value.html.match(urlRegex);
-    value.formats = [...value.formats.filter((item) => item !== ActiveEnum.Html), ActiveEnum.Text];
-    value.text = urls?.length === 2 ? urls[1] : '';
-    value.image = image.toDataURL();
-  }
-
-  if (value.formats.includes(ActiveEnum.File)) {
-    value.text = clipboard.readBuffer('public.file-url').toString();
-  }
-
-  return value;
+  // const formats = clipboard.availableFormats();
+  // const defaultActive = defaultFormat(formats);
+  // const value: StorageItem = {
+  //   id: uuid(),
+  //   text: clipboard?.readText(),
+  //   rtf: clipboard?.readRTF(),
+  //   html: clipboard?.readHTML(),
+  //   bookmark: clipboard?.readBookmark(),
+  //   formats,
+  //   defaultActive,
+  //   timeStamp: new Date().getTime(),
+  //   collect: false,
+  // };
+  // const image = clipboard.readImage();
+  // if (value.formats.includes(ActiveEnum.Image) && !image.isEmpty()) {
+  //   const urlRegex = /img src="([^"]+)"/;
+  //   const urls = value.html.match(urlRegex);
+  //   value.formats = [...value.formats.filter((item) => item !== ActiveEnum.Html), ActiveEnum.Text];
+  //   value.text = urls?.length === 2 ? urls[1] : '';
+  //   value.image = image.toDataURL();
+  // }
+  // if (value.formats.includes(ActiveEnum.File)) {
+  //   value.text = clipboard.readBuffer('public.file-url').toString();
+  // }
+  return {};
 };
 
 const clipboardOb = (cb: ArrChangeCallback) => () => {
@@ -127,19 +122,19 @@ const writeSelected = (id: string) => {
   const curr = queryById(id);
   const active = curr?.defaultActive;
   if (active === ActiveEnum.Text) {
-    clipboard.writeText(curr.text);
+    // clipboard.writeText(curr.text);
     return;
   }
   if (active === ActiveEnum.Html) {
-    clipboard.writeHTML(curr.html);
+    // clipboard.writeHTML(curr.html);
     return;
   }
   if (active === ActiveEnum.Image) {
-    clipboard.writeHTML(curr.html);
+    // clipboard.writeHTML(curr.html);
     return;
   }
   if (active === ActiveEnum.File) {
-    clipboard.writeBuffer('public.file-url', Buffer.from(curr.text, 'utf-8'));
+    // clipboard.writeBuffer('public.file-url', Buffer.from(curr.text, 'utf-8'));
     return;
   }
 };

@@ -1,13 +1,8 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
 import Layout from '@/views/Layout';
-
 import './global.scss';
 
-const root = document.getElementById('root');
+const App = () => {
+  return <Layout />;
+};
 
-ReactDOM.createRoot(root).render(
-  <React.StrictMode>
-    <Layout />
-  </React.StrictMode>
-);
+export default App;

@@ -25,9 +25,7 @@ const ClipHistoryBoard: FC = () => {
     if (typeof currIndex === 'number') {
       return String(num);
     }
-    if (typeof num === 'string') {
-      return Number(num);
-    }
+    return Number(num);
   };
 
   const handleAnchor = (id: string) => {
@@ -39,13 +37,13 @@ const ClipHistoryBoard: FC = () => {
   };
 
   const handleBridge = () => {
-    const arr = window?.eBridge?.getClipHistory() as StorageItem[];
-    if (arr?.length) {
-      setHistoryCtx(arr);
-      setTimeout(() => {
-        setCurrIndex(setCurrIndexChange('0'));
-      }, 100);
-    }
+    // const arr = window?.eBridge?.getClipHistory() as StorageItem[];
+    // if (arr?.length) {
+    //   setHistoryCtx(arr);
+    //   setTimeout(() => {
+    //     setCurrIndex(setCurrIndexChange('0'));
+    //   }, 100);
+    // }
   };
 
   const handleVisibility = () => {
@@ -60,23 +58,23 @@ const ClipHistoryBoard: FC = () => {
   const handleClick = (currId: string) => () => {
     const idx = historyCtx.findIndex((ctx) => ctx.id === currId);
     if (idx !== -1) {
-      setCurrIndex(setCurrIndexChange(idx));
+      // setCurrIndex(setCurrIndexChange(idx));
     }
   };
 
   const sendingPaste = () => {
     if (!focus) {
-      window?.eBridge?.setStoreValue(historyCtx, currId);
-      window?.eBridge?.writeSelected(currId);
-      window?.eBridge?.paste();
+      // window?.eBridge?.setStoreValue(historyCtx, currId);
+      // window?.eBridge?.writeSelected(currId);
+      // window?.eBridge?.paste();
       setShow(false);
     }
   };
 
   const hideWindow = () => {
     setShow(false);
-    window?.eBridge?.hideWindow();
-    window?.eBridge?.setStoreValue(historyCtx);
+    // window?.eBridge?.hideWindow();
+    // window?.eBridge?.setStoreValue(historyCtx);
   };
 
   const sendingExit = () => {
@@ -187,7 +185,7 @@ const ClipHistoryBoard: FC = () => {
                   id={`clip-${idx}`}
                   key={ctx.id}
                   navFocus={focus}
-                  onClick={handleClick(ctx.id)}
+                  onClick={handleClick(ctx.id!)}
                   onDoubleClick={handleDoubleClick}
                 />
               ))}
