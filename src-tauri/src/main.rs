@@ -5,6 +5,15 @@ use lib::window;
 
 fn main() {
     tauri::Builder::default()
+        .on_window_event(|event| match event.event() {
+            tauri::WindowEvent::Moved(_) => window::resized(event.window()),
+            tauri::WindowEvent::Focused(focused) => {
+                if !focused {
+                    event.window().hide().unwrap();
+                }
+            }
+            _ => {}
+        })
         .invoke_handler(tauri::generate_handler![
             window::show,
             window::hide,

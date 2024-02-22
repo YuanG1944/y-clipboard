@@ -27,14 +27,13 @@
     "macOSPrivateApi": true,
     "windows": [
       {
-        "decorations": true,
+        "decorations": false,
         "fullscreen": false,
         "resizable": true,
         "hiddenTitle": true,
         "alwaysOnTop": true,
         "visible": false,
-        "transparent": false,
-        "maximized": true
+        "transparent": true
       }
     ],
     "security": {

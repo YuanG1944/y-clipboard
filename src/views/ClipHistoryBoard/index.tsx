@@ -1,8 +1,7 @@
 import { FC, useEffect, useState } from 'react';
+import styles from './index.module.scss';
 
 import NavBar from '@/components/NavBar';
-
-import styles from './index.module.scss';
 import ClipCard from '@/components/ClipCard';
 import QueueAnim from 'rc-queue-anim';
 import { useKeyPress } from 'ahooks';
