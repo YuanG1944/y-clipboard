@@ -33,7 +33,7 @@
         "hiddenTitle": true,
         "alwaysOnTop": true,
         "visible": false,
-        "transparent": true
+        "transparent": false
       }
     ],
     "security": {

@@ -1,3 +1,3 @@
-import { Windows } from '@/actions/windows';
+import Windows from '@/actions/windows';
 
-new Windows();
+Windows.getInstance();

@@ -6,6 +6,9 @@ import ClipCard from '@/components/ClipCard';
 import QueueAnim from 'rc-queue-anim';
 import { useKeyPress } from 'ahooks';
 import { StorageItem } from '@/actions/clipboard/type';
+import Windows from '@/actions/windows';
+
+const windows = Windows.getInstance();
 
 const ClipHistoryBoard: FC = () => {
   const [historyCtx, setHistoryCtx] = useState<StorageItem[]>([]);
@@ -72,7 +75,7 @@ const ClipHistoryBoard: FC = () => {
 
   const hideWindow = () => {
     setShow(false);
-    // window?.eBridge?.hideWindow();
+    windows.hide();
     // window?.eBridge?.setStoreValue(historyCtx);
   };
 

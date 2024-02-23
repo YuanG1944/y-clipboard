@@ -2,7 +2,7 @@ use tauri::{Position, Size};
 
 use crate::device::get_cursor_monitor;
 
-fn repos(window: &tauri::Window) {
+pub fn repos(window: &tauri::Window) {
     let monitors = window.available_monitors().unwrap();
     let cursor_monitor = get_cursor_monitor(&monitors).unwrap();
 

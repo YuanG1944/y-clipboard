@@ -1,16 +1,29 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use lib::window;
+use lib::{shortcut, window};
+use tauri::{GlobalShortcutManager, Manager};
 
 fn main() {
     tauri::Builder::default()
+        .setup(|app| {
+            // 后续做成动态配置快捷键
+            let global_shortcut = shortcut::GlobalShortcut::new(
+                String::from("CommandOrControl+Shift+B"),
+                String::from("f12"),
+            );
+            global_shortcut.register_global_shortcut(app);
+
+            Ok(())
+        })
         .on_window_event(|event| match event.event() {
             tauri::WindowEvent::Moved(_) => window::resized(event.window()),
-            tauri::WindowEvent::Focused(focused) => {
-                if !focused {
-                    event.window().hide().unwrap();
-                }
+            tauri::WindowEvent::Destroyed => {
+                let _ = event
+                    .window()
+                    .app_handle()
+                    .global_shortcut_manager()
+                    .unregister_all();
             }
             _ => {}
         })
