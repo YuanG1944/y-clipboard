@@ -38,11 +38,9 @@ pub fn hide(window: tauri::Window) {
 #[tauri::command]
 pub fn show(window: tauri::Window) {
     if !window.is_visible().unwrap() {
-        repos(&window);
         window.show().expect("failed to show windows");
-        window.set_focus().expect("failed to set fucus");
-    } else {
-        window.hide().expect("failed to hide windows");
+        repos(&window);
+        window.set_focus().expect("failed to set window focus");
     }
 }
 

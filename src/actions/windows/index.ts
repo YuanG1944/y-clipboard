@@ -36,11 +36,7 @@ export default class Windows {
   //   }
   // }
 
-  registerAllListener() {
-    appWindow.onFocusChanged((event) => {
-      console.info('window change', event);
-    });
-  }
+  registerAllListener() {}
 
   hide() {
     setTimeout(() => {

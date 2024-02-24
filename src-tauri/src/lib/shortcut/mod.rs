@@ -40,8 +40,8 @@ impl GlobalShortcut {
                 if !is {
                     let _ = shortcut_manager.register(paste, move || {
                         window.show().expect("failed to show windows");
-                        window.set_focus().expect("failed to set fucus");
                         window::repos(window.as_ref());
+                        window.set_focus().expect("failed to set window focus");
                     });
                 }
             }

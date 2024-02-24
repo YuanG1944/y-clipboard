@@ -13,14 +13,16 @@
   "tauri": {
     "allowlist": {
       "all": false,
-      "shell": {
-        "all": false,
-        "open": true
+      "os": {
+        "all": true
       },
       "globalShortcut": {
         "all": true
       },
       "clipboard": {
+        "all": true
+      },
+      "window": {
         "all": true
       }
     },

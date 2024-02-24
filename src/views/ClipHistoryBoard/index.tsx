@@ -1,12 +1,16 @@
 import { FC, useEffect, useState } from 'react';
+import QueueAnim from 'rc-queue-anim';
+import { useKeyPress } from 'ahooks';
+
 import styles from './index.module.scss';
 
 import NavBar from '@/components/NavBar';
 import ClipCard from '@/components/ClipCard';
-import QueueAnim from 'rc-queue-anim';
-import { useKeyPress } from 'ahooks';
-import { StorageItem } from '@/actions/clipboard/type';
 import Windows from '@/actions/windows';
+import { StorageItem } from '@/actions/clipboard/type';
+
+import { os } from '@tauri-apps/api';
+import { appWindow } from '@tauri-apps/api/window';
 
 const windows = Windows.getInstance();
 
@@ -55,6 +59,18 @@ const ClipHistoryBoard: FC = () => {
       }, 400);
       handleBridge();
     }
+  };
+
+  const win32VisibilityChange = async () => {
+    handleVisibility();
+    os.platform().then((platform) => {
+      if (platform !== 'win32') return;
+      appWindow.onFocusChanged((act) => {
+        if (act.event === 'tauri://focus' && !show) {
+          handleVisibility();
+        }
+      });
+    });
   };
 
   const handleClick = (currId: string) => () => {
@@ -164,6 +180,7 @@ const ClipHistoryBoard: FC = () => {
   }, [currIndex]);
 
   useEffect(() => {
+    win32VisibilityChange();
     document.addEventListener('visibilitychange', handleVisibility);
     return () => {
       document.removeEventListener('visibilitychange', handleVisibility);

@@ -15,10 +15,7 @@ path = "src/lib/mod.rs"
 tauri-build = { version = "1.5", features = [] }
 
 [dependencies]
-tauri = { version = "1.5", features = [ "macos-private-api",
-  "clipboard-all",
-  "global-shortcut-all",
-  "shell-open",
+tauri = { version = "1.5", features = [ "clipboard-all", "window-all", "os-all", "global-shortcut-all", "macos-private-api",
 ] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
