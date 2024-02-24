@@ -12,7 +12,7 @@
 
   "tauri": {
     "allowlist": {
-      "all": false,
+      "all": true,
       "os": {
         "all": true
       },
@@ -29,7 +29,7 @@
     "macOSPrivateApi": true,
     "windows": [
       {
-        "decorations": false,
+        "decorations": true,
         "fullscreen": false,
         "resizable": true,
         "hiddenTitle": true,

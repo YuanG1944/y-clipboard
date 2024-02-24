@@ -1,11 +1,12 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use lib::{shortcut, window};
+use lib::{clipboard_monitor, shortcut, window};
 use tauri::{GlobalShortcutManager, Manager};
 
 fn main() {
     tauri::Builder::default()
+        .plugin(clipboard_monitor::plugin::init(true))
         .setup(|app| {
             // 后续做成动态配置快捷键
             let global_shortcut = shortcut::GlobalShortcut::new(
@@ -17,7 +18,7 @@ fn main() {
             Ok(())
         })
         .on_window_event(|event| match event.event() {
-            tauri::WindowEvent::Moved(_) => window::resized(event.window()),
+            // tauri::WindowEvent::Moved(_) => window::resized(event.window()),
             tauri::WindowEvent::Destroyed => {
                 let _ = event
                     .window()

@@ -1,12 +1,9 @@
-import { WinActEnum, WinTool } from './type';
-import { register, unregisterAll, isRegistered } from '@tauri-apps/api/globalShortcut';
+import { WinActEnum } from './type';
+import { unregisterAll } from '@tauri-apps/api/globalShortcut';
 import { invoke } from '@tauri-apps/api/tauri';
-import { appWindow } from '@tauri-apps/api/window';
 
 export default class Windows {
   private static instance: Windows;
-  // private pasteShortcut = 'CommandOrControl+Shift+B';
-  // private devToolShortcut = 'f12';
 
   constructor() {
     if (Windows.instance) {
@@ -22,20 +19,6 @@ export default class Windows {
     return Windows.instance;
   }
 
-  // async registerGlobalKeyBoard() {
-  //   if (!(await isRegistered(this.pasteShortcut))) {
-  //     await register(this.pasteShortcut, () => {
-  //       this.show();
-  //     });
-  //   }
-
-  //   if (!(await isRegistered(this.devToolShortcut))) {
-  //     await register(this.devToolShortcut, () => {
-  //       invoke(WinTool.DEVTOOL);
-  //     });
-  //   }
-  // }
-
   registerAllListener() {}
 
   hide() {
@@ -49,7 +32,6 @@ export default class Windows {
   }
 
   createWindow() {
-    // this.registerGlobalKeyBoard();
     this.registerAllListener();
   }
 

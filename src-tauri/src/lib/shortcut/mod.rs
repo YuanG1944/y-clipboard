@@ -34,7 +34,7 @@ impl GlobalShortcut {
         let paste = self.paste.as_str();
         let devtool = self.devtool.as_str();
 
-        match shortcut_manager.is_registered(paste) {
+        let _ = match shortcut_manager.is_registered(paste) {
             Ok(is) => {
                 let window = Arc::clone(&window);
                 if !is {
@@ -46,18 +46,18 @@ impl GlobalShortcut {
                 }
             }
             Err(_) => {}
-        }
+        };
 
-        match shortcut_manager.is_registered(devtool) {
+        let _ = match shortcut_manager.is_registered(devtool) {
             Ok(is) => {
                 let window = Arc::clone(&window);
                 if !is {
-                    let _ = shortcut_manager.register(paste, move || {
+                    let _ = shortcut_manager.register(devtool, move || {
                         window.open_devtools();
                     });
                 }
             }
             Err(_) => {}
-        }
+        };
     }
 }

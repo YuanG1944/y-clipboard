@@ -11,6 +11,7 @@ import { StorageItem } from '@/actions/clipboard/type';
 
 import { os } from '@tauri-apps/api';
 import { appWindow } from '@tauri-apps/api/window';
+import { getHistory } from '@/actions/clipboard';
 
 const windows = Windows.getInstance();
 
@@ -21,6 +22,14 @@ const ClipHistoryBoard: FC = () => {
   const [currId, setCurrId] = useState<string>('');
   const [focus, setFocus] = useState(false);
   const [show, setShow] = useState(false);
+
+  const safeJsonParse = (str: string) => {
+    try {
+      return JSON.parse(str);
+    } catch (error) {
+      return '';
+    }
+  };
 
   /**
    * Make sure currIndex change to rerender dom
@@ -42,10 +51,13 @@ const ClipHistoryBoard: FC = () => {
     }
   };
 
-  const handleBridge = () => {
+  const handleBridge = async () => {
+    const str = (await getHistory()) as string;
+    const clipboardHistory = safeJsonParse(str) || [];
+    console.info('clipboardHistory--->', clipboardHistory);
     // const arr = window?.eBridge?.getClipHistory() as StorageItem[];
-    // if (arr?.length) {
-    //   setHistoryCtx(arr);
+    // if (clipboardHistory?.length) {
+    //   setHistoryCtx(clipboardHistory);
     //   setTimeout(() => {
     //     setCurrIndex(setCurrIndexChange('0'));
     //   }, 100);
