@@ -80,7 +80,8 @@ where
 
         println!("-----clipboard change-----");
         // push item to history store
-        self.store.lock().unwrap().push(self.item_collect());
+        let item: HistoryItem = self.item_collect();
+        self.store.try_lock().map_err(|err| err.to_string()).unwrap().push(item);
 
         CallbackResult::Next
     }

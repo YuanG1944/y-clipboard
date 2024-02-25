@@ -115,6 +115,7 @@ async fn start_monitor<R: Runtime>(
     std::thread::spawn(move || {
         let _ = Master::new(ClipboardMonitor::new(app, running, store)).run();
     });
+    
     Ok(())
 }
 
