@@ -105,8 +105,7 @@ fn write_image_binary(manager: State<'_, ClipboardManager>, bytes: Vec<u8>) -> R
 
 #[tauri::command]
 fn paste() {
-    println!("paste!!!!!!!!!!!");
-    os_paste();
+    os_paste(false);
 }
 
 #[tauri::command]
@@ -196,6 +195,7 @@ pub fn init<R: Runtime>(open_watch: bool) -> TauriPlugin<R> {
                 start_monitor_setup(app_handle, &state);
             }
             app.manage(state);
+            os_paste(true);
             Ok(())
         })
         .on_event(

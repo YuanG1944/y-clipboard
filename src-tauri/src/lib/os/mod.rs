@@ -2,20 +2,24 @@ use rdev::{simulate, EventType, Key, SimulateError};
 use std::{thread, time};
 
 #[cfg(target_os = "macos")]
-pub fn os_paste() {
-    // todo  第一次复制指令不生效问题
-    std::thread::spawn(|| {
-        dispatch(&EventType::KeyPress(Key::ControlLeft));
-        dispatch(&EventType::KeyPress(Key::F4));
-        dispatch(&EventType::KeyRelease(Key::F4));
-        dispatch(&EventType::KeyRelease(Key::ControlLeft));
+pub fn os_paste(init: bool) {
+    std::thread::spawn(move || {
+        // 解决第一次keypress不生效问题
+        if init == true {
+            dispatch(&EventType::KeyPress(Key::ShiftLeft));
+        } else {
+            dispatch(&EventType::KeyPress(Key::ControlLeft));
+            dispatch(&EventType::KeyPress(Key::F4));
+            dispatch(&EventType::KeyRelease(Key::F4));
+            dispatch(&EventType::KeyRelease(Key::ControlLeft));
 
-        sleep(100);
+            sleep(100);
 
-        dispatch(&EventType::KeyPress(Key::MetaLeft));
-        dispatch(&EventType::KeyPress(Key::KeyV));
-        dispatch(&EventType::KeyRelease(Key::KeyV));
-        dispatch(&EventType::KeyRelease(Key::MetaLeft));
+            dispatch(&EventType::KeyPress(Key::MetaLeft));
+            dispatch(&EventType::KeyPress(Key::KeyV));
+            dispatch(&EventType::KeyRelease(Key::KeyV));
+            dispatch(&EventType::KeyRelease(Key::MetaLeft));
+        }
     });
 }
 
