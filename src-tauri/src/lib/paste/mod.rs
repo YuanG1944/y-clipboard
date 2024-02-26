@@ -2,16 +2,27 @@ use rdev::{simulate, EventType, Key, SimulateError};
 use std::{thread, time};
 
 // solve the problem of first using dispatch not available
-#[cfg(target_os = "macos")]
 pub fn key_register() {
     dispatch(&EventType::KeyPress(Key::ShiftLeft));
+    dispatch(&EventType::KeyRelease(Key::ShiftLeft));
+    sleep(100);
 }
 
-#[cfg(target_os = "macos")]
+#[cfg(target_os = "windows")]
 fn switch_application_action() {
+    dispatch(&EventType::KeyPress(Key::Alt));
+    dispatch(&EventType::KeyPress(Key::Tab));
+    dispatch(&EventType::KeyRelease(Key::Tab));
+    dispatch(&EventType::KeyRelease(Key::Alt));
+    sleep(100);
+}
+
+#[cfg(target_os = "windows")]
+fn paste_action() {
+    sleep(300);
     dispatch(&EventType::KeyPress(Key::ControlLeft));
-    dispatch(&EventType::KeyPress(Key::F4));
-    dispatch(&EventType::KeyRelease(Key::F4));
+    dispatch(&EventType::KeyPress(Key::KeyV));
+    dispatch(&EventType::KeyRelease(Key::KeyV));
     dispatch(&EventType::KeyRelease(Key::ControlLeft));
     sleep(100);
 }
@@ -22,6 +33,7 @@ fn paste_action() {
     dispatch(&EventType::KeyPress(Key::KeyV));
     dispatch(&EventType::KeyRelease(Key::KeyV));
     dispatch(&EventType::KeyRelease(Key::MetaLeft));
+    sleep(100);
 }
 
 #[cfg(target_os = "macos")]
@@ -34,7 +46,10 @@ pub fn os_paste() {
 
 #[cfg(target_os = "windows")]
 pub fn os_paste() {
-    println!("This is running on Windows");
+    std::thread::spawn(move || {
+        // switch_application_action();
+        paste_action();
+    });
 }
 
 #[cfg(target_os = "linux")]
@@ -57,3 +72,4 @@ fn sleep(ms: u64) {
     let delay = time::Duration::from_millis(ms);
     thread::sleep(delay);
 }
+

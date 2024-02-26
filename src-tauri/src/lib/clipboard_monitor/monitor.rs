@@ -7,6 +7,9 @@ use serde_json;
 use std::collections::VecDeque;
 use std::sync::Arc;
 use std::sync::Mutex;
+use std::sync::TryLockError;
+use std::thread;
+use std::time::Duration;
 use tauri::{Manager, Runtime};
 
 use crate::clipboard_history::HistoryItem;
@@ -102,12 +105,21 @@ where
         let item: HistoryItem = self.item_collect();
 
         if self.is_equal(&item) == false {
-            println!("-----clipboard change-----");
-            self.store
-                .try_lock()
-                .map_err(|err| err.to_string())
-                .unwrap()
-                .push(item);
+            loop {
+                match self.store.try_lock() {
+                    Ok(mut guard) => {
+                        println!("--------change------");
+                        guard.push(item);
+                        break;
+                    }
+                    Err(TryLockError::WouldBlock) => {
+                        thread::sleep(Duration::from_millis(40));
+                    }
+                    Err(e) => {
+                        panic!("锁获取失败: {}", e);
+                    }
+                }
+            }
         }
 
         CallbackResult::Next

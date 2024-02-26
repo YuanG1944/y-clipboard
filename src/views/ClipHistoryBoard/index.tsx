@@ -83,14 +83,13 @@ const ClipHistoryBoard: FC = () => {
 
   const sendingPaste = async () => {
     if (!focus) {
-      // window?.eBridge?.setStoreValue(historyCtx, currId);
-      // window?.eBridge?.writeSelected(currId);
-      // window?.eBridge?.paste();
       setHistoryStr(historyCtx, currId);
       writeSelected(historyCtx, currId);
       windows.hide();
       setShow(false);
-      paste();
+      setTimeout(() => {
+        paste();
+      }, 200);
     }
   };
 
