@@ -6,7 +6,7 @@ use tauri::{
     Manager, Runtime, State,
 };
 
-use crate::os::os_paste;
+use crate::paste::{key_register, os_paste};
 
 use super::monitor::{ClipboardManager, ClipboardMonitor};
 
@@ -105,7 +105,7 @@ fn write_image_binary(manager: State<'_, ClipboardManager>, bytes: Vec<u8>) -> R
 
 #[tauri::command]
 fn paste() {
-    os_paste(false);
+    os_paste();
 }
 
 #[tauri::command]
@@ -195,7 +195,7 @@ pub fn init<R: Runtime>(open_watch: bool) -> TauriPlugin<R> {
                 start_monitor_setup(app_handle, &state);
             }
             app.manage(state);
-            os_paste(true);
+            key_register();
             Ok(())
         })
         .on_event(
