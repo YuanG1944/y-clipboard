@@ -32,13 +32,13 @@ const ClipCard: FC<ICardProps> = ({
 
   const renderUrl = () => {
     const urlRegex = /img src="([^"]+)"/;
-    const urls = context.html.match(urlRegex);
+    const urls = context?.html?.match(urlRegex);
     return urls?.length === 2 ? (
       <a href={urls[1]}>{urls[1]}</a>
     ) : (
       <div
         style={{ wordBreak: 'break-word' }}
-        dangerouslySetInnerHTML={{ __html: context.html }}
+        dangerouslySetInnerHTML={{ __html: context.html || '' }}
       ></div>
     );
   };
@@ -64,7 +64,7 @@ const ClipCard: FC<ICardProps> = ({
 
   const handleActiveChange = (act: ActiveEnum) => {
     setActive(act);
-    onActiveChange(act);
+    onActiveChange && onActiveChange(act);
   };
 
   const handleSwitchChange = () => {

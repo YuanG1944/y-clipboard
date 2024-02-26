@@ -1,8 +1,8 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::collections::VecDeque;
 use uuid::Uuid;
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct HistoryItem {
     id: String,
     text: String,
@@ -20,18 +20,32 @@ impl HistoryItem {
         }
     }
 
+    pub fn get_text(&self) -> &str {
+        &self.text.as_str()
+    }
+
     pub fn set_text(&mut self, text: String) {
         self.text = text;
     }
+
+    pub fn get_html(&self) -> &str {
+        &self.html.as_str()
+    }
+
     pub fn set_html(&mut self, html: String) {
         self.html = html;
     }
+
     pub fn set_formats(&mut self, formats: Vec<String>) {
         self.formats = Vec::from(formats);
     }
+
+    pub fn push_formats(&mut self, format: String) {
+        self.formats.push(format);
+    }
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct HistoryStore {
     history: VecDeque<HistoryItem>,
 }

@@ -6,11 +6,21 @@ use tauri::{
     Manager, Runtime, State,
 };
 
+use crate::os::os_paste;
+
 use super::monitor::{ClipboardManager, ClipboardMonitor};
 
 #[tauri::command]
 fn get_history(manager: State<'_, ClipboardManager>) -> Result<String, String> {
     manager.get_history()
+}
+
+#[tauri::command]
+fn set_history_str(
+    manager: State<'_, ClipboardManager>,
+    json_str: String,
+) -> Result<String, String> {
+    manager.set_history_str(json_str)
 }
 
 #[tauri::command]
@@ -94,6 +104,12 @@ fn write_image_binary(manager: State<'_, ClipboardManager>, bytes: Vec<u8>) -> R
 }
 
 #[tauri::command]
+fn paste() {
+    println!("paste!!!!!!!!!!!");
+    os_paste();
+}
+
+#[tauri::command]
 fn clear(manager: State<'_, ClipboardManager>) -> Result<(), String> {
     manager.clear()
 }
@@ -115,7 +131,7 @@ async fn start_monitor<R: Runtime>(
     std::thread::spawn(move || {
         let _ = Master::new(ClipboardMonitor::new(app, running, store)).run();
     });
-    
+
     Ok(())
 }
 
@@ -154,6 +170,7 @@ pub fn init<R: Runtime>(open_watch: bool) -> TauriPlugin<R> {
             start_monitor,
             is_monitor_running,
             get_history,
+            set_history_str,
             has_text,
             has_image,
             has_html,
@@ -169,6 +186,7 @@ pub fn init<R: Runtime>(open_watch: bool) -> TauriPlugin<R> {
             write_rtf,
             write_image_binary,
             write_image_base64,
+            paste,
             clear
         ])
         .setup(move |app| {

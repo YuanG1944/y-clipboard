@@ -22,7 +22,7 @@ const NavBar: FC<INavBarProps> = ({ checkFocus }) => {
     console.info('onSearch--->', info?.source, value);
   };
 
-  const handleKeyDownSearch: KeyboardEventHandler<HTMLInputElement> = event => {
+  const handleKeyDownSearch: KeyboardEventHandler<HTMLInputElement> = (event) => {
     if (event.key === 'Enter') {
       handleSearch(event.currentTarget.value, event);
     }
@@ -32,8 +32,8 @@ const NavBar: FC<INavBarProps> = ({ checkFocus }) => {
   return (
     <Search
       allowClear
-      size='small'
-      placeholder='Y-Clips'
+      size="small"
+      placeholder="Y-Clips"
       onFocus={handleFocus}
       onBlur={handleBlur}
       onSearch={handleSearch}

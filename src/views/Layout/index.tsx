@@ -1,6 +1,6 @@
 import { FC } from 'react';
 import styles from './index.module.scss';
-import ClipHistoryBoard from '@/views/ClipHistoryBoard';
+import ClipHistoryBoard from '../ClipHistoryBoard';
 
 const Layout: FC = () => {
   return (

@@ -18,7 +18,7 @@ fn main() {
             Ok(())
         })
         .on_window_event(|event| match event.event() {
-            // tauri::WindowEvent::Moved(_) => window::resized(event.window()),
+            tauri::WindowEvent::Moved(_) => window::resized(event.window()),
             tauri::WindowEvent::Destroyed => {
                 let _ = event
                     .window()

@@ -11,31 +11,34 @@
   },
 
   "tauri": {
+    "macOSPrivateApi": true,
     "allowlist": {
-      "all": true,
-      "os": {
+      "shell": {
+        "open": true
+      },
+      "window": {
         "all": true
       },
       "globalShortcut": {
         "all": true
       },
-      "clipboard": {
+      "notification": {
         "all": true
       },
-      "window": {
+      "os": {
         "all": true
       }
     },
-    "macOSPrivateApi": true,
     "windows": [
       {
-        "decorations": true,
+        "decorations": false,
         "fullscreen": false,
         "resizable": true,
         "hiddenTitle": true,
         "alwaysOnTop": true,
         "visible": false,
-        "transparent": false
+        "transparent": true,
+        "skipTaskbar": true
       }
     ],
     "security": {

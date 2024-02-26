@@ -33,12 +33,12 @@ const CardTitle: FC<ICardTitle> = ({
   const [activeEnum, setActiveEnum] = useState(ActiveEnum.Text);
 
   const initDefaultTitle = () => {
-    setActiveEnum(context.defaultActive);
-    console.info('context--->', context);
-    const arr = context.formats.reduce((pre, item) => {
+    setActiveEnum(context.defaultActive!);
+    const arr = context.formats!.reduce((pre, it) => {
+      let item = it as ActiveEnum;
       const active = context.defaultActive === item;
       switch (item) {
-        case 'text/plain':
+        case ActiveEnum.Text:
           return [
             ...pre,
             {
@@ -47,7 +47,7 @@ const CardTitle: FC<ICardTitle> = ({
               active,
             },
           ];
-        case 'text/html':
+        case ActiveEnum.Html:
           return [
             ...pre,
             {
@@ -56,7 +56,7 @@ const CardTitle: FC<ICardTitle> = ({
               active,
             },
           ];
-        case 'image/png':
+        case ActiveEnum.Image:
           return [
             ...pre,
             {
@@ -65,7 +65,7 @@ const CardTitle: FC<ICardTitle> = ({
               active,
             },
           ];
-        case 'text/uri-list':
+        case ActiveEnum.File:
           return [
             ...pre,
             {
@@ -77,7 +77,7 @@ const CardTitle: FC<ICardTitle> = ({
         default:
           return pre;
       }
-    }, []);
+    }, [] as ITitleActive[]);
     setTitleList(arr);
   };
 
@@ -102,9 +102,9 @@ const CardTitle: FC<ICardTitle> = ({
               active: false,
             },
           ];
-        }, []),
+        }, [] as ITitleActive[]),
       );
-      onSwitchChange();
+      onSwitchChange && onSwitchChange();
     }
   };
 
@@ -127,7 +127,7 @@ const CardTitle: FC<ICardTitle> = ({
         };
       });
       setTitleList(nextList);
-      onSwitchChange();
+      onSwitchChange && onSwitchChange();
     }
   };
 
@@ -144,7 +144,7 @@ const CardTitle: FC<ICardTitle> = ({
   }, []);
 
   useEffect(() => {
-    onActiveChange(activeEnum);
+    onActiveChange && onActiveChange(activeEnum);
   }, [activeEnum]);
 
   return (

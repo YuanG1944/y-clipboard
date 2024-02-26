@@ -1,46 +1,76 @@
-// // import { clipboard, ipcRenderer, nativeImage } from 'electron';
-// import { ActiveEnum, ActiveMapping, ArrChangeCallback, StorageItem } from './type';
-// import { v4 as uuid } from 'uuid';
-// import { StoreEnum, CLIP_HISTORY } from '@/actions/windows/type';
+import { z } from 'zod';
+import { invoke } from '@tauri-apps/api/tauri';
+import { emit, listen, UnlistenFn } from '@tauri-apps/api/event';
+import { ActiveEnum, ActiveMapping, StorageItem } from './type';
 
-// let timer: number | null = null;
-// let clipHistory: StorageItem[] = [];
+export const PASTE = 'plugin:clipboard|paste';
+export const START_MONITOR_COMMAND = 'plugin:clipboard|start_monitor';
+export const STOP_MONITOR_COMMAND = 'plugin:clipboard|stop_monitor';
+export const TEXT_CHANGED = 'plugin:clipboard://text-changed';
+export const HTML_CHANGED = 'plugin:clipboard://html-changed';
+export const RTF_CHANGED = 'plugin:clipboard://rtf-changed';
+export const FILES_CHANGED = 'plugin:clipboard://files-changed';
+export const IMAGE_CHANGED = 'plugin:clipboard://image-changed';
+export const IS_MONITOR_RUNNING_COMMAND = 'plugin:clipboard|is_monitor_running';
+export const GET_HISTORY = 'plugin:clipboard|get_history';
+export const SET_HISTORY_STR = 'plugin:clipboard|set_history_str';
+export const HAS_TEXT_COMMAND = 'plugin:clipboard|has_text';
+export const HAS_IMAGE_COMMAND = 'plugin:clipboard|has_image';
+export const HAS_HTML_COMMAND = 'plugin:clipboard|has_html';
+export const HAS_RTF_COMMAND = 'plugin:clipboard|has_rtf';
+export const WRITE_TEXT_COMMAND = 'plugin:clipboard|write_text';
+export const WRITE_HTML_COMMAND = 'plugin:clipboard|write_html';
+export const WRITE_RTF_COMMAND = 'plugin:clipboard|write_rtf';
+export const CLEAR_COMMAND = 'plugin:clipboard|clear';
+export const READ_TEXT_COMMAND = 'plugin:clipboard|read_text';
+export const READ_HTML_COMMAND = 'plugin:clipboard|read_html';
+export const READ_RTF_COMMAND = 'plugin:clipboard|read_rtf';
+export const READ_FILES_COMMAND = 'plugin:clipboard|read_files';
+export const READ_IMAGE_BINARY_COMMAND = 'plugin:clipboard|read_image_binary';
+export const READ_IMAGE_BASE64_COMMAND = 'plugin:clipboard|read_image_base64';
+export const WRITE_IMAGE_BINARY_COMMAND = 'plugin:clipboard|write_image_binary';
+export const WRITE_IMAGE_BASE64_COMMAND = 'plugin:clipboard|write_image_base64';
+export const CLIPBOARD_MONITOR_STATUS_UPDATE_EVENT = 'plugin:clipboard://clipboard-monitor/status';
+export const MONITOR_UPDATE_EVENT = 'plugin:clipboard://clipboard-monitor/update';
+export const ClipboardChangedPayloadSchema = z.object({ value: z.string() });
+export const ClipboardChangedFilesPayloadSchema = z.object({
+  value: z.string().array(),
+});
+export type ClipboardChangedPayload = z.infer<typeof ClipboardChangedPayloadSchema>;
 
-// const moveToFirst = (storageArr: StorageItem[], id: string) => {
-//   const tempArr = storageArr;
-//   if (!id) return tempArr;
-//   const index = tempArr.findIndex((item) => item.id === id);
-//   if (index > -1) {
-//     const item = tempArr.splice(index, 1)[0];
-//     tempArr.unshift(item);
-//   }
-//   return tempArr;
-// };
+const moveToFirst = (storageArr: StorageItem[], id: string) => {
+  const tempArr = storageArr;
+  if (!id) return tempArr;
+  const index = tempArr.findIndex((item) => item.id === id);
+  if (index > -1) {
+    const item = tempArr.splice(index, 1)[0];
+    tempArr.unshift(item);
+  }
+  return tempArr;
+};
 
-// export const defaultFormat = (format: string[]) => {
-//   const num = format.reduce((pre, item) => {
-//     return pre + (ActiveMapping?.[item as ActiveEnum] || 0);
-//   }, 0);
-//   // console.info('format-->', format);
-//   // console.info('num-->', num);
-//   if (num >> 3) {
-//     return ActiveEnum.File;
-//   }
-//   if (num >> 2) {
-//     return ActiveEnum.Image;
-//   }
-//   if (num >> 1) {
-//     return ActiveEnum.Text;
-//   }
-//   if (num) {
-//     return ActiveEnum.Html;
-//   }
-//   return ActiveEnum.Text;
-// };
+export const defaultFormat = (format: string[]) => {
+  const num = format.reduce((pre, item) => {
+    return pre + (ActiveMapping?.[item as ActiveEnum] || 0);
+  }, 0);
+  if (num >> 3) {
+    return ActiveEnum.File;
+  }
+  if (num >> 2) {
+    return ActiveEnum.Image;
+  }
+  if (num >> 1) {
+    return ActiveEnum.Text;
+  }
+  if (num) {
+    return ActiveEnum.Html;
+  }
+  return ActiveEnum.Text;
+};
 
 // const setStoreValue = (value: StorageItem[], currId: string = '') => {
 //   clipHistory = moveToFirst(value, currId);
-//   // ipcRenderer.send(StoreEnum.SET_STORE, CLIP_HISTORY, value);
+// ipcRenderer.send(StoreEnum.SET_STORE, CLIP_HISTORY, value);
 // };
 
 // const getStoreValue = () => {};
@@ -54,41 +84,41 @@
 // };
 
 // const isSameElements = (pre: StorageItem, curr: StorageItem) => {
-//   // if (curr.formats.includes(ActiveEnum.Image)) {
-//   //   if (pre?.html === curr?.html) return true;
-//   //   return false;
-//   // }
-//   // if (!(curr?.text || '').trim() || !(curr?.html || '').trim()) return true;
-//   // if (!pre?.text && !pre?.html) return false;
-//   // if (pre?.text === curr?.text) return true;
+// if (curr.formats.includes(ActiveEnum.Image)) {
+//   if (pre?.html === curr?.html) return true;
+//   return false;
+// }
+// if (!(curr?.text || '').trim() || !(curr?.html || '').trim()) return true;
+// if (!pre?.text && !pre?.html) return false;
+// if (pre?.text === curr?.text) return true;
 //   return false;
 // };
 
 // const assembleCopyItem = (): StorageItem => {
-//   // const formats = clipboard.availableFormats();
-//   // const defaultActive = defaultFormat(formats);
-//   // const value: StorageItem = {
-//   //   id: uuid(),
-//   //   text: clipboard?.readText(),
-//   //   rtf: clipboard?.readRTF(),
-//   //   html: clipboard?.readHTML(),
-//   //   bookmark: clipboard?.readBookmark(),
-//   //   formats,
-//   //   defaultActive,
-//   //   timeStamp: new Date().getTime(),
-//   //   collect: false,
-//   // };
-//   // const image = clipboard.readImage();
-//   // if (value.formats.includes(ActiveEnum.Image) && !image.isEmpty()) {
-//   //   const urlRegex = /img src="([^"]+)"/;
-//   //   const urls = value.html.match(urlRegex);
-//   //   value.formats = [...value.formats.filter((item) => item !== ActiveEnum.Html), ActiveEnum.Text];
-//   //   value.text = urls?.length === 2 ? urls[1] : '';
-//   //   value.image = image.toDataURL();
-//   // }
-//   // if (value.formats.includes(ActiveEnum.File)) {
-//   //   value.text = clipboard.readBuffer('public.file-url').toString();
-//   // }
+// const formats = clipboard.availableFormats();
+// const defaultActive = defaultFormat(formats);
+// const value: StorageItem = {
+//   id: uuid(),
+//   text: clipboard?.readText(),
+//   rtf: clipboard?.readRTF(),
+//   html: clipboard?.readHTML(),
+//   bookmark: clipboard?.readBookmark(),
+//   formats,
+//   defaultActive,
+//   timeStamp: new Date().getTime(),
+//   collect: false,
+// };
+// const image = clipboard.readImage();
+// if (value.formats.includes(ActiveEnum.Image) && !image.isEmpty()) {
+//   const urlRegex = /img src="([^"]+)"/;
+//   const urls = value.html.match(urlRegex);
+//   value.formats = [...value.formats.filter((item) => item !== ActiveEnum.Html), ActiveEnum.Text];
+//   value.text = urls?.length === 2 ? urls[1] : '';
+//   value.image = image.toDataURL();
+// }
+// if (value.formats.includes(ActiveEnum.File)) {
+//   value.text = clipboard.readBuffer('public.file-url').toString();
+// }
 //   return {};
 // };
 
@@ -122,19 +152,19 @@
 //   const curr = queryById(id);
 //   const active = curr?.defaultActive;
 //   if (active === ActiveEnum.Text) {
-//     // clipboard.writeText(curr.text);
+// clipboard.writeText(curr.text);
 //     return;
 //   }
 //   if (active === ActiveEnum.Html) {
-//     // clipboard.writeHTML(curr.html);
+// clipboard.writeHTML(curr.html);
 //     return;
 //   }
 //   if (active === ActiveEnum.Image) {
-//     // clipboard.writeHTML(curr.html);
+// clipboard.writeHTML(curr.html);
 //     return;
 //   }
 //   if (active === ActiveEnum.File) {
-//     // clipboard.writeBuffer('public.file-url', Buffer.from(curr.text, 'utf-8'));
+// clipboard.writeBuffer('public.file-url', Buffer.from(curr.text, 'utf-8'));
 //     return;
 //   }
 // };
@@ -148,45 +178,49 @@
 //   stop,
 // };
 
-import { z } from 'zod';
-import { invoke } from '@tauri-apps/api/tauri';
-import { emit, listen, UnlistenFn } from '@tauri-apps/api/event';
+export const safeJsonParse = (str: string) => {
+  try {
+    return JSON.parse(str);
+  } catch (error) {
+    return '';
+  }
+};
 
-export const START_MONITOR_COMMAND = 'plugin:clipboard|start_monitor';
-export const STOP_MONITOR_COMMAND = 'plugin:clipboard|stop_monitor';
-export const TEXT_CHANGED = 'plugin:clipboard://text-changed';
-export const HTML_CHANGED = 'plugin:clipboard://html-changed';
-export const RTF_CHANGED = 'plugin:clipboard://rtf-changed';
-export const FILES_CHANGED = 'plugin:clipboard://files-changed';
-export const IMAGE_CHANGED = 'plugin:clipboard://image-changed';
-export const IS_MONITOR_RUNNING_COMMAND = 'plugin:clipboard|is_monitor_running';
-export const GET_HISTORY = 'plugin:clipboard|get_history';
-export const HAS_TEXT_COMMAND = 'plugin:clipboard|has_text';
-export const HAS_IMAGE_COMMAND = 'plugin:clipboard|has_image';
-export const HAS_HTML_COMMAND = 'plugin:clipboard|has_html';
-export const HAS_RTF_COMMAND = 'plugin:clipboard|has_rtf';
-export const WRITE_TEXT_COMMAND = 'plugin:clipboard|write_text';
-export const WRITE_HTML_COMMAND = 'plugin:clipboard|write_html';
-export const WRITE_RTF_COMMAND = 'plugin:clipboard|write_rtf';
-export const CLEAR_COMMAND = 'plugin:clipboard|clear';
-export const READ_TEXT_COMMAND = 'plugin:clipboard|read_text';
-export const READ_HTML_COMMAND = 'plugin:clipboard|read_html';
-export const READ_RTF_COMMAND = 'plugin:clipboard|read_rtf';
-export const READ_FILES_COMMAND = 'plugin:clipboard|read_files';
-export const READ_IMAGE_BINARY_COMMAND = 'plugin:clipboard|read_image_binary';
-export const READ_IMAGE_BASE64_COMMAND = 'plugin:clipboard|read_image_base64';
-export const WRITE_IMAGE_BINARY_COMMAND = 'plugin:clipboard|write_image_binary';
-export const WRITE_IMAGE_BASE64_COMMAND = 'plugin:clipboard|write_image_base64';
-export const CLIPBOARD_MONITOR_STATUS_UPDATE_EVENT = 'plugin:clipboard://clipboard-monitor/status';
-export const MONITOR_UPDATE_EVENT = 'plugin:clipboard://clipboard-monitor/update';
-export const ClipboardChangedPayloadSchema = z.object({ value: z.string() });
-export const ClipboardChangedFilesPayloadSchema = z.object({
-  value: z.string().array(),
-});
-export type ClipboardChangedPayload = z.infer<typeof ClipboardChangedPayloadSchema>;
+export async function getHistory(): Promise<StorageItem[]> {
+  const clipboardHistoryStr = ((await invoke(GET_HISTORY)) as string) ?? '';
+  const clipboardHistory: StorageItem[] = safeJsonParse(clipboardHistoryStr);
+  return clipboardHistory.map((item) => {
+    const defaultActive = defaultFormat(item.formats || []);
+    return {
+      ...item,
+      defaultActive,
+    };
+  });
+}
 
-export function getHistory(): Promise<String> {
-  return invoke(GET_HISTORY);
+export function setHistoryStr(historyArr: StorageItem[], currId: string = ''): Promise<void> {
+  const temp = moveToFirst(historyArr, currId);
+  const jsonStr = JSON.stringify(temp);
+  return invoke(SET_HISTORY_STR, { jsonStr });
+}
+
+export async function writeSelected(historyArr: StorageItem[], currId: string = '') {
+  const curr = historyArr.find((item) => item.id === currId);
+  const active = curr?.defaultActive;
+  if (active === ActiveEnum.Text && curr?.text) {
+    await writeText(curr?.text);
+    return;
+  }
+  if (active === ActiveEnum.Html && curr?.html) {
+    await writeText(curr?.html);
+    return;
+  }
+  if (active === ActiveEnum.Image) {
+    return;
+  }
+  if (active === ActiveEnum.File) {
+    return;
+  }
 }
 
 export function hasText(): Promise<boolean> {
@@ -489,4 +523,8 @@ export function startListening(): Promise<() => Promise<void>> {
         await stopMonitor();
       };
     });
+}
+
+export async function paste(): Promise<void> {
+  await invoke(PASTE);
 }

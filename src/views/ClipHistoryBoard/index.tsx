@@ -11,7 +11,7 @@ import { StorageItem } from '@/actions/clipboard/type';
 
 import { os } from '@tauri-apps/api';
 import { appWindow } from '@tauri-apps/api/window';
-import { getHistory } from '@/actions/clipboard';
+import { getHistory, paste, setHistoryStr, writeSelected } from '@/actions/clipboard';
 
 const windows = Windows.getInstance();
 
@@ -22,14 +22,6 @@ const ClipHistoryBoard: FC = () => {
   const [currId, setCurrId] = useState<string>('');
   const [focus, setFocus] = useState(false);
   const [show, setShow] = useState(false);
-
-  const safeJsonParse = (str: string) => {
-    try {
-      return JSON.parse(str);
-    } catch (error) {
-      return '';
-    }
-  };
 
   /**
    * Make sure currIndex change to rerender dom
@@ -52,16 +44,13 @@ const ClipHistoryBoard: FC = () => {
   };
 
   const handleBridge = async () => {
-    const str = (await getHistory()) as string;
-    const clipboardHistory = safeJsonParse(str) || [];
-    console.info('clipboardHistory--->', clipboardHistory);
-    // const arr = window?.eBridge?.getClipHistory() as StorageItem[];
-    // if (clipboardHistory?.length) {
-    //   setHistoryCtx(clipboardHistory);
-    //   setTimeout(() => {
-    //     setCurrIndex(setCurrIndexChange('0'));
-    //   }, 100);
-    // }
+    const clipboardHistory = await getHistory();
+    if (clipboardHistory?.length) {
+      setHistoryCtx(clipboardHistory);
+      setTimeout(() => {
+        setCurrIndex(setCurrIndexChange('0'));
+      }, 100);
+    }
   };
 
   const handleVisibility = () => {
@@ -88,23 +77,27 @@ const ClipHistoryBoard: FC = () => {
   const handleClick = (currId: string) => () => {
     const idx = historyCtx.findIndex((ctx) => ctx.id === currId);
     if (idx !== -1) {
-      // setCurrIndex(setCurrIndexChange(idx));
+      setCurrIndex(setCurrIndexChange(idx));
     }
   };
 
-  const sendingPaste = () => {
+  const sendingPaste = async () => {
     if (!focus) {
       // window?.eBridge?.setStoreValue(historyCtx, currId);
       // window?.eBridge?.writeSelected(currId);
       // window?.eBridge?.paste();
+      setHistoryStr(historyCtx, currId);
+      writeSelected(historyCtx, currId);
+      windows.hide();
       setShow(false);
+      paste();
     }
   };
 
   const hideWindow = () => {
     setShow(false);
     windows.hide();
-    // window?.eBridge?.setStoreValue(historyCtx);
+    setHistoryStr(historyCtx);
   };
 
   const sendingExit = () => {

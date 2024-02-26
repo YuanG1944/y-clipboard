@@ -9,13 +9,9 @@ export interface StorageItem {
   text?: string;
   html?: string;
   rtf?: string;
-  // bookmark?: ReadBookmark;
   buffer?: Buffer;
+  file?: string;
   image?: string;
-  size?: {
-    height: number;
-    width: number;
-  };
   formats?: string[];
   timeStamp?: number;
   defaultActive?: ActiveEnum;
@@ -29,10 +25,10 @@ export interface TempItem {
 }
 
 export enum ActiveEnum {
-  Text = 'text/plain',
-  Html = 'text/html',
-  Image = 'image/png',
-  File = 'text/uri-list',
+  Text = 'text',
+  Html = 'html',
+  Image = 'image',
+  File = 'file',
 }
 
 export const ActiveTitle = {

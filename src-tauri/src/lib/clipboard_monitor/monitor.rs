@@ -4,6 +4,7 @@ use clipboard_master::{CallbackResult, ClipboardHandler};
 use clipboard_rs::{common::RustImage, Clipboard, ClipboardContext, ContentFormat, RustImageData};
 use image::EncodableLayout;
 use serde_json;
+use std::collections::VecDeque;
 use std::sync::Arc;
 use std::sync::Mutex;
 use tauri::{Manager, Runtime};
@@ -41,24 +42,43 @@ where
 
     pub fn item_collect(&self) -> HistoryItem {
         let mut item = HistoryItem::new();
-        let formats = self
-            .manager
-            .clipboard
-            .lock()
-            .unwrap()
-            .available_formats()
-            .unwrap();
-
-        item.set_formats(formats);
+        // let formats = self
+        //     .manager
+        //     .clipboard
+        //     .lock()
+        //     .unwrap()
+        //     .available_formats()
+        //     .unwrap();
 
         if self.manager.has_text().unwrap() {
             item.set_text(self.manager.read_text().unwrap());
+            item.push_formats(String::from("text"));
         }
         if self.manager.has_html().unwrap() {
             item.set_html(self.manager.read_html().unwrap());
+            item.push_formats(String::from("html"));
         }
 
         item
+    }
+
+    pub fn is_equal(&self, curr_item: &HistoryItem) -> bool {
+        let curr_store = self.store.lock().map_err(|err| err.to_string()).unwrap();
+        let latest_items = curr_store.get_store();
+
+        if latest_items.len() == 0 {
+            return false;
+        }
+
+        if latest_items[0].get_html() == curr_item.get_html() {
+            return true;
+        }
+
+        if latest_items[0].get_text() == curr_item.get_text() {
+            return true;
+        }
+
+        false
     }
 }
 
@@ -78,10 +98,17 @@ where
             format!("clipboard update"),
         );
 
-        println!("-----clipboard change-----");
         // push item to history store
         let item: HistoryItem = self.item_collect();
-        self.store.try_lock().map_err(|err| err.to_string()).unwrap().push(item);
+
+        if self.is_equal(&item) == false {
+            println!("-----clipboard change-----");
+            self.store
+                .try_lock()
+                .map_err(|err| err.to_string())
+                .unwrap()
+                .push(item);
+        }
 
         CallbackResult::Next
     }
@@ -124,6 +151,20 @@ impl ClipboardManager {
         match serde_json::to_string(arr.get_store()) {
             Ok(json_str) => Ok(json_str.clone()),
             Err(e) => Err(format!("Error serializing VecDeque to JSON: {:?}", e)),
+        }
+    }
+
+    pub fn set_history_str(&self, history_store_str: String) -> Result<String, String> {
+        match serde_json::from_str::<VecDeque<HistoryItem>>(history_store_str.as_str()) {
+            Ok(history_store) => {
+                self.store
+                    .try_lock()
+                    .map_err(|err| err.to_string())
+                    .unwrap()
+                    .set_store(history_store);
+                Ok(String::from("Set success"))
+            }
+            Err(e) => Err(format!("{}", e)),
         }
     }
 
@@ -199,7 +240,7 @@ impl ClipboardManager {
     /// read image from clipboard and return a base64 string
     pub fn read_image_base64(&self) -> Result<String, String> {
         let image_bytes = self.read_image_binary()?;
-        let base64_str = general_purpose::STANDARD_NO_PAD.encode(&image_bytes);
+        let base64_str: String = general_purpose::STANDARD_NO_PAD.encode(&image_bytes);
         Ok(base64_str)
     }
 
