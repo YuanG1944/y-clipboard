@@ -94,9 +94,15 @@ const ClipHistoryBoard: FC = () => {
   };
 
   const hideWindow = () => {
-    setShow(false);
-    windows.hide();
-    setHistoryStr(historyCtx);
+    os.platform().then((platform) => {
+      setShow(false);
+      if (platform === 'darwin') {
+        windows.hideWithSwitchApp();
+      } else {
+        windows.hide();
+      }
+      setHistoryStr(historyCtx);
+    });
   };
 
   const sendingExit = () => {

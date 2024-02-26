@@ -27,6 +27,12 @@ export default class Windows {
     }, 400);
   }
 
+  hideWithSwitchApp() {
+    setTimeout(() => {
+      invoke(WinActEnum.HIDE_WIN_SWITCH);
+    }, 400);
+  }
+
   show() {
     invoke(WinActEnum.SHOW_WIN);
   }

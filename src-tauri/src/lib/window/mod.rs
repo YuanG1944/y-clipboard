@@ -1,6 +1,6 @@
 use tauri::{Position, Size};
 
-use crate::device::get_cursor_monitor;
+use crate::{device::get_cursor_monitor, paste::switch_application_action};
 
 pub fn repos(window: &tauri::Window) {
     let monitors = window.available_monitors().unwrap();
@@ -31,6 +31,14 @@ pub fn resized(window: &tauri::Window) {
 #[tauri::command]
 pub fn hide(window: tauri::Window) {
     if window.is_visible().unwrap() {
+        window.hide().expect("failed to hide windows");
+    }
+}
+
+#[tauri::command]
+pub fn hide_with_switch_app(window: tauri::Window) {
+    if window.is_visible().unwrap() {
+        switch_application_action();
         window.hide().expect("failed to hide windows");
     }
 }

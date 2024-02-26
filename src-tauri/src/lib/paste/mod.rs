@@ -3,17 +3,17 @@ use std::{thread, time};
 
 // solve the problem of first using dispatch not available
 pub fn key_register() {
-    dispatch(&EventType::KeyPress(Key::ShiftLeft));
-    dispatch(&EventType::KeyRelease(Key::ShiftLeft));
+    dispatch(&EventType::KeyPress(Key::ControlLeft));
+    dispatch(&EventType::KeyRelease(Key::ControlLeft));
     sleep(100);
 }
 
-#[cfg(target_os = "windows")]
-fn switch_application_action() {
-    dispatch(&EventType::KeyPress(Key::Alt));
-    dispatch(&EventType::KeyPress(Key::Tab));
-    dispatch(&EventType::KeyRelease(Key::Tab));
-    dispatch(&EventType::KeyRelease(Key::Alt));
+#[cfg(target_os = "macos")]
+pub fn switch_application_action() {
+    dispatch(&EventType::KeyPress(Key::ControlLeft));
+    dispatch(&EventType::KeyPress(Key::F4));
+    dispatch(&EventType::KeyRelease(Key::F4));
+    dispatch(&EventType::KeyRelease(Key::ControlLeft));
     sleep(100);
 }
 
@@ -47,7 +47,6 @@ pub fn os_paste() {
 #[cfg(target_os = "windows")]
 pub fn os_paste() {
     std::thread::spawn(move || {
-        // switch_application_action();
         paste_action();
     });
 }

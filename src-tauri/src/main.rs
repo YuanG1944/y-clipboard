@@ -18,7 +18,7 @@ fn main() {
             Ok(())
         })
         .on_window_event(|event| match event.event() {
-            tauri::WindowEvent::Moved(_) => window::resized(event.window()),
+            // tauri::WindowEvent::Moved(_) => window::resized(event.window()),
             tauri::WindowEvent::Destroyed => {
                 let _ = event
                     .window()
@@ -31,6 +31,7 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             window::show,
             window::hide,
+            window::hide_with_switch_app,
             window::toggle_devtool,
         ])
         .run(tauri::generate_context!())
