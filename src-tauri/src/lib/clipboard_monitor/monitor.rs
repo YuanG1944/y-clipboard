@@ -6,6 +6,7 @@ use image::EncodableLayout;
 use serde_json;
 use std::collections::VecDeque;
 use std::fs;
+use std::path::Path;
 use std::process::Command;
 use std::sync::Arc;
 use std::sync::Mutex;
@@ -61,8 +62,25 @@ where
             item.push_formats(String::from("image"));
         }
         if self.manager.has_file_url().unwrap() {
-            item.set_files(self.manager.read_files().unwrap());
-            item.push_formats(String::from("files"));
+            let files = self.manager.read_files().unwrap();
+
+            if self.manager.has_text().unwrap() == false {
+                let files_name: Vec<&str> = files
+                    .iter()
+                    .map(|f| {
+                        let path = Path::new(f);
+                        path.file_name().unwrap().to_str().unwrap()
+                    })
+                    .collect();
+
+                item.set_text(files_name.join(" "));
+                item.push_formats(String::from("text"));
+            }
+
+            if self.manager.read_files().unwrap().len() > 0 {
+                item.set_files(self.manager.read_files().unwrap());
+                item.push_formats(String::from("files"));
+            }
         }
 
         item
@@ -201,13 +219,38 @@ impl ClipboardManager {
             .has(format))
     }
 
+    #[cfg(target_os = "macos")]
     pub fn has_file_url(&self) -> Result<bool, String> {
+        println!(
+            "avaliable---> {:?}",
+            self.clipboard.lock().unwrap().available_formats()
+        );
         Ok(self
             .clipboard
             .try_lock()
             .map_err(|err| err.to_string())
             .unwrap()
             .has(ContentFormat::Other("public.file-url")))
+    }
+
+    #[cfg(target_os = "windows")]
+    pub fn has_file_url(&self) -> Result<bool, String> {
+        Ok(self
+            .clipboard
+            .try_lock()
+            .map_err(|err| err.to_string())
+            .unwrap()
+            .has(ContentFormat::Other("FileContents")))
+    }
+
+    #[cfg(target_os = "linux")]
+    pub fn has_file_url(&self) -> Result<bool, String> {
+        println!(
+            "avaliable---> {:?}",
+            self.clipboard.lock().unwrap().available_formats()
+        );
+        // TODO
+        false
     }
 
     pub fn has_text(&self) -> Result<bool, String> {
@@ -370,10 +413,10 @@ impl ClipboardManager {
 
     #[cfg(target_os = "windows")]
     pub fn open_file(&self, file_path: String) -> Result<(), String> {
-        Command::new("cmd")
-            .arg(&["/C", "start", "", file_path])
-            .spawn()
-            .expect("Failed to open file on macOS.");
+        // Command::new("cmd")
+        //     .arg(&["/C", "start", "", file_path.as_str()])
+        //     .spawn()
+        //     .expect("Failed to open file on macOS.");
         Ok(())
     }
 

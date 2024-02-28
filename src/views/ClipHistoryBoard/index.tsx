@@ -7,7 +7,7 @@ import styles from './index.module.scss';
 import NavBar from '@/components/NavBar';
 import ClipCard from '@/components/ClipCard';
 import Windows from '@/actions/windows';
-import { StorageItem } from '@/actions/clipboard/type';
+import { ActiveEnum, StorageItem } from '@/actions/clipboard/type';
 
 import { os } from '@tauri-apps/api';
 import { appWindow } from '@tauri-apps/api/window';
@@ -123,18 +123,18 @@ const ClipHistoryBoard: FC = () => {
     hideWindow();
   };
 
-  // const handleActiveChange = (act: ActiveEnum) => {
-  //   const ctx = historyCtx.map((it) => {
-  //     if (it.id === currId) {
-  //       return {
-  //         ...it,
-  //         defaultActive: act,
-  //       };
-  //     }
-  //     return it;
-  //   });
-  //   setHistoryCtx(ctx);
-  // };
+  const handleActiveChange = (act: ActiveEnum) => {
+    const ctx = historyCtx.map((it) => {
+      if (it.id === currId) {
+        return {
+          ...it,
+          defaultActive: act,
+        };
+      }
+      return it;
+    });
+    setHistoryCtx(ctx);
+  };
 
   useKeyPress('rightarrow', () => {
     setCurrIndex((num) => {
@@ -216,6 +216,7 @@ const ClipHistoryBoard: FC = () => {
                   navFocus={focus}
                   onClick={handleClick(ctx.id!)}
                   onDoubleClick={handleDoubleClick}
+                  onActiveChange={handleActiveChange}
                 />
               ))}
             </div>

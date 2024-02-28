@@ -18,6 +18,11 @@ pub fn switch_application_action() {
 }
 
 #[cfg(target_os = "windows")]
+pub fn switch_application_action() {
+    // windows do not need this
+}
+
+#[cfg(target_os = "windows")]
 fn paste_action() {
     sleep(300);
     dispatch(&EventType::KeyPress(Key::ControlLeft));

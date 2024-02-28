@@ -1,4 +1,4 @@
-import { FC, useMemo, useState } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import { Card, Upload, UploadFile } from 'antd';
 import styles from './index.module.scss';
 import { ActiveEnum, StorageItem } from '@/actions/clipboard/type';
@@ -6,6 +6,7 @@ import classnames from 'classnames';
 import CardTitle from './CardTitle';
 import QueueAnim from 'rc-queue-anim';
 import { openFile } from '@/actions/clipboard';
+import { os } from '@tauri-apps/api';
 
 export interface ICardProps {
   id: string;
@@ -28,8 +29,15 @@ const ClipCard: FC<ICardProps> = ({
 }) => {
   const [active, setActive] = useState(ActiveEnum.Text);
   const [show, setShow] = useState(true);
+  const [platform, setPlatform] = useState('');
 
   const focus = useMemo(() => currId === context.id, [currId]);
+
+  const getPlatform = () => {
+    os.platform().then((p) => {
+      setPlatform(p);
+    });
+  };
 
   const renderUrl = () => {
     const urlRegex = /img src="([^"]+)"/;
@@ -63,7 +71,7 @@ const ClipCard: FC<ICardProps> = ({
       case ActiveEnum.File:
         const fileList = context?.files?.map((file) => ({
           uid: file,
-          name: file.split('/').slice(-1)[0],
+          name: platform === 'win32' ? file.split('\\').slice(-1)[0] : file.split('/').slice(-1)[0],
           thumbUrl: file,
         }));
         return (
@@ -76,7 +84,7 @@ const ClipCard: FC<ICardProps> = ({
       default:
         return <></>;
     }
-  }, [active]);
+  }, [active, platform]);
 
   const handleActiveChange = (act: ActiveEnum) => {
     setActive(act);
@@ -93,6 +101,10 @@ const ClipCard: FC<ICardProps> = ({
       setShow(true);
     }, 300);
   };
+
+  useEffect(() => {
+    getPlatform();
+  }, []);
 
   return (
     <Card
