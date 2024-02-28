@@ -7,6 +7,8 @@ pub struct HistoryItem {
     id: String,
     text: String,
     html: String,
+    image: String,
+    files: Vec<String>,
     formats: Vec<String>,
 }
 
@@ -16,6 +18,8 @@ impl HistoryItem {
             id: Uuid::new_v4().to_string(),
             text: String::from(""),
             html: String::from(""),
+            image: String::from(""),
+            files: vec![],
             formats: vec![],
         }
     }
@@ -34,6 +38,22 @@ impl HistoryItem {
 
     pub fn set_html(&mut self, html: String) {
         self.html = html;
+    }
+
+    pub fn get_image(&self) -> &str {
+        &self.image.as_str()
+    }
+
+    pub fn set_image(&mut self, image: String) {
+        self.image = image;
+    }
+
+    pub fn get_files(&self) -> &Vec<String> {
+        &self.files
+    }
+
+    pub fn set_files(&mut self, files: Vec<String>) {
+        self.files = Vec::from(files);
     }
 
     pub fn set_formats(&mut self, formats: Vec<String>) {
@@ -58,6 +78,7 @@ impl HistoryStore {
     }
 
     pub fn push(&mut self, val: HistoryItem) {
+        println!("HistoryItem--> {:?}", val);
         self.history.push_front(val);
     }
 

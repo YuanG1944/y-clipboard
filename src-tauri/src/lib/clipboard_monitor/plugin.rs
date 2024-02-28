@@ -104,6 +104,19 @@ fn write_image_binary(manager: State<'_, ClipboardManager>, bytes: Vec<u8>) -> R
 }
 
 #[tauri::command]
+fn write_files_path(
+    manager: State<'_, ClipboardManager>,
+    files: Vec<String>,
+) -> Result<(), String> {
+    manager.write_files_path(files)
+}
+
+#[tauri::command]
+fn open_file(manager: State<'_, ClipboardManager>, file_path: String) -> Result<(), String> {
+    manager.open_file(file_path)
+}
+
+#[tauri::command]
 fn paste() {
     os_paste();
 }
@@ -185,6 +198,8 @@ pub fn init<R: Runtime>(open_watch: bool) -> TauriPlugin<R> {
             write_rtf,
             write_image_binary,
             write_image_base64,
+            write_files_path,
+            open_file,
             paste,
             clear
         ])

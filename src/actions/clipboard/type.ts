@@ -10,7 +10,7 @@ export interface StorageItem {
   html?: string;
   rtf?: string;
   buffer?: Buffer;
-  file?: string;
+  files?: string[];
   image?: string;
   formats?: string[];
   timeStamp?: number;
@@ -28,7 +28,7 @@ export enum ActiveEnum {
   Text = 'text',
   Html = 'html',
   Image = 'image',
-  File = 'file',
+  File = 'files',
 }
 
 export const ActiveTitle = {

@@ -1,10 +1,11 @@
 import { FC, useMemo, useState } from 'react';
-import { Card } from 'antd';
+import { Card, Upload, UploadFile } from 'antd';
 import styles from './index.module.scss';
 import { ActiveEnum, StorageItem } from '@/actions/clipboard/type';
 import classnames from 'classnames';
 import CardTitle from './CardTitle';
 import QueueAnim from 'rc-queue-anim';
+import { openFile } from '@/actions/clipboard';
 
 export interface ICardProps {
   id: string;
@@ -43,6 +44,10 @@ const ClipCard: FC<ICardProps> = ({
     );
   };
 
+  const handleOpenFile = (file: UploadFile) => {
+    file.thumbUrl && openFile(file.thumbUrl);
+  };
+
   const highlightStyles = useMemo(() => {
     return focus ? styles.highlight : '';
   }, [currId]);
@@ -54,9 +59,20 @@ const ClipCard: FC<ICardProps> = ({
       case ActiveEnum.Html:
         return renderUrl();
       case ActiveEnum.Image:
-        return <img width="100%" src={context.image} alt="" />;
+        return <img width="100%" src={`data:image/png;base64,${context.image}`} alt="" />;
       case ActiveEnum.File:
-        return <div>File</div>;
+        const fileList = context?.files?.map((file) => ({
+          uid: file,
+          name: file.split('/').slice(-1)[0],
+          thumbUrl: file,
+        }));
+        return (
+          <Upload
+            showUploadList={{ showRemoveIcon: false }}
+            fileList={fileList}
+            onPreview={handleOpenFile}
+          />
+        );
       default:
         return <></>;
     }

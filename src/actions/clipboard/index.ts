@@ -21,6 +21,8 @@ export const HAS_RTF_COMMAND = 'plugin:clipboard|has_rtf';
 export const WRITE_TEXT_COMMAND = 'plugin:clipboard|write_text';
 export const WRITE_HTML_COMMAND = 'plugin:clipboard|write_html';
 export const WRITE_RTF_COMMAND = 'plugin:clipboard|write_rtf';
+export const WRITE_FILES_PATH = 'plugin:clipboard|write_files_path';
+export const OPEN_FILE_COMMAND = 'plugin:clipboard|open_file';
 export const CLEAR_COMMAND = 'plugin:clipboard|clear';
 export const READ_TEXT_COMMAND = 'plugin:clipboard|read_text';
 export const READ_HTML_COMMAND = 'plugin:clipboard|read_html';
@@ -68,116 +70,6 @@ export const defaultFormat = (format: string[]) => {
   return ActiveEnum.Text;
 };
 
-// const setStoreValue = (value: StorageItem[], currId: string = '') => {
-//   clipHistory = moveToFirst(value, currId);
-// ipcRenderer.send(StoreEnum.SET_STORE, CLIP_HISTORY, value);
-// };
-
-// const getStoreValue = () => {};
-
-// const getClipHistory = () => clipHistory;
-
-// const getPreCopy = () => clipHistory?.[0] ?? null;
-
-// const queryById = (id: string) => {
-//   return clipHistory.find((item) => item.id === id);
-// };
-
-// const isSameElements = (pre: StorageItem, curr: StorageItem) => {
-// if (curr.formats.includes(ActiveEnum.Image)) {
-//   if (pre?.html === curr?.html) return true;
-//   return false;
-// }
-// if (!(curr?.text || '').trim() || !(curr?.html || '').trim()) return true;
-// if (!pre?.text && !pre?.html) return false;
-// if (pre?.text === curr?.text) return true;
-//   return false;
-// };
-
-// const assembleCopyItem = (): StorageItem => {
-// const formats = clipboard.availableFormats();
-// const defaultActive = defaultFormat(formats);
-// const value: StorageItem = {
-//   id: uuid(),
-//   text: clipboard?.readText(),
-//   rtf: clipboard?.readRTF(),
-//   html: clipboard?.readHTML(),
-//   bookmark: clipboard?.readBookmark(),
-//   formats,
-//   defaultActive,
-//   timeStamp: new Date().getTime(),
-//   collect: false,
-// };
-// const image = clipboard.readImage();
-// if (value.formats.includes(ActiveEnum.Image) && !image.isEmpty()) {
-//   const urlRegex = /img src="([^"]+)"/;
-//   const urls = value.html.match(urlRegex);
-//   value.formats = [...value.formats.filter((item) => item !== ActiveEnum.Html), ActiveEnum.Text];
-//   value.text = urls?.length === 2 ? urls[1] : '';
-//   value.image = image.toDataURL();
-// }
-// if (value.formats.includes(ActiveEnum.File)) {
-//   value.text = clipboard.readBuffer('public.file-url').toString();
-// }
-//   return {};
-// };
-
-// const clipboardOb = (cb: ArrChangeCallback) => () => {
-//   const preCopy = getPreCopy();
-//   const curr = assembleCopyItem();
-
-//   if (isSameElements(preCopy, curr)) {
-//     return;
-//   }
-//   console.info('preCopy-->', preCopy);
-//   console.info('curr-->', curr);
-
-//   clipHistory.unshift(curr);
-//   cb(clipHistory);
-// };
-
-// const start = (cb: ArrChangeCallback = () => {}, duration = 500) => {
-//   if (!timer) {
-//     Object.assign(clipHistory, getStoreValue());
-//     timer = setInterval(clipboardOb(cb), duration);
-//   }
-// };
-
-// const stop = () => {
-//   clearInterval(timer);
-//   timer = null;
-// };
-
-// const writeSelected = (id: string) => {
-//   const curr = queryById(id);
-//   const active = curr?.defaultActive;
-//   if (active === ActiveEnum.Text) {
-// clipboard.writeText(curr.text);
-//     return;
-//   }
-//   if (active === ActiveEnum.Html) {
-// clipboard.writeHTML(curr.html);
-//     return;
-//   }
-//   if (active === ActiveEnum.Image) {
-// clipboard.writeHTML(curr.html);
-//     return;
-//   }
-//   if (active === ActiveEnum.File) {
-// clipboard.writeBuffer('public.file-url', Buffer.from(curr.text, 'utf-8'));
-//     return;
-//   }
-// };
-
-// export default {
-//   setStoreValue,
-//   getStoreValue,
-//   writeSelected,
-//   getClipHistory,
-//   start,
-//   stop,
-// };
-
 export const safeJsonParse = (str: string) => {
   try {
     return JSON.parse(str);
@@ -215,7 +107,8 @@ export async function writeSelected(historyArr: StorageItem[], currId: string = 
     await writeText(curr?.html);
     return;
   }
-  if (active === ActiveEnum.Image) {
+  if (active === ActiveEnum.Image && curr?.image) {
+    await writeImageBase64(curr?.image);
     return;
   }
   if (active === ActiveEnum.File) {
@@ -249,6 +142,14 @@ export function writeHtml(html: string): Promise<void> {
 
 export function writeRtf(rtf: string): Promise<void> {
   return invoke(WRITE_RTF_COMMAND, { rtf });
+}
+
+export function writeFilePath(files: string[]): Promise<void> {
+  return invoke(WRITE_FILES_PATH, { files });
+}
+
+export function openFile(filePath: string): Promise<void> {
+  return invoke(OPEN_FILE_COMMAND, { filePath });
 }
 
 export function clear(): Promise<void> {

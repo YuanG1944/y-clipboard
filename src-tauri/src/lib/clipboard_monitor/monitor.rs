@@ -5,6 +5,8 @@ use clipboard_rs::{common::RustImage, Clipboard, ClipboardContext, ContentFormat
 use image::EncodableLayout;
 use serde_json;
 use std::collections::VecDeque;
+use std::fs;
+use std::process::Command;
 use std::sync::Arc;
 use std::sync::Mutex;
 use std::sync::TryLockError;
@@ -45,13 +47,6 @@ where
 
     pub fn item_collect(&self) -> HistoryItem {
         let mut item = HistoryItem::new();
-        // let formats = self
-        //     .manager
-        //     .clipboard
-        //     .lock()
-        //     .unwrap()
-        //     .available_formats()
-        //     .unwrap();
 
         if self.manager.has_text().unwrap() {
             item.set_text(self.manager.read_text().unwrap());
@@ -60,6 +55,14 @@ where
         if self.manager.has_html().unwrap() {
             item.set_html(self.manager.read_html().unwrap());
             item.push_formats(String::from("html"));
+        }
+        if self.manager.has_image().unwrap() {
+            item.set_image(self.manager.read_image_base64().unwrap());
+            item.push_formats(String::from("image"));
+        }
+        if self.manager.has_file_url().unwrap() {
+            item.set_files(self.manager.read_files().unwrap());
+            item.push_formats(String::from("files"));
         }
 
         item
@@ -73,11 +76,23 @@ where
             return false;
         }
 
-        if latest_items[0].get_html() == curr_item.get_html() {
+        let latest_item_html = latest_items[0].get_html().trim();
+        let curr_item_html = curr_item.get_html().trim();
+
+        if latest_item_html.len() > 0
+            && curr_item_html.len() > 0
+            && latest_item_html == curr_item_html
+        {
             return true;
         }
 
-        if latest_items[0].get_text() == curr_item.get_text() {
+        let latest_item_text = latest_items[0].get_html().trim();
+        let curr_item_text = curr_item.get_html().trim();
+
+        if latest_item_text.len() > 0
+            && curr_item_text.len() > 0
+            && latest_item_text == curr_item_text
+        {
             return true;
         }
 
@@ -126,7 +141,6 @@ where
     }
 
     fn on_clipboard_error(&mut self, error: std::io::Error) -> CallbackResult {
-        println!("clipboard err--->");
         let _ = self.app_handle.emit_all(
             "plugin:clipboard://clipboard-monitor/error",
             error.to_string(),
@@ -159,7 +173,6 @@ impl ClipboardManager {
 
     pub fn get_history(&self) -> Result<String, String> {
         let arr = self.store.lock().map_err(|err| err.to_string()).unwrap();
-        println!("currStore--> {:?}", arr.get_store());
         match serde_json::to_string(arr.get_store()) {
             Ok(json_str) => Ok(json_str.clone()),
             Err(e) => Err(format!("Error serializing VecDeque to JSON: {:?}", e)),
@@ -186,6 +199,15 @@ impl ClipboardManager {
             .lock()
             .map_err(|err| err.to_string())?
             .has(format))
+    }
+
+    pub fn has_file_url(&self) -> Result<bool, String> {
+        Ok(self
+            .clipboard
+            .try_lock()
+            .map_err(|err| err.to_string())
+            .unwrap()
+            .has(ContentFormat::Other("public.file-url")))
     }
 
     pub fn has_text(&self) -> Result<bool, String> {
@@ -275,6 +297,7 @@ impl ClipboardManager {
 
     // Write to Clipboard APIs
     pub fn write_text(&self, text: String) -> Result<(), String> {
+        let text = String::from(text.trim());
         self.clipboard
             .lock()
             .map_err(|err| err.to_string())?
@@ -309,13 +332,57 @@ impl ClipboardManager {
     }
 
     pub fn write_image_binary(&self, bytes: Vec<u8>) -> Result<(), String> {
-        println!("writing bin image to clipboard");
         let img = RustImageData::from_bytes(bytes.as_bytes()).map_err(|err| err.to_string())?;
         self.clipboard
             .lock()
             .map_err(|err| err.to_string())?
             .set_image(img)
             .unwrap();
+        Ok(())
+    }
+
+    pub fn write_files_path(&self, files: Vec<String>) -> Result<(), String> {
+        let _ = files.iter().map(|f| {
+            let _ = match fs::read(f) {
+                Ok(buf) => self
+                    .clipboard
+                    .lock()
+                    .map_err(|err| err.to_string())
+                    .unwrap()
+                    .set_buffer("public.file-url", buf),
+                Err(err) => {
+                    println!("write_files_path err: {}", err);
+                    Ok(())
+                }
+            };
+        });
+        Ok(())
+    }
+
+    #[cfg(target_os = "macos")]
+    pub fn open_file(&self, file_path: String) -> Result<(), String> {
+        Command::new("open")
+            .arg(file_path)
+            .spawn()
+            .expect("Failed to open file on macOS.");
+        Ok(())
+    }
+
+    #[cfg(target_os = "windows")]
+    pub fn open_file(&self, file_path: String) -> Result<(), String> {
+        Command::new("cmd")
+            .arg(&["/C", "start", "", file_path])
+            .spawn()
+            .expect("Failed to open file on macOS.");
+        Ok(())
+    }
+
+    #[cfg(target_os = "linux")]
+    pub fn open_file(&self, file_path: String) -> Result<(), String> {
+        Command::new("xdg-open")
+            .arg(file_path)
+            .spawn()
+            .expect("Failed to open file on Linux.");
         Ok(())
     }
 
