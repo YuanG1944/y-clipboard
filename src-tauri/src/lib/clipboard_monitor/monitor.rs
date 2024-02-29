@@ -104,8 +104,8 @@ where
             return true;
         }
 
-        let latest_item_text = latest_items[0].get_html().trim();
-        let curr_item_text = curr_item.get_html().trim();
+        let latest_item_text = latest_items[0].get_text().trim();
+        let curr_item_text = curr_item.get_text().trim();
 
         if latest_item_text.len() > 0
             && curr_item_text.len() > 0
@@ -221,10 +221,10 @@ impl ClipboardManager {
 
     #[cfg(target_os = "macos")]
     pub fn has_file_url(&self) -> Result<bool, String> {
-        println!(
-            "avaliable---> {:?}",
-            self.clipboard.lock().unwrap().available_formats()
-        );
+        // println!(
+        //     "avaliable---> {:?}",
+        //     self.clipboard.lock().unwrap().available_formats()
+        // );
         Ok(self
             .clipboard
             .try_lock()
@@ -385,7 +385,7 @@ impl ClipboardManager {
     }
 
     pub fn write_files_path(&self, files: Vec<String>) -> Result<(), String> {
-        let _ = files.iter().map(|f| {
+        let _ = files.iter().for_each(|f| {
             let _ = match fs::read(f) {
                 Ok(buf) => self
                     .clipboard
