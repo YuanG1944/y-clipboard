@@ -13,7 +13,7 @@ export interface StorageItem {
   files?: string[];
   image?: string;
   formats?: string[];
-  timeStamp?: number;
+  timestamp?: number;
   defaultActive?: ActiveEnum;
   collect?: boolean;
 }

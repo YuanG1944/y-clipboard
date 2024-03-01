@@ -18,6 +18,7 @@
     "ahooks": "^3.7.10",
     "antd": "^5.14.0",
     "classnames": "^2.5.1",
+    "dayjs": "^1.11.10",
     "electron-squirrel-startup": "^1.0.0",
     "electron-store": "^8.1.0",
     "rc-queue-anim": "^2.0.0",

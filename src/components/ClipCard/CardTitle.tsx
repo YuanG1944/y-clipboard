@@ -4,6 +4,7 @@ import { Button } from 'antd';
 import styles from './index.module.scss';
 import { ActiveEnum, ActiveTitle, StorageItem } from '@/actions/clipboard/type';
 import { useKeyPress } from 'ahooks';
+import dayjs from 'dayjs';
 
 export interface ICardTitle {
   id: string;
@@ -147,16 +148,21 @@ const CardTitle: FC<ICardTitle> = ({
     onActiveChange && onActiveChange(activeEnum);
   }, [activeEnum]);
 
+  console.info('context.timeStamp-->', context);
+
   return (
     <div className={styles.title}>
-      <div className={styles.text}>{titleList.filter((item) => item.active)?.[0]?.title}</div>
+      <div className={styles.ctx}>
+        <div className={styles.text}>{titleList.filter((item) => item.active)?.[0]?.title}</div>
+        <div className={styles.time}>{dayjs(context.timestamp).format('YYYY-MM-DD HH:mm')}</div>
+      </div>
       <div>
         {titleList
           .filter((item) => !item.active)
           .map((item, index) => {
             return (
               <Button
-                style={{ color: '#fff' }}
+                style={{ color: focus ? '#ffffffd9' : '#FFFFFFA6' }}
                 disabled={!focus}
                 type="text"
                 key={`${item.title}-${index}`}

@@ -160,7 +160,7 @@ where
                         thread::sleep(Duration::from_millis(40));
                     }
                     Err(e) => {
-                        panic!("锁获取失败: {}", e);
+                        panic!("get lock fail: {}", e);
                     }
                 }
             }

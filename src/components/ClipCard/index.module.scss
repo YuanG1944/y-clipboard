@@ -1,4 +1,5 @@
 .clipCard {
+  position: relative;
   box-sizing: content-box;
   cursor: pointer;
   width: 320px;
@@ -6,6 +7,7 @@
   flex-shrink: 0;
   margin-right: 8px;
   margin-bottom: 8px;
+  overflow: hidden;
 
   &:first-of-type {
     margin-left: 8px;
@@ -14,12 +16,29 @@
   &Ctx {
     word-break: break-all;
     width: 100%;
-    height: 180px;
     overflow-y: auto;
     overflow-x: hidden;
     .text {
-      color: #262626;
+      color: #000000a6;
       font-size: 14px;
+    }
+    .cover {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 248px;
+      position: relative;
+
+      &::after {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        top: 0;
+        left: 0;
+        box-shadow: 0 0 20px 5px #ffffff inset;
+      }
     }
   }
 }
@@ -31,17 +50,24 @@
 
 .title {
   display: flex;
-  justify-content: center;
-  .text {
-    color: #fff;
+  align-items: center;
+  .ctx {
     flex: 1;
+    .text {
+      font-size: 18px;
+      color: #fffffff0;
+    }
+    .time {
+      font-size: 10px;
+      color: #ffffffa6;
+    }
   }
 }
 
 :global {
   .card-background-text {
     .ant-card-head {
-      background-color: #f1c40f;
+      background-color: #faad14;
     }
   }
   .card-background-html {
@@ -52,6 +78,12 @@
   .card-background-image {
     .ant-card-head {
       background-color: #e74c3c;
+    }
+    .ant-card-body {
+      height: 100%;
+      padding: 0;
+      justify-content: center;
+      overflow: hidden;
     }
   }
 }

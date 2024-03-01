@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 use std::collections::VecDeque;
+use std::time::{SystemTime, UNIX_EPOCH};
 use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -8,17 +9,25 @@ pub struct HistoryItem {
     text: String,
     html: String,
     image: String,
+    timestamp: u128,
     files: Vec<String>,
     formats: Vec<String>,
 }
 
 impl HistoryItem {
     pub fn new() -> Self {
+        let timestamp = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_millis();
+
+        print!("timestamp ----> {}", timestamp);
         Self {
             id: Uuid::new_v4().to_string(),
             text: String::from(""),
             html: String::from(""),
             image: String::from(""),
+            timestamp,
             files: vec![],
             formats: vec![],
         }

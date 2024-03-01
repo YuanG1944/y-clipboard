@@ -70,7 +70,11 @@ const ClipCard: FC<ICardProps> = ({
       case ActiveEnum.Html:
         return renderUrl();
       case ActiveEnum.Image:
-        return <img width="100%" src={`data:image/png;base64,${context.image}`} alt="" />;
+        return (
+          <div className={styles.cover}>
+            <img width="100%" height="100%" src={`data:image/png;base64,${context.image}`} alt="" />
+          </div>
+        );
       case ActiveEnum.File:
         const fileList = context?.files?.map((file) => ({
           uid: file,
@@ -90,7 +94,9 @@ const ClipCard: FC<ICardProps> = ({
   }, [active, platform]);
 
   const handleActiveChange = (act: ActiveEnum) => {
-    setActive(act);
+    setTimeout(() => {
+      setActive(act);
+    }, 400);
     onActiveChange && onActiveChange(act);
   };
 
