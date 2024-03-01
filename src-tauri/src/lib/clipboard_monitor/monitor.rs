@@ -77,10 +77,11 @@ where
                 item.push_formats(String::from("text"));
             }
 
-            if self.manager.read_files().unwrap().len() > 0 {
-                item.set_files(self.manager.read_files().unwrap());
-                item.push_formats(String::from("files"));
-            }
+            // TODO fileUrl write pending
+            // if self.manager.read_files().unwrap().len() > 0 {
+            //     item.set_files(self.manager.read_files().unwrap());
+            //     item.push_formats(String::from("files"));
+            // }
         }
 
         item
@@ -110,6 +111,16 @@ where
         if latest_item_text.len() > 0
             && curr_item_text.len() > 0
             && latest_item_text == curr_item_text
+        {
+            return true;
+        }
+
+        let latest_item_image = latest_items[0].get_image();
+        let curr_item_image = curr_item.get_image();
+
+        if latest_item_image.len() > 0
+            && curr_item_image.len() > 0
+            && latest_item_image == curr_item_image
         {
             return true;
         }

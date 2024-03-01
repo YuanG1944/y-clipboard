@@ -156,6 +156,7 @@ const CardTitle: FC<ICardTitle> = ({
           .map((item, index) => {
             return (
               <Button
+                style={{ color: '#fff' }}
                 disabled={!focus}
                 type="text"
                 key={`${item.title}-${index}`}

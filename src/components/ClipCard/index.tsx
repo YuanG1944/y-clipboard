@@ -43,12 +43,13 @@ const ClipCard: FC<ICardProps> = ({
     const urlRegex = /img src="([^"]+)"/;
     const urls = context?.html?.match(urlRegex);
     return urls?.length === 2 ? (
-      <a href={urls[1]}>{urls[1]}</a>
+      <a href={urls[1]} target="_blank">
+        {urls[1]}
+      </a>
     ) : (
-      <div
-        style={{ wordBreak: 'break-word' }}
-        dangerouslySetInnerHTML={{ __html: context.html || '' }}
-      ></div>
+      <div style={{ wordBreak: 'break-word', width: '100%' }}>
+        <div dangerouslySetInnerHTML={{ __html: context.html || '' }}></div>
+      </div>
     );
   };
 
@@ -60,10 +61,12 @@ const ClipCard: FC<ICardProps> = ({
     return focus ? styles.highlight : '';
   }, [currId]);
 
+  const cardClass = useMemo(() => `card-background-${String(active ?? '')}`, [active]);
+
   const contents = useMemo(() => {
     switch (active) {
       case ActiveEnum.Text:
-        return <div>{context.text}</div>;
+        return <div className={styles.text}>{context.text}</div>;
       case ActiveEnum.Html:
         return renderUrl();
       case ActiveEnum.Image:
@@ -120,7 +123,7 @@ const ClipCard: FC<ICardProps> = ({
           onSwitchChange={handleSwitchChange}
         />
       }
-      className={classnames(styles.clipCard, highlightStyles)}
+      className={classnames(styles.clipCard, highlightStyles, cardClass)}
       onClick={onClick}
       onDoubleClick={onDoubleClick}
       hoverable={!focus}

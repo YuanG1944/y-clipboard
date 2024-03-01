@@ -99,21 +99,23 @@ export function setHistoryStr(historyArr: StorageItem[], currId: string = ''): P
 export async function writeSelected(historyArr: StorageItem[], currId: string = '') {
   const curr = historyArr.find((item) => item.id === currId);
   const active = curr?.defaultActive;
-  console.info('active--->', active);
+
   if (active === ActiveEnum.Text && curr?.text) {
     await writeText(curr?.text);
     return;
   }
+
   if (active === ActiveEnum.Html && curr?.html) {
     await writeHtml(curr?.html);
     return;
   }
+
   if (active === ActiveEnum.Image && curr?.image) {
     await writeImageBase64(curr?.image);
     return;
   }
+
   if (active === ActiveEnum.File) {
-    await writeFilePath(curr?.files || []);
     return;
   }
 }
