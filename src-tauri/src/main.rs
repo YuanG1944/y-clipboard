@@ -8,6 +8,9 @@ fn main() {
     tauri::Builder::default()
         .plugin(clipboard_monitor::plugin::init(true))
         .setup(|app| {
+            #[cfg(target_os = "macos")]
+            app.set_activation_policy(tauri::ActivationPolicy::Accessory);
+
             // 后续做成动态配置快捷键
             let global_shortcut = shortcut::GlobalShortcut::new(
                 String::from("CommandOrControl+Shift+B"),
