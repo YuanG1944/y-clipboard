@@ -38,46 +38,21 @@ const CardTitle: FC<ICardTitle> = ({
     const arr = context.formats!.reduce((pre, it) => {
       let item = it as ActiveEnum;
       const active = context.defaultActive === item;
-      switch (item) {
-        case ActiveEnum.Text:
-          return [
-            ...pre,
-            {
-              title: ActiveTitle[item],
-              tag: item,
-              active,
-            },
-          ];
-        case ActiveEnum.Html:
-          return [
-            ...pre,
-            {
-              title: ActiveTitle[item],
-              tag: item,
-              active,
-            },
-          ];
-        case ActiveEnum.Image:
-          return [
-            ...pre,
-            {
-              title: ActiveTitle[item],
-              tag: item,
-              active,
-            },
-          ];
-        case ActiveEnum.File:
-          return [
-            ...pre,
-            {
-              title: ActiveTitle[item],
-              tag: item,
-              active,
-            },
-          ];
-        default:
-          return pre;
+      if (
+        Object.keys(ActiveEnum)
+          .map((key) => key.toLowerCase())
+          .includes(item)
+      ) {
+        return [
+          ...pre,
+          {
+            title: ActiveTitle[item],
+            tag: item,
+            active,
+          },
+        ];
       }
+      return pre;
     }, [] as ITitleActive[]);
     setTitleList(arr);
   };
@@ -147,8 +122,6 @@ const CardTitle: FC<ICardTitle> = ({
   useEffect(() => {
     onActiveChange && onActiveChange(activeEnum);
   }, [activeEnum]);
-
-  console.info('context.timeStamp-->', context);
 
   return (
     <div className={styles.title}>

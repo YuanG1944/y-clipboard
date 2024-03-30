@@ -69,6 +69,8 @@ const ClipCard: FC<ICardProps> = ({
         return <div className={styles.text}>{context.text}</div>;
       case ActiveEnum.Html:
         return renderUrl();
+      case ActiveEnum.RTF:
+        return renderUrl();
       case ActiveEnum.Image:
         return (
           <div className={styles.cover}>

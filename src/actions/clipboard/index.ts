@@ -55,14 +55,17 @@ export const defaultFormat = (format: string[]) => {
   const num = format.reduce((pre, item) => {
     return pre + (ActiveMapping?.[item as ActiveEnum] || 0);
   }, 0);
-  if (num >> 3) {
+  if (num >> 4) {
     return ActiveEnum.File;
   }
-  if (num >> 2) {
+  if (num >> 3) {
     return ActiveEnum.Image;
   }
-  if (num >> 1) {
+  if (num >> 2) {
     return ActiveEnum.Text;
+  }
+  if (num >> 1) {
+    return ActiveEnum.RTF;
   }
   if (num) {
     return ActiveEnum.Html;
@@ -107,6 +110,11 @@ export async function writeSelected(historyArr: StorageItem[], currId: string = 
 
   if (active === ActiveEnum.Html && curr?.html) {
     await writeHtml(curr?.html);
+    return;
+  }
+
+  if (active === ActiveEnum.RTF && curr?.rtf) {
+    await writeRtf(curr?.rtf);
     return;
   }
 

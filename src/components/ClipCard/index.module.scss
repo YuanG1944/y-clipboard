@@ -8,6 +8,7 @@
   margin-right: 8px;
   margin-bottom: 8px;
   overflow: hidden;
+  border: unset;
 
   &:first-of-type {
     margin-left: 8px;
@@ -68,16 +69,25 @@
   .card-background-text {
     .ant-card-head {
       background-color: #faad14;
+      border-radius: unset;
     }
   }
   .card-background-html {
     .ant-card-head {
       background-color: #3498db;
+      border-radius: unset;
+    }
+  }
+  .card-background-rtf {
+    .ant-card-head {
+      background-color: #531dab;
+      border-radius: unset;
     }
   }
   .card-background-image {
     .ant-card-head {
       background-color: #e74c3c;
+      border-radius: unset;
     }
     .ant-card-body {
       height: 100%;

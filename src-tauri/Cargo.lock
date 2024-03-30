@@ -4957,6 +4957,7 @@ dependencies = [
 name = "y-clip"
 version = "0.0.0"
 dependencies = [
+ "anyhow",
  "base64 0.21.7",
  "clipboard-files",
  "clipboard-master",
@@ -4964,6 +4965,8 @@ dependencies = [
  "cocoa 0.24.1",
  "device_query",
  "image",
+ "once_cell",
+ "parking_lot",
  "rdev",
  "serde",
  "serde_json",

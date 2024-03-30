@@ -24,6 +24,8 @@
     "rc-queue-anim": "^2.0.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-router": "^6.22.3",
+    "react-router-dom": "^6.22.3",
     "run-applescript": "^7.0.0",
     "uuid": "^9.0.1"
   },

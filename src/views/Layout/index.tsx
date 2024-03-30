@@ -1,12 +1,14 @@
 import { FC } from 'react';
-import styles from './index.module.scss';
+import { Routes, Route } from 'react-router-dom';
 import ClipHistoryBoard from '../ClipHistoryBoard';
+import ConfigMenu from '../ConfigMenu';
 
 const Layout: FC = () => {
   return (
-    <div className={styles.layout}>
-      <ClipHistoryBoard />
-    </div>
+    <Routes>
+      <Route path="/" element={<ClipHistoryBoard />} />
+      <Route path="/config" element={<ConfigMenu />} />
+    </Routes>
   );
 };
 

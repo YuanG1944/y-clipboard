@@ -27,20 +27,23 @@ export interface TempItem {
 export enum ActiveEnum {
   Text = 'text',
   Html = 'html',
+  RTF = 'rtf',
   Image = 'image',
   File = 'files',
 }
 
 export const ActiveTitle = {
   [ActiveEnum.Text]: 'Text',
-  [ActiveEnum.Html]: 'Format',
+  [ActiveEnum.RTF]: 'Format',
+  [ActiveEnum.Html]: 'Html',
   [ActiveEnum.Image]: 'Image',
   [ActiveEnum.File]: 'File',
 };
 
 export const ActiveMapping = {
-  [ActiveEnum.File]: 0b1000,
-  [ActiveEnum.Image]: 0b0100,
-  [ActiveEnum.Text]: 0b0010,
-  [ActiveEnum.Html]: 0b0001,
+  [ActiveEnum.File]: 0b10000,
+  [ActiveEnum.Image]: 0b01000,
+  [ActiveEnum.Text]: 0b00100,
+  [ActiveEnum.RTF]: 0b00010,
+  [ActiveEnum.Html]: 0b00001,
 };

@@ -8,6 +8,7 @@ pub struct HistoryItem {
     id: String,
     text: String,
     html: String,
+    rtf: String,
     image: String,
     timestamp: u128,
     files: Vec<String>,
@@ -21,11 +22,11 @@ impl HistoryItem {
             .unwrap()
             .as_millis();
 
-        print!("timestamp ----> {}", timestamp);
         Self {
             id: Uuid::new_v4().to_string(),
             text: String::from(""),
             html: String::from(""),
+            rtf: String::from(""),
             image: String::from(""),
             timestamp,
             files: vec![],
@@ -47,6 +48,14 @@ impl HistoryItem {
 
     pub fn set_html(&mut self, html: String) {
         self.html = html;
+    }
+
+    pub fn get_rtf(&self) -> &str {
+        &self.rtf.as_str()
+    }
+
+    pub fn set_rtf(&mut self, rtf: String) {
+        self.rtf = rtf;
     }
 
     pub fn get_image(&self) -> &str {

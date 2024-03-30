@@ -1,2 +1,2 @@
-pub mod plugin;
 pub mod monitor;
+pub mod plugin;

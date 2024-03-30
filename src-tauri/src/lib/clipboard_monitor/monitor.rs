@@ -57,6 +57,10 @@ where
             item.set_html(self.manager.read_html().unwrap());
             item.push_formats(String::from("html"));
         }
+        if self.manager.has_rtf().unwrap() {
+            item.set_rtf(self.manager.read_rtf().unwrap());
+            item.push_formats(String::from("rtf"));
+        }
         if self.manager.has_image().unwrap() {
             item.set_image(self.manager.read_image_base64().unwrap());
             item.push_formats(String::from("image"));
@@ -257,7 +261,7 @@ impl ClipboardManager {
     #[cfg(target_os = "linux")]
     pub fn has_file_url(&self) -> Result<bool, String> {
         println!(
-            "avaliable---> {:?}",
+            "available---> {:?}",
             self.clipboard.lock().unwrap().available_formats()
         );
         // TODO

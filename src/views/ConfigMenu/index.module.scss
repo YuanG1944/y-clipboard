@@ -1,0 +1,19 @@
+.configLayout {
+  position: relative;
+  height: 100vh;
+  width: calc(50% - 8px);
+  overflow: hidden;
+
+  .sider {
+    text-align: center;
+    line-height: 120px;
+    background-color: #fff;
+  }
+
+  .content {
+    width: 100%;
+    text-align: center;
+    min-height: 120;
+    line-height: 120px;
+  }
+}

@@ -31,6 +31,8 @@
     },
     "windows": [
       {
+        "label": "main",
+        "url": "/",
         "decorations": false,
         "fullscreen": false,
         "resizable": true,
@@ -38,7 +40,24 @@
         "alwaysOnTop": true,
         "visible": false,
         "transparent": true,
-        "skipTaskbar": true
+        "skipTaskbar": true,
+        "minimizable": true
+      },
+      {
+        "label": "config",
+        "title": "Preferences",
+        "url": "/config",
+        "visible": false,
+        "width": 648.0,
+        "height": 480.0,
+        "decorations": true,
+        "fullscreen": false,
+        "resizable": true,
+        "hiddenTitle": false,
+        "alwaysOnTop": false,
+        "transparent": false,
+        "skipTaskbar": false,
+        "closable": false
       }
     ],
     "security": {

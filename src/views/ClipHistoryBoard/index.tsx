@@ -198,7 +198,7 @@ const ClipHistoryBoard: FC = () => {
   }, []);
 
   return (
-    <>
+    <div className={styles.clipLayout}>
       <div className={styles.blankSpace} onClick={handleBlankSpace}></div>
       <QueueAnim className={styles.animateLayout} type={'bottom'} ease={'easeInOutQuart'} key="ani">
         {show ? (
@@ -223,7 +223,7 @@ const ClipHistoryBoard: FC = () => {
           </div>
         ) : null}
       </QueueAnim>
-    </>
+    </div>
   );
 };
 
