@@ -25,6 +25,11 @@ fn main() {
                     window::handler::WindowHandler::resized(event.window())
                 }
             }
+            tauri::WindowEvent::CloseRequested { api, .. } => {
+                api.prevent_close();
+                let window = event.window();
+                window.hide().expect("Could not hide window");
+            }
             tauri::WindowEvent::Destroyed => {
                 let _ = event
                     .window()
@@ -47,14 +52,6 @@ fn main() {
 fn set_up(app: &mut App) {
     #[cfg(target_os = "macos")]
     app.set_activation_policy(tauri::ActivationPolicy::Accessory);
-
-    // // 后续做成动态配置快捷键
-    // let global_shortcut = shortcut::manage::GlobalShortcut::new(
-    //     String::from("CommandOrControl+Shift+B"),
-    //     String::from("f12"),
-    // );
-
     window::handler::WindowHandler::new().init(app.app_handle());
     tray::Tray::register_stray(&app.app_handle()).unwrap();
-    // global_shortcut.register_global_shortcut(app);
 }

@@ -1,8 +1,5 @@
 use anyhow::Result;
-use tauri::{
-    async_runtime::TokioHandle, AppHandle, CustomMenuItem, Manager, SystemTrayEvent,
-    SystemTrayMenu, SystemTrayMenuItem, SystemTraySubmenu,
-};
+use tauri::{AppHandle, CustomMenuItem, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem};
 
 use crate::window;
 
@@ -41,17 +38,6 @@ impl Tray {
                 _ => {}
             },
 
-            #[cfg(target_os = "windows")]
-            SystemTrayEvent::LeftClick { .. } => {
-                if let Some(window) = app_handle.get_window("main") {
-                    if let Err(err) = window.show() {
-                        println!("Failed to show window: {}", err);
-                    }
-                    if let Err(err) = window.set_focus() {
-                        println!("Failed to set focus on window: {}", err);
-                    }
-                }
-            }
             _ => {}
         }
     }

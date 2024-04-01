@@ -6,7 +6,7 @@ import ConfigMenu from '../ConfigMenu';
 const Layout: FC = () => {
   return (
     <Routes>
-      <Route path="/" element={<ClipHistoryBoard />} />
+      <Route path="/main" element={<ClipHistoryBoard />} />
       <Route path="/config" element={<ConfigMenu />} />
     </Routes>
   );

@@ -2,7 +2,7 @@ use anyhow::{bail, Result};
 use once_cell::sync::OnceCell;
 use parking_lot::Mutex;
 use std::sync::Arc;
-use tauri::{AppHandle, Manager, Position, Runtime, Size, Window};
+use tauri::{AppHandle, Manager, PhysicalSize, Position, Runtime, Size, Window};
 
 use crate::{device::get_cursor_monitor, tray::Tray};
 
@@ -57,11 +57,16 @@ impl WindowHandler {
         let url = window_info.url;
 
         if let Some(window) = app_handle.get_window(label.as_str()) {
+            if label.as_str() == "config" && window.is_minimized().unwrap() {
+                let _ = window.unminimize();
+                return;
+            }
             if window.is_visible().unwrap() {
                 let _ = window.hide();
                 return;
             }
-            let _ = window.show();
+
+            let _ = window.show().expect("failed to show windows");
             let _ = window.set_focus();
             return;
         }
@@ -72,7 +77,7 @@ impl WindowHandler {
             tauri::WindowUrl::App(url.into()),
         )
         .title(title)
-        .visible(false)
+        .visible(true)
         .resizable(window_info.resizable)
         .fullscreen(window_info.fullscreen)
         .always_on_top(window_info.always_on_top)
@@ -86,7 +91,7 @@ impl WindowHandler {
         match new_window {
             Ok(window) => {
                 if window.is_visible().unwrap() {
-                    let _ = window.close();
+                    let _ = window.hide();
                 }
                 let _ = window.show();
                 let _ = window.set_focus();

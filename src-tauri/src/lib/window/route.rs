@@ -31,7 +31,7 @@ impl WindowConfig {
         WindowConfig {
             label: RoutesEnum::Main(String::from("main")),
             title: "y-clipboard".into(),
-            url: "/".into(),
+            url: "/main".into(),
             width: 0.0,
             height: 0.0,
             decorations: false,
@@ -44,6 +44,7 @@ impl WindowConfig {
             closable: false,
         }
     }
+
     pub fn config() -> Self {
         WindowConfig {
             label: RoutesEnum::Config(String::from("config")),
@@ -53,12 +54,12 @@ impl WindowConfig {
             height: 480.0,
             decorations: true,
             fullscreen: false,
-            resizable: true,
+            resizable: false,
             hidden_title: false,
-            always_on_top: false,
+            always_on_top: true,
             transparent: false,
-            skip_taskbar: false,
-            closable: false,
+            skip_taskbar: true,
+            closable: true,
         }
     }
 }
