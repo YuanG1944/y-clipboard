@@ -87,7 +87,7 @@ const ClipHistoryBoard: FC = () => {
       writeSelected(historyCtx, currId);
       windows.hide();
       setShow(false);
-      setTimeout(() => {
+      setTimeout(async () => {
         paste();
       }, 200);
     }
@@ -123,9 +123,9 @@ const ClipHistoryBoard: FC = () => {
     hideWindow();
   };
 
-  const handleActiveChange = (act: ActiveEnum) => {
+  const handleActiveChange = (act: ActiveEnum, id: string) => {
     const ctx = historyCtx.map((it) => {
-      if (it.id === currId) {
+      if (it.id === id) {
         return {
           ...it,
           defaultActive: act,

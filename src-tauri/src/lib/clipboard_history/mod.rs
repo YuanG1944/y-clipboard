@@ -3,21 +3,23 @@ use std::collections::VecDeque;
 use std::time::{SystemTime, UNIX_EPOCH};
 use uuid::Uuid;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(serde::Serialize, serde::Deserialize, Debug, Default, PartialEq)]
 pub struct HistoryItem {
     id: String,
     text: String,
     html: String,
     rtf: String,
     image: String,
-    timestamp: u128,
+    favorite: bool,
+    tag: String,
+    create_time: u128,
     files: Vec<String>,
     formats: Vec<String>,
 }
 
 impl HistoryItem {
     pub fn new() -> Self {
-        let timestamp = SystemTime::now()
+        let create_time = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap()
             .as_millis();
@@ -28,7 +30,9 @@ impl HistoryItem {
             html: String::from(""),
             rtf: String::from(""),
             image: String::from(""),
-            timestamp,
+            tag: String::from(""),
+            favorite: false,
+            create_time,
             files: vec![],
             formats: vec![],
         }
@@ -40,6 +44,14 @@ impl HistoryItem {
 
     pub fn set_text(&mut self, text: String) {
         self.text = text;
+    }
+
+    pub fn get_favorite(&self) -> bool {
+        self.favorite
+    }
+
+    pub fn set_favorite(&mut self, favorite: bool) {
+        self.favorite = favorite;
     }
 
     pub fn get_html(&self) -> &str {

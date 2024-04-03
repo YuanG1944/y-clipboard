@@ -61,6 +61,9 @@ fn function_keycode_map(modifier_code: u32) -> String {
 }
 
 fn capitalized(name: &str, is_first_word_upper_case: bool) -> String {
+    if name.is_empty() {
+        return "".to_string();
+    }
     let name = name.to_lowercase();
     if !is_first_word_upper_case {
         return name;
@@ -84,10 +87,11 @@ pub fn get_short_cut_name(key_code_arr: Vec<u32>, is_first_word_upper_case: bool
         } else if !keycode_map(key_code).is_empty() {
             key_str = capitalized(&keycode_map(key_code), is_first_word_upper_case);
         } else {
-            normal_key = capitalized(
-                &String::from_utf8(vec![key_code as u8]).unwrap(),
-                is_first_word_upper_case,
-            );
+            let name = match String::from_utf8(vec![key_code as u8]) {
+                Ok(str) => str,
+                Err(_) => "".to_string(),
+            };
+            normal_key = capitalized(&name, is_first_word_upper_case);
         }
     }
     if function_key.is_empty() && key_str.is_empty() {

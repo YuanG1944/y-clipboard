@@ -15,7 +15,7 @@ export interface ICardProps {
   navFocus: boolean;
   onClick?: React.MouseEventHandler<HTMLDivElement>;
   onDoubleClick?: React.MouseEventHandler<HTMLDivElement>;
-  onActiveChange?: (act: ActiveEnum) => void;
+  onActiveChange?: (act: ActiveEnum, id: string) => void;
 }
 
 const ClipCard: FC<ICardProps> = ({
@@ -74,7 +74,7 @@ const ClipCard: FC<ICardProps> = ({
       case ActiveEnum.Image:
         return (
           <div className={styles.cover}>
-            <img width="100%" height="100%" src={`data:image/png;base64,${context.image}`} alt="" />
+            <img width="100%" src={`data:image/png;base64,${context.image}`} alt="" />
           </div>
         );
       case ActiveEnum.File:
@@ -99,7 +99,7 @@ const ClipCard: FC<ICardProps> = ({
     setTimeout(() => {
       setActive(act);
     }, 400);
-    onActiveChange && onActiveChange(act);
+    onActiveChange && onActiveChange(act, id);
   };
 
   const handleSwitchChange = () => {
@@ -138,7 +138,7 @@ const ClipCard: FC<ICardProps> = ({
     >
       <QueueAnim type={'left'} ease={'easeInOutQuart'} key="ani">
         {show ? (
-          <div className={styles.clipCardCtx} key={'num2'}>
+          <div className={styles.clipCardCtx} key={'contents'}>
             {contents}
           </div>
         ) : null}

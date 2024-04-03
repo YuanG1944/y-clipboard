@@ -1,8 +1,8 @@
 [package]
 name = "y-clip"
-version = "0.0.0"
-description = "A Tauri App"
-authors = ["you"]
+version = "0.0.1"
+description = "A paste history tool"
+authors = ["Yuan"]
 edition = "2021"
 
 [lib]
@@ -38,9 +38,8 @@ rdev = "=0.4.6"
 parking_lot = "0.12.1"
 anyhow = "1.0"
 once_cell = "1.17.0"
+rusqlite = { version = "0.28.0", features = ["bundled"] }
 
-[target.'cfg(target_os = "macos")'.dependencies]
-cocoa = "0.24.1"
 
 [features]
 # this feature is used for production builds or when `devPath` points to the filesystem

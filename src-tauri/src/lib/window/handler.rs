@@ -2,7 +2,7 @@ use anyhow::{bail, Result};
 use once_cell::sync::OnceCell;
 use parking_lot::Mutex;
 use std::sync::Arc;
-use tauri::{AppHandle, Manager, PhysicalSize, Position, Runtime, Size, Window};
+use tauri::{AppHandle, Manager, Position, Runtime, Size, Window};
 
 use crate::{device::get_cursor_monitor, tray::Tray};
 

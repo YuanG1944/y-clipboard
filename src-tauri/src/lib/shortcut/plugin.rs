@@ -20,6 +20,10 @@ fn set_paste_shortcut<R: Runtime>(
 
     let short_cut_str = get_short_cut_name(hot_key_arr, true);
 
+    if short_cut_str.is_empty() {
+        return Ok(());
+    }
+
     let _ = GlobalShortcut::register_paste(&app, short_cut_str.as_str());
 
     shortcut.set_paste(short_cut_str)

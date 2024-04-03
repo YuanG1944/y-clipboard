@@ -44,7 +44,7 @@ const moveToFirst = (storageArr: StorageItem[], id: string) => {
   const tempArr = storageArr;
   if (!id) return tempArr;
   const index = tempArr.findIndex((item) => item.id === id);
-  if (index > -1) {
+  if (index > 0) {
     const item = tempArr.splice(index, 1)[0];
     tempArr.unshift(item);
   }
@@ -55,6 +55,7 @@ export const defaultFormat = (format: string[]) => {
   const num = format.reduce((pre, item) => {
     return pre + (ActiveMapping?.[item as ActiveEnum] || 0);
   }, 0);
+
   if (num >> 4) {
     return ActiveEnum.File;
   }
@@ -101,6 +102,7 @@ export function setHistoryStr(historyArr: StorageItem[], currId: string = ''): P
 
 export async function writeSelected(historyArr: StorageItem[], currId: string = '') {
   const curr = historyArr.find((item) => item.id === currId);
+
   const active = curr?.defaultActive;
 
   if (active === ActiveEnum.Text && curr?.text) {
@@ -149,6 +151,7 @@ export function writeText(text: string): Promise<void> {
 }
 
 export function writeHtml(html: string): Promise<void> {
+  console.info('writeHtml');
   return invoke(WRITE_HTML_COMMAND, { html });
 }
 
