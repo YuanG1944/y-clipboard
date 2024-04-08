@@ -53,7 +53,7 @@ impl SqliteDB {
     }
 
     pub fn insert_item(&self, item: HistoryItem) -> Result<i64> {
-        let sql = "insert into record (content,md5,create_time,is_favorite,data_type,content_preview) values (?1,?2,?3,?4,?5,?6)";
+        // let sql = "insert into record (content,md5,create_time,is_favorite,data_type,content_preview) values (?1,?2,?3,?4,?5,?6)";
         Ok(self.conn.last_insert_rowid())
     }
 }

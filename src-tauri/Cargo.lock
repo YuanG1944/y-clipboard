@@ -5037,6 +5037,7 @@ dependencies = [
  "clipboard-master",
  "clipboard-rs",
  "device_query",
+ "dunce",
  "image",
  "once_cell",
  "parking_lot",
