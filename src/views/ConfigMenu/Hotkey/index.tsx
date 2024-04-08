@@ -36,6 +36,10 @@ const App: React.FC = () => {
   };
 
   const setFunctionKey = (ev: KeyboardEvent, reset: boolean) => {
+    if (keyArr.includes(229)) {
+      resetKeyArr();
+      return;
+    }
     if (keyArr.length && keyArr[keyArr.length - 1] === ev.keyCode) {
       resetKeyArr();
       return;
@@ -53,6 +57,10 @@ const App: React.FC = () => {
   };
 
   const setOtherKey = (ev: KeyboardEvent, reset: boolean) => {
+    if (keyArr.includes(229)) {
+      resetKeyArr();
+      return;
+    }
     if (keyArr.length && !functionKeyArray.includes(String(keyArr[keyArr.length - 1]))) {
       resetKeyArr();
       return;

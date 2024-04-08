@@ -34,6 +34,8 @@ const CardTitle: FC<ICardTitle> = ({
   const [activeEnum, setActiveEnum] = useState(ActiveEnum.Text);
 
   const initDefaultTitle = () => {
+    console.info('initDefaultTitle---->', context.defaultActive);
+
     setActiveEnum(context.defaultActive!);
     const arr = context.formats!.reduce((pre, it) => {
       let item = it as ActiveEnum;
@@ -54,10 +56,12 @@ const CardTitle: FC<ICardTitle> = ({
       }
       return pre;
     }, [] as ITitleActive[]);
+    console.info('arr--->', arr);
     setTitleList(arr);
   };
 
   const handleTitleChange = (value: ITitleActive) => () => {
+    console.info('handleTitleChange---->', value);
     if (focus) {
       setActiveEnum(value.tag);
       setTitleList((val) =>
@@ -85,6 +89,7 @@ const CardTitle: FC<ICardTitle> = ({
   };
 
   const handleArrowActive = (op: 'up' | 'down') => {
+    console.info('handleArrowActive--->', titleList);
     if (context.id === currId) {
       const n = titleList.length;
       const idx = titleList.findIndex((item) => item.active);
@@ -120,6 +125,7 @@ const CardTitle: FC<ICardTitle> = ({
   }, []);
 
   useEffect(() => {
+    console.info('aciteveEnum title change--->', activeEnum);
     onActiveChange && onActiveChange(activeEnum);
   }, [activeEnum]);
 
