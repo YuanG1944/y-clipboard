@@ -14,6 +14,8 @@ export const IMAGE_CHANGED = 'plugin:clipboard://image-changed';
 export const IS_MONITOR_RUNNING_COMMAND = 'plugin:clipboard|is_monitor_running';
 export const GET_HISTORY = 'plugin:clipboard|get_history';
 export const SET_HISTORY_STR = 'plugin:clipboard|set_history_str';
+export const UPDATE_CREATE_TIME = 'plugin:clipboard|update_pasted_create_time';
+export const DELETE_HISTORIES = 'plugin:clipboard|delete_items';
 export const HAS_TEXT_COMMAND = 'plugin:clipboard|has_text';
 export const HAS_IMAGE_COMMAND = 'plugin:clipboard|has_image';
 export const HAS_HTML_COMMAND = 'plugin:clipboard|has_html';
@@ -98,6 +100,17 @@ export function setHistoryStr(historyArr: StorageItem[], currId: string = ''): P
   const temp = moveToFirst(historyArr, currId);
   const jsonStr = JSON.stringify(temp);
   return invoke(SET_HISTORY_STR, { jsonStr });
+}
+
+export function updateCreateTime(id: string = ''): Promise<void> {
+  if (!id) return Promise.resolve();
+  return invoke(UPDATE_CREATE_TIME, { id });
+}
+
+export function deleteItems(ids: string[] = []): Promise<void> {
+  if (!ids.length) return Promise.resolve();
+  const jsonStr = JSON.stringify(ids);
+  return invoke(DELETE_HISTORIES, { jsonStr });
 }
 
 export async function writeSelected(historyArr: StorageItem[], currId: string = '') {

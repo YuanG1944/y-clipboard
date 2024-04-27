@@ -4,16 +4,19 @@ import Menu, { getItem } from '@/components/Menu';
 import styles from './index.module.scss';
 import Hotkey from './Hotkey';
 import Version from './Version';
+import History from './History';
 
 const { Sider, Content } = Layout;
 
 export enum MenuEnum {
   HOTKEY = 'hotkey',
   VERSION = 'version',
+  HISTORY = 'history',
 }
 
 const items: MenuProps['items'] = [
   getItem('Hotkey', MenuEnum.HOTKEY, null),
+  getItem('History', MenuEnum.HISTORY, null),
   getItem('Version', MenuEnum.VERSION, null),
 ];
 
@@ -28,6 +31,8 @@ const ConfigMenu: FC = () => {
     switch (menuItem) {
       case MenuEnum.HOTKEY:
         return Hotkey;
+      case MenuEnum.HISTORY:
+        return History;
       case MenuEnum.VERSION:
         return Version;
       default:

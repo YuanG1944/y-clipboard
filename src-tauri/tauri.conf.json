@@ -27,6 +27,14 @@
       },
       "os": {
         "all": true
+      },
+      "fs": {
+        "createDir": true,
+        "copyFile": true,
+        "exists": true,
+        "readDir": true,
+        "readFile": true,
+        "writeFile": true
       }
     },
     "windows": [

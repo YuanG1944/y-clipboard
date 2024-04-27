@@ -5,16 +5,16 @@ use uuid::Uuid;
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Default, PartialEq)]
 pub struct HistoryItem {
-    id: String,
-    text: String,
-    html: String,
-    rtf: String,
-    image: String,
-    favorite: bool,
-    tag: String,
-    create_time: u128,
-    files: Vec<String>,
-    formats: Vec<String>,
+    pub id: String,
+    pub text: String,
+    pub html: String,
+    pub rtf: String,
+    pub image: String,
+    pub favorite: bool,
+    pub tags: Vec<String>,
+    pub create_time: u64,
+    pub files: Vec<String>,
+    pub formats: Vec<String>,
 }
 
 impl HistoryItem {
@@ -22,7 +22,7 @@ impl HistoryItem {
         let create_time = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap()
-            .as_millis();
+            .as_secs();
 
         Self {
             id: Uuid::new_v4().to_string(),
@@ -30,12 +30,16 @@ impl HistoryItem {
             html: String::from(""),
             rtf: String::from(""),
             image: String::from(""),
-            tag: String::from(""),
+            tags: vec![],
             favorite: false,
             create_time,
             files: vec![],
             formats: vec![],
         }
+    }
+
+    pub fn get_id(&self) -> &str {
+        &self.id.as_str()
     }
 
     pub fn get_text(&self) -> &str {
@@ -86,6 +90,18 @@ impl HistoryItem {
         self.files = Vec::from(files);
     }
 
+    pub fn get_tags(&self) -> &Vec<String> {
+        &self.tags
+    }
+
+    pub fn get_create_time(&self) -> u64 {
+        self.create_time
+    }
+
+    pub fn get_formats(&self) -> &Vec<String> {
+        &self.formats
+    }
+
     pub fn set_formats(&mut self, formats: Vec<String>) {
         self.formats = Vec::from(formats);
     }
@@ -108,7 +124,6 @@ impl HistoryStore {
     }
 
     pub fn push(&mut self, val: HistoryItem) {
-        println!("HistoryItem--> {:?}", val);
         self.history.push_front(val);
     }
 

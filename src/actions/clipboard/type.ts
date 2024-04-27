@@ -15,6 +15,7 @@ export interface StorageItem {
   formats?: string[];
   timestamp?: number;
   defaultActive?: ActiveEnum;
+  deleted?: boolean;
   collect?: boolean;
 }
 

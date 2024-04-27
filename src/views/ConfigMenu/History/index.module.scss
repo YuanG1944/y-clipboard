@@ -1,0 +1,26 @@
+.hotkey {
+  margin: 60px 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .form {
+    width: 55%;
+
+    .clearButton {
+      width: 100%;
+      display: flex;
+      justify-content: flex-end;
+    }
+  }
+}
+
+.deleteModalIcon {
+  color: #ff7875;
+  font-size: 20px;
+}
+
+.modalContents {
+  font-size: 16px;
+}

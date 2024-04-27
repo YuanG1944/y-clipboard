@@ -1,4 +1,5 @@
 use anyhow::Result;
+use std::fs::{self, File};
 use std::path::PathBuf;
 use tauri::api::path::home_dir;
 
@@ -41,4 +42,29 @@ pub fn app_data_dir() -> Result<PathBuf> {
 
 pub fn app_data_img_dir() -> Result<PathBuf> {
     Ok(app_data_dir()?.join("img"))
+}
+
+#[allow(unused)]
+pub fn create_dir(path: &PathBuf) -> Result<(), String> {
+    Ok(if !std::path::Path::new(&path).exists() {
+        if let Some(parent) = std::path::Path::new(path).parent() {
+            if fs::create_dir_all(parent).is_ok() {
+                match File::create(path) {
+                    Ok(_) => {
+                        match File::create(&path) {
+                            Ok(_) => println!("File:{} created successfully! ", path.display()),
+                            Err(err) => {
+                                println!("Failed to create directories: {}", err);
+                            }
+                        };
+                    }
+                    Err(e) => println!("Failed to create file: {:?}", e),
+                }
+            } else {
+                println!("Failed to create directories");
+            }
+        } else {
+            println!("Invalid path");
+        }
+    })
 }

@@ -10,13 +10,11 @@ use std::path::Path;
 use std::process::Command;
 use std::sync::Arc;
 use std::sync::Mutex;
-use std::sync::TryLockError;
-use std::thread;
-use std::time::Duration;
 use tauri::{Manager, Runtime};
 
 use crate::clipboard_history::HistoryItem;
 use crate::clipboard_history::HistoryStore;
+use crate::db::database::SqliteDB;
 
 pub struct ClipboardMonitor<R>
 where
@@ -24,7 +22,6 @@ where
 {
     app_handle: tauri::AppHandle<R>,
     running: Arc<Mutex<bool>>,
-    store: Arc<Mutex<HistoryStore>>,
     manager: ClipboardManager,
 }
 
@@ -32,16 +29,11 @@ impl<R> ClipboardMonitor<R>
 where
     R: Runtime,
 {
-    pub fn new(
-        app_handle: tauri::AppHandle<R>,
-        running: Arc<Mutex<bool>>,
-        store: Arc<Mutex<HistoryStore>>,
-    ) -> Self {
+    pub fn new(app_handle: tauri::AppHandle<R>, running: Arc<Mutex<bool>>) -> Self {
         let manager: ClipboardManager = ClipboardManager::default();
         Self {
             app_handle,
             running,
-            store,
             manager,
         }
     }
@@ -92,44 +84,46 @@ where
     }
 
     pub fn is_equal(&self, curr_item: &HistoryItem) -> bool {
-        let curr_store = self.store.lock().map_err(|err| err.to_string()).unwrap();
-        let latest_items = curr_store.get_store();
+        let curr_store = SqliteDB::new().pick_latest_one();
+        match curr_store {
+            Ok(latest_items) => {
+                if latest_items.len() == 0 {
+                    return false;
+                }
 
-        if latest_items.len() == 0 {
-            return false;
+                let latest_item_html = latest_items[0].get_html().trim();
+                let curr_item_html = curr_item.get_html().trim();
+
+                if latest_item_html.len() > 0
+                    && curr_item_html.len() > 0
+                    && latest_item_html == curr_item_html
+                {
+                    return true;
+                }
+
+                let latest_item_text = latest_items[0].get_text().trim();
+                let curr_item_text = curr_item.get_text().trim();
+
+                if latest_item_text.len() > 0
+                    && curr_item_text.len() > 0
+                    && latest_item_text == curr_item_text
+                {
+                    return true;
+                }
+
+                let latest_item_image = latest_items[0].get_image();
+                let curr_item_image = curr_item.get_image();
+
+                if latest_item_image.len() > 0
+                    && curr_item_image.len() > 0
+                    && latest_item_image == curr_item_image
+                {
+                    return true;
+                }
+                return false;
+            }
+            Err(_) => false,
         }
-
-        let latest_item_html = latest_items[0].get_html().trim();
-        let curr_item_html = curr_item.get_html().trim();
-
-        if latest_item_html.len() > 0
-            && curr_item_html.len() > 0
-            && latest_item_html == curr_item_html
-        {
-            return true;
-        }
-
-        let latest_item_text = latest_items[0].get_text().trim();
-        let curr_item_text = curr_item.get_text().trim();
-
-        if latest_item_text.len() > 0
-            && curr_item_text.len() > 0
-            && latest_item_text == curr_item_text
-        {
-            return true;
-        }
-
-        let latest_item_image = latest_items[0].get_image();
-        let curr_item_image = curr_item.get_image();
-
-        if latest_item_image.len() > 0
-            && curr_item_image.len() > 0
-            && latest_item_image == curr_item_image
-        {
-            return true;
-        }
-
-        false
     }
 }
 
@@ -151,23 +145,10 @@ where
 
         // push item to history store
         let item: HistoryItem = self.item_collect();
+        // let item2: HistoryItem = self.item_collect();
 
         if self.is_equal(&item) == false {
-            loop {
-                match self.store.try_lock() {
-                    Ok(mut guard) => {
-                        println!("--------change------");
-                        guard.push(item);
-                        break;
-                    }
-                    Err(TryLockError::WouldBlock) => {
-                        thread::sleep(Duration::from_millis(40));
-                    }
-                    Err(e) => {
-                        panic!("get lock fail: {}", e);
-                    }
-                }
-            }
+            let _ = SqliteDB::new().insert_item(item);
         }
 
         CallbackResult::Next
@@ -205,10 +186,12 @@ impl ClipboardManager {
     }
 
     pub fn get_history(&self) -> Result<String, String> {
-        let arr = self.store.lock().map_err(|err| err.to_string()).unwrap();
-        match serde_json::to_string(arr.get_store()) {
-            Ok(json_str) => Ok(json_str.clone()),
-            Err(e) => Err(format!("Error serializing VecDeque to JSON: {:?}", e)),
+        match SqliteDB::new().find_all() {
+            Ok(arr) => match serde_json::to_string(&arr) {
+                Ok(json_str) => Ok(json_str.clone()),
+                Err(e) => Err(format!("Error serializing VecDeque to JSON: {:?}", e)),
+            },
+            Err(e) => Err(format!("Error get data from database: {:?}", e)),
         }
     }
 
@@ -222,6 +205,23 @@ impl ClipboardManager {
                     .set_store(history_store);
                 Ok(String::from("Set success"))
             }
+            Err(e) => Err(format!("{}", e)),
+        }
+    }
+
+    pub fn update_pasted_create_time(&self, id: String) -> Result<String, String> {
+        match SqliteDB::new().update_pasted_create_time(id) {
+            Ok(_) => Ok(format!("Update create time success")),
+            Err(e) => Err(format!("Error get data from database: {:?}", e)),
+        }
+    }
+
+    pub fn delete_items(&self, ids_str: String) -> Result<String, String> {
+        match serde_json::from_str::<Vec<String>>(ids_str.as_str()) {
+            Ok(ids) => match SqliteDB::new().delete_items(ids) {
+                Ok(_) => Ok(String::from("Set success")),
+                Err(e) => Err(format!("{}", e)),
+            },
             Err(e) => Err(format!("{}", e)),
         }
     }

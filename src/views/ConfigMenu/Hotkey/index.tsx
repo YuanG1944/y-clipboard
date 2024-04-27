@@ -179,8 +179,8 @@ const App: React.FC = () => {
   return (
     <>
       <div className={styles.hotkey}>
-        <Form form={form}>
-          <Form.Item label="Paste Hotkey" name="paste" required>
+        <Form layout="vertical" form={form}>
+          <Form.Item label="Paste" name="paste" required>
             <div className={styles.inputGroup}>
               <Input
                 value={keyValue.join('+')}

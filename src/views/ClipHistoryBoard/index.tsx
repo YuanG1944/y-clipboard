@@ -11,13 +11,19 @@ import { ActiveEnum, StorageItem } from '@/actions/clipboard/type';
 
 import { os } from '@tauri-apps/api';
 import { appWindow } from '@tauri-apps/api/window';
-import { getHistory, paste, setHistoryStr, writeSelected } from '@/actions/clipboard';
+import {
+  deleteItems,
+  getHistory,
+  paste,
+  updateCreateTime,
+  writeSelected,
+} from '@/actions/clipboard';
 
 const windows = Windows.getInstance();
 
 const ClipHistoryBoard: FC = () => {
   const [historyCtx, setHistoryCtx] = useState<StorageItem[]>([]);
-  const [preHistoryCtx, setPreviewHistoryCtx] = useState<StorageItem[][]>([]);
+  const [preHistoryCtx, setPreviewHistoryCtx] = useState<string[]>([]);
   const [currIndex, setCurrIndex] = useState<number | string>(-1);
   const [currId, setCurrId] = useState<string>('');
   const [focus, setFocus] = useState(false);
@@ -44,13 +50,12 @@ const ClipHistoryBoard: FC = () => {
   };
 
   const handleBridge = async () => {
-    const clipboardHistory = await getHistory();
-    if (clipboardHistory?.length) {
-      setHistoryCtx(clipboardHistory);
-      setTimeout(() => {
-        setCurrIndex(setCurrIndexChange('0'));
-      }, 100);
-    }
+    const clipboardHistory = (await getHistory()) ?? [];
+    setHistoryCtx(clipboardHistory);
+    setPreviewHistoryCtx([]);
+    setTimeout(() => {
+      setCurrIndex(setCurrIndexChange('0'));
+    }, 100);
   };
 
   const handleVisibility = () => {
@@ -83,7 +88,8 @@ const ClipHistoryBoard: FC = () => {
 
   const sendingPaste = async () => {
     if (!focus) {
-      setHistoryStr(historyCtx, currId);
+      updateCreateTime(currId);
+      deleteItems(preHistoryCtx);
       writeSelected(historyCtx, currId);
       windows.hide();
       setShow(false);
@@ -101,7 +107,7 @@ const ClipHistoryBoard: FC = () => {
       } else {
         windows.hide();
       }
-      setHistoryStr(historyCtx);
+      deleteItems(preHistoryCtx);
     });
   };
 
@@ -164,8 +170,19 @@ const ClipHistoryBoard: FC = () => {
 
   useKeyPress('backspace', () => {
     if (!focus) {
-      setPreviewHistoryCtx((arr) => [...arr, historyCtx]);
-      setHistoryCtx((ctx) => ctx.filter((item) => currId !== item.id));
+      setPreviewHistoryCtx((arr) => [...arr, currId]);
+      setHistoryCtx((ctx) =>
+        ctx.map((item) => {
+          if (item.id === currId) {
+            return {
+              ...item,
+              deleted: true,
+            };
+          }
+          return item;
+        }),
+      );
+
       setCurrIndex((num) => {
         if (Number(num) > 0) {
           return Number(num) - 1;
@@ -178,7 +195,19 @@ const ClipHistoryBoard: FC = () => {
   useKeyPress(['meta.z', 'ctrl.z'], () => {
     if (!focus) {
       if (!preHistoryCtx.length) return;
-      setHistoryCtx(preHistoryCtx.slice(-1)[0]);
+      setHistoryCtx((ctx) =>
+        ctx.map((item) => {
+          const last = preHistoryCtx.length - 1;
+          if (item.id === preHistoryCtx[last]) {
+            return {
+              ...item,
+              deleted: false,
+            };
+          }
+          return item;
+        }),
+      );
+
       setPreviewHistoryCtx((arr) => arr.slice(0, -1));
     }
   });
@@ -207,18 +236,20 @@ const ClipHistoryBoard: FC = () => {
               <NavBar checkFocus={handleFocus} />
             </div>
             <div className={styles.contents} key="aniCard">
-              {historyCtx.map((ctx, idx) => (
-                <ClipCard
-                  currId={currId}
-                  context={ctx}
-                  id={`clip-${idx}`}
-                  key={ctx.id}
-                  navFocus={focus}
-                  onClick={handleClick(ctx.id!)}
-                  onDoubleClick={handleDoubleClick}
-                  onActiveChange={handleActiveChange}
-                />
-              ))}
+              {historyCtx
+                .filter((ctx) => ctx.deleted !== true)
+                .map((ctx, idx) => (
+                  <ClipCard
+                    currId={currId}
+                    context={ctx}
+                    id={`clip-${idx}`}
+                    key={ctx.id}
+                    navFocus={focus}
+                    onClick={handleClick(ctx.id!)}
+                    onDoubleClick={handleDoubleClick}
+                    onActiveChange={handleActiveChange}
+                  />
+                ))}
             </div>
           </div>
         ) : null}

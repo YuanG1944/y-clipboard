@@ -1,13 +1,14 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
-use lib::{clipboard_monitor, shortcut, tray, window};
+use lib::{clipboard_monitor, db, shortcut, tray, window};
 use tauri::{App, GlobalShortcutManager, Manager};
 
 fn main() {
     tauri::Builder::default()
         .plugin(clipboard_monitor::plugin::init(true))
         .plugin(shortcut::plugin::init())
+        .plugin(db::plugin::init())
         .setup(|app| {
             set_up(app);
             Ok(())
@@ -52,6 +53,8 @@ fn main() {
 fn set_up(app: &mut App) {
     #[cfg(target_os = "macos")]
     app.set_activation_policy(tauri::ActivationPolicy::Accessory);
+
     window::handler::WindowHandler::new().init(app.app_handle());
     tray::Tray::register_stray(&app.app_handle()).unwrap();
+    db::database::SqliteDB::init();
 }

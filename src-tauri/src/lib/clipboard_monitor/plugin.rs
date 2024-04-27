@@ -24,6 +24,19 @@ fn set_history_str(
 }
 
 #[tauri::command]
+fn update_pasted_create_time(
+    manager: State<'_, ClipboardManager>,
+    id: String,
+) -> Result<String, String> {
+    manager.update_pasted_create_time(id)
+}
+
+#[tauri::command]
+fn delete_items(manager: State<'_, ClipboardManager>, json_str: String) -> Result<String, String> {
+    manager.delete_items(json_str)
+}
+
+#[tauri::command]
 fn has_text(manager: State<'_, ClipboardManager>) -> Result<bool, String> {
     manager.has_text()
 }
@@ -141,18 +154,17 @@ async fn start_monitor<R: Runtime>(
     let store = state.store.clone();
 
     std::thread::spawn(move || {
-        let _ = Master::new(ClipboardMonitor::new(app, running, store)).run();
+        let _ = Master::new(ClipboardMonitor::new(app, running)).run();
     });
 
     Ok(())
 }
 
-fn start_monitor_setup<R: Runtime>(app_handle: tauri::AppHandle<R>, state: &ClipboardManager) {
-    let store = state.store.clone();
+fn start_monitor_setup<R: Runtime>(app_handle: tauri::AppHandle<R>) {
     let running = Arc::new(Mutex::new(true));
 
     std::thread::spawn(move || {
-        let _ = Master::new(ClipboardMonitor::new(app_handle, running, store)).run();
+        let _ = Master::new(ClipboardMonitor::new(app_handle, running)).run();
     });
 }
 
@@ -183,6 +195,8 @@ pub fn init<R: Runtime>(open_watch: bool) -> TauriPlugin<R> {
             is_monitor_running,
             get_history,
             set_history_str,
+            update_pasted_create_time,
+            delete_items,
             has_text,
             has_image,
             has_html,
@@ -207,7 +221,7 @@ pub fn init<R: Runtime>(open_watch: bool) -> TauriPlugin<R> {
             let state = ClipboardManager::default();
             let app_handle = app.app_handle();
             if open_watch {
-                start_monitor_setup(app_handle, &state);
+                start_monitor_setup(app_handle);
             }
             app.manage(state);
             key_register();

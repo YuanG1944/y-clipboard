@@ -1,4 +1,5 @@
 use anyhow::Result;
+use std::process::Command;
 use tauri::{AppHandle, CustomMenuItem, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem};
 
 use crate::window;
@@ -13,6 +14,7 @@ impl Tray {
                 CustomMenuItem::new("preferences", "Preferences").accelerator("CmdOrControl+,"),
             )
             .add_native_item(SystemTrayMenuItem::Separator)
+            // .add_item(CustomMenuItem::new("restart", "Restart"))
             .add_item(CustomMenuItem::new("quit", "Quit"))
     }
 
@@ -31,6 +33,11 @@ impl Tray {
                         String::from("config"),
                     ));
                 }
+                // "restart" => {
+                //     let app_exe = std::env::current_exe().unwrap();
+                //     Command::new(app_exe).spawn().expect("Fail restart");
+                //     std::process::exit(0);
+                // }
                 "quit" => {
                     app_handle.exit(0);
                     std::process::exit(0);
