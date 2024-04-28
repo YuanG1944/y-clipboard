@@ -101,6 +101,7 @@ export async function getHistoryByPage(page: number, pageSize: number): Promise<
   const clipboardHistoryStr =
     ((await invoke(GET_HISTORY_BY_PAGE, { page, pageSize })) as string) ?? '';
   const clipboardHistory: StorageItem[] = safeJsonParse(clipboardHistoryStr);
+
   return clipboardHistory.map((item) => {
     const defaultActive = defaultFormat(item.formats || []);
     return {

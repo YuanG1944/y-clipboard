@@ -46,6 +46,7 @@ anyhow = "1.0"
 once_cell = "1.17.0"
 rusqlite = { version = "0.28.0", features = ["bundled"] }
 tokio = { version = "1.13", features = ["full"] }
+dunce = "1.0.4"
 
 
 [features]

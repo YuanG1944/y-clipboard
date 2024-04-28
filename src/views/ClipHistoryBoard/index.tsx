@@ -30,7 +30,8 @@ const ClipHistoryBoard: FC = () => {
   const [focus, setFocus] = useState(false);
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [page, setPage] = useState(2);
+  // const [page, setPage] = useState(1);
+  const page = useRef(1);
   const [pageSize, setPageSize] = useState(10);
   const cardContentRef = useRef<HTMLDivElement>(null);
 
@@ -50,17 +51,17 @@ const ClipHistoryBoard: FC = () => {
     if (id) {
       const currClipDom = document?.querySelector(`#${id}`);
       currClipDom &&
-        currClipDom.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' });
+        currClipDom.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
     }
   };
 
   const resetPage = () => {
-    setPage(2);
+    page.current = 1;
     setPageSize(10);
   };
 
   const handleBridge = async () => {
-    const clipboardHistory = (await getHistoryByPage(1, 20)) ?? [];
+    const clipboardHistory = (await getHistoryByPage(1, pageSize)) ?? [];
     setHistoryCtx(clipboardHistory);
     setPreviewHistoryCtx([]);
     resetPage();
@@ -72,10 +73,10 @@ const ClipHistoryBoard: FC = () => {
   const loadMoreInfo = async () => {
     setLoading(true);
     try {
-      const clipboardHistory = (await getHistoryByPage(page, pageSize)) ?? [];
+      const clipboardHistory = (await getHistoryByPage(page.current + 1, pageSize)) ?? [];
       if (clipboardHistory.length) {
         setHistoryCtx((arr) => [...arr, ...clipboardHistory]);
-        setPage((num) => num + 1);
+        page.current += 1;
       }
     } catch (error) {
       console.error('Loading Fail');
@@ -169,10 +170,12 @@ const ClipHistoryBoard: FC = () => {
   };
 
   const handleScrollingEvent = () => {
-    const scrollLeft = cardContentRef.current!.scrollLeft; // 获取当前的水平滚动位置
-    const scrollWidth = cardContentRef.current!.scrollWidth; // 获取元素的总滚动宽度
-    const clientWidth = cardContentRef.current!.clientWidth; // 获取元素的视口宽度
-
+    // get scroll position
+    const scrollLeft = cardContentRef.current!.scrollLeft;
+    // get scroll width
+    const scrollWidth = cardContentRef.current!.scrollWidth;
+    // get view width
+    const clientWidth = cardContentRef.current!.clientWidth;
     if (scrollLeft + clientWidth >= scrollWidth - 20) {
       loadMoreInfo();
     }
@@ -263,7 +266,6 @@ const ClipHistoryBoard: FC = () => {
   }, []);
 
   useEffect(() => {
-    console.info('current-->', cardContentRef.current);
     if (cardContentRef.current) {
       cardContentRef.current.addEventListener('scroll', handleScrollingEvent);
     }
