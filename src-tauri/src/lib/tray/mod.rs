@@ -1,6 +1,8 @@
 use anyhow::Result;
-use std::process::Command;
-use tauri::{AppHandle, CustomMenuItem, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem};
+use tauri::{
+    api::process, AppHandle, CustomMenuItem, Manager, SystemTrayEvent, SystemTrayMenu,
+    SystemTrayMenuItem,
+};
 
 use crate::window;
 
@@ -33,11 +35,7 @@ impl Tray {
                         String::from("config"),
                     ));
                 }
-                // "restart" => {
-                //     let app_exe = std::env::current_exe().unwrap();
-                //     Command::new(app_exe).spawn().expect("Fail restart");
-                //     std::process::exit(0);
-                // }
+                // "restart" => app_handle.restart(),
                 "quit" => {
                     app_handle.exit(0);
                     std::process::exit(0);

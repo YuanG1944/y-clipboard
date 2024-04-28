@@ -81,7 +81,7 @@ impl SqliteDB {
                 key, 
                 value
             )
-            VALUES ('expire', '604800');
+            VALUES ('expire', '-7 day');
         "#;
 
         let _ = conn.execute(init_history_info_table, ());
@@ -247,6 +247,62 @@ impl SqliteDB {
         Ok(res)
     }
 
+    pub fn find_history_by_page(&self, page: usize, page_size: usize) -> Result<Vec<HistoryItem>> {
+        let offset = page.saturating_sub(1) * page_size;
+
+        let sql = format!(
+            r#"
+            SELECT
+                id, 
+                text, 
+                html, 
+                rtf, 
+                image, 
+                files, 
+                favorite,
+                tags,
+                create_time, 
+                formats 
+            FROM 
+                history_info 
+            ORDER BY 
+                create_time DESC
+            LIMIT ?1 OFFSET ?2
+            "#
+        );
+
+        let mut stmt = self.conn.prepare(&sql)?;
+        let mut rows = stmt.query([page_size as u32, offset as u32])?;
+        let mut res = Vec::new();
+
+        while let Some(row) = rows.next()? {
+            let id: String = row.get(0)?;
+            let text: String = row.get(1)?;
+            let html: String = row.get(2)?;
+            let rtf: String = row.get(3)?;
+            let image: String = row.get(4)?;
+            let files: String = row.get(5)?;
+            let favorite: bool = row.get(6)?;
+            let tags: String = row.get(7)?;
+            let create_time: u64 = row.get(8)?;
+            let formats: String = row.get(9)?;
+            let item = HistoryItem {
+                id,
+                text,
+                html,
+                rtf,
+                image,
+                files: files.split(',').map(|s| s.to_string()).collect(),
+                favorite,
+                tags: tags.split(',').map(|s| s.to_string()).collect(),
+                create_time,
+                formats: formats.split(',').map(|s| s.to_string()).collect(),
+            };
+            res.push(item);
+        }
+        Ok(res)
+    }
+
     pub fn pick_latest_one(&self) -> Result<Vec<HistoryItem>> {
         let sql = r#"
             SELECT
@@ -303,5 +359,26 @@ impl SqliteDB {
         let sql = "DELETE FROM history_info";
         self.conn.execute(sql, []);
         Ok(format!("All data has been deleted!"))
+    }
+
+    pub fn clear_overtime_history(&self) -> Result<()> {
+        let expire_time_res: std::prelude::v1::Result<String, anyhow::Error> =
+            self.get_config("expire".to_string());
+
+        match expire_time_res {
+            Ok(expire_time) => {
+                let sql = format!(
+                    "DELETE FROM history_info WHERE create_time < strftime('%s', 'now', '{}')",
+                    expire_time
+                );
+
+                self.conn.execute(sql.as_str(), [])?;
+                Ok(())
+            }
+            Err(_) => {
+                println!("Fatal: get expire err");
+                Ok(())
+            }
+        }
     }
 }

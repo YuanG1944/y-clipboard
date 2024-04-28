@@ -1,7 +1,7 @@
 use crate::window;
 use anyhow::Result;
 use std::sync::{Arc, Mutex};
-use tauri::{App, GlobalShortcutManager, Manager, Runtime};
+use tauri::{GlobalShortcutManager, Manager, Runtime};
 
 pub struct GlobalShortcut {
     paste: String,

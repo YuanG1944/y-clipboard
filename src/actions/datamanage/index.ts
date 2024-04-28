@@ -14,3 +14,7 @@ export function setExpire(value: string): Promise<void> {
 export function getExpire(): Promise<string> {
   return invoke(DBManageActEnum.GET_CONFIG, { key: ExpireKey });
 }
+
+export function restartClearInterval(): Promise<string> {
+  return invoke(DBManageActEnum.RESTART_CLEAR_HISTORY_INTERVAL);
+}

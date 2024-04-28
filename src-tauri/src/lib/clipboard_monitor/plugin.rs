@@ -16,6 +16,15 @@ fn get_history(manager: State<'_, ClipboardManager>) -> Result<String, String> {
 }
 
 #[tauri::command]
+fn get_history_by_page(
+    manager: State<'_, ClipboardManager>,
+    page: usize,
+    page_size: usize,
+) -> Result<String, String> {
+    manager.get_history_by_page(page, page_size)
+}
+
+#[tauri::command]
 fn set_history_str(
     manager: State<'_, ClipboardManager>,
     json_str: String,
@@ -151,7 +160,6 @@ async fn start_monitor<R: Runtime>(
     }
     *running = true;
     let running = state.running.clone();
-    let store = state.store.clone();
 
     std::thread::spawn(move || {
         let _ = Master::new(ClipboardMonitor::new(app, running)).run();
@@ -194,6 +202,7 @@ pub fn init<R: Runtime>(open_watch: bool) -> TauriPlugin<R> {
             start_monitor,
             is_monitor_running,
             get_history,
+            get_history_by_page,
             set_history_str,
             update_pasted_create_time,
             delete_items,

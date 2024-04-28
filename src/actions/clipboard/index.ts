@@ -13,6 +13,7 @@ export const FILES_CHANGED = 'plugin:clipboard://files-changed';
 export const IMAGE_CHANGED = 'plugin:clipboard://image-changed';
 export const IS_MONITOR_RUNNING_COMMAND = 'plugin:clipboard|is_monitor_running';
 export const GET_HISTORY = 'plugin:clipboard|get_history';
+export const GET_HISTORY_BY_PAGE = 'plugin:clipboard|get_history_by_page';
 export const SET_HISTORY_STR = 'plugin:clipboard|set_history_str';
 export const UPDATE_CREATE_TIME = 'plugin:clipboard|update_pasted_create_time';
 export const DELETE_HISTORIES = 'plugin:clipboard|delete_items';
@@ -86,6 +87,19 @@ export const safeJsonParse = (str: string) => {
 
 export async function getHistory(): Promise<StorageItem[]> {
   const clipboardHistoryStr = ((await invoke(GET_HISTORY)) as string) ?? '';
+  const clipboardHistory: StorageItem[] = safeJsonParse(clipboardHistoryStr);
+  return clipboardHistory.map((item) => {
+    const defaultActive = defaultFormat(item.formats || []);
+    return {
+      ...item,
+      defaultActive,
+    };
+  });
+}
+
+export async function getHistoryByPage(page: number, pageSize: number): Promise<StorageItem[]> {
+  const clipboardHistoryStr =
+    ((await invoke(GET_HISTORY_BY_PAGE, { page, pageSize })) as string) ?? '';
   const clipboardHistory: StorageItem[] = safeJsonParse(clipboardHistoryStr);
   return clipboardHistory.map((item) => {
     const defaultActive = defaultFormat(item.formats || []);

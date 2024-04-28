@@ -3,35 +3,47 @@ import { ExclamationCircleFilled } from '@ant-design/icons';
 
 import styles from './index.module.scss';
 import { Button, Form, Modal, Select } from 'antd';
-import { clearHistory, getExpire, ExpireKey, setExpire } from '@/actions/datamanage';
+import {
+  clearHistory,
+  getExpire,
+  ExpireKey,
+  setExpire,
+  restartClearInterval,
+} from '@/actions/datamanage';
 
 const { Option } = Select;
 
 const expireOptions = [
+  // {
+  //   label: '10 Seconds',
+  //   value: '-10 seconds',
+  // },
   {
     label: '1 Day',
-    value: '86400',
+    value: '-1 day',
   },
   {
     label: '7 Days',
-    value: '604800',
+    value: '-7 day',
   },
   {
     label: '14 Days',
-    value: '1209600',
+    value: '-14 day',
   },
   {
     label: '30 Days',
-    value: '2592000',
+    value: '-30 day',
   },
   {
     label: '60 Days',
-    value: '5184000',
+    value: '-60 day',
   },
 ];
 
 const History: FC = () => {
   const [form] = Form.useForm();
+  const expireValue = Form.useWatch(ExpireKey, form);
+
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleClearHistory = async () => {
@@ -59,6 +71,10 @@ const History: FC = () => {
   useEffect(() => {
     initFormValue();
   }, []);
+
+  useEffect(() => {
+    restartClearInterval();
+  }, [expireValue]);
 
   return (
     <div className={styles.hotkey}>

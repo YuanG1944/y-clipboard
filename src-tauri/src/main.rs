@@ -4,11 +4,13 @@
 use lib::{clipboard_monitor, db, shortcut, tray, window};
 use tauri::{App, GlobalShortcutManager, Manager};
 
-fn main() {
+#[tokio::main]
+async fn main() {
     tauri::Builder::default()
         .plugin(clipboard_monitor::plugin::init(true))
         .plugin(shortcut::plugin::init())
-        .plugin(db::plugin::init())
+        // 86400s == 1 day
+        .plugin(db::plugin::init(86400 as u64))
         .setup(|app| {
             set_up(app);
             Ok(())

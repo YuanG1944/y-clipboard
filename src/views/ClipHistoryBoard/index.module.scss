@@ -43,4 +43,11 @@ $ContentHeight: calc(100% - $NavHeight);
     align-items: center;
     overflow-y: auto;
   }
+
+  .loadingImg {
+    width: 10px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+  }
 }

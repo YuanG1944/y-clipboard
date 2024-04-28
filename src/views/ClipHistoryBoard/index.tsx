@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useEffect, useRef, useState } from 'react';
 import QueueAnim from 'rc-queue-anim';
 import { useKeyPress } from 'ahooks';
 
@@ -13,11 +13,12 @@ import { os } from '@tauri-apps/api';
 import { appWindow } from '@tauri-apps/api/window';
 import {
   deleteItems,
-  getHistory,
+  getHistoryByPage,
   paste,
   updateCreateTime,
   writeSelected,
 } from '@/actions/clipboard';
+import loadingAnim from '@/assets/loading-anim.gif';
 
 const windows = Windows.getInstance();
 
@@ -28,6 +29,10 @@ const ClipHistoryBoard: FC = () => {
   const [currId, setCurrId] = useState<string>('');
   const [focus, setFocus] = useState(false);
   const [show, setShow] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [page, setPage] = useState(2);
+  const [pageSize, setPageSize] = useState(10);
+  const cardContentRef = useRef<HTMLDivElement>(null);
 
   /**
    * Make sure currIndex change to rerender dom
@@ -49,13 +54,34 @@ const ClipHistoryBoard: FC = () => {
     }
   };
 
+  const resetPage = () => {
+    setPage(2);
+    setPageSize(10);
+  };
+
   const handleBridge = async () => {
-    const clipboardHistory = (await getHistory()) ?? [];
+    const clipboardHistory = (await getHistoryByPage(1, 20)) ?? [];
     setHistoryCtx(clipboardHistory);
     setPreviewHistoryCtx([]);
+    resetPage();
     setTimeout(() => {
       setCurrIndex(setCurrIndexChange('0'));
     }, 100);
+  };
+
+  const loadMoreInfo = async () => {
+    setLoading(true);
+    try {
+      const clipboardHistory = (await getHistoryByPage(page, pageSize)) ?? [];
+      if (clipboardHistory.length) {
+        setHistoryCtx((arr) => [...arr, ...clipboardHistory]);
+        setPage((num) => num + 1);
+      }
+    } catch (error) {
+      console.error('Loading Fail');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleVisibility = () => {
@@ -142,6 +168,16 @@ const ClipHistoryBoard: FC = () => {
     setHistoryCtx(ctx);
   };
 
+  const handleScrollingEvent = () => {
+    const scrollLeft = cardContentRef.current!.scrollLeft; // 获取当前的水平滚动位置
+    const scrollWidth = cardContentRef.current!.scrollWidth; // 获取元素的总滚动宽度
+    const clientWidth = cardContentRef.current!.clientWidth; // 获取元素的视口宽度
+
+    if (scrollLeft + clientWidth >= scrollWidth - 20) {
+      loadMoreInfo();
+    }
+  };
+
   useKeyPress('rightarrow', () => {
     setCurrIndex((num) => {
       if (!focus && Number(num) < historyCtx.length - 1) {
@@ -226,6 +262,16 @@ const ClipHistoryBoard: FC = () => {
     };
   }, []);
 
+  useEffect(() => {
+    console.info('current-->', cardContentRef.current);
+    if (cardContentRef.current) {
+      cardContentRef.current.addEventListener('scroll', handleScrollingEvent);
+    }
+    return () => {
+      cardContentRef.current?.removeEventListener('scroll', handleScrollingEvent);
+    };
+  }, [cardContentRef.current]);
+
   return (
     <div className={styles.clipLayout}>
       <div className={styles.blankSpace} onClick={handleBlankSpace}></div>
@@ -235,7 +281,7 @@ const ClipHistoryBoard: FC = () => {
             <div className={styles.navBar}>
               <NavBar checkFocus={handleFocus} />
             </div>
-            <div className={styles.contents} key="aniCard">
+            <div ref={cardContentRef} className={styles.contents} key="aniCard">
               {historyCtx
                 .filter((ctx) => ctx.deleted !== true)
                 .map((ctx, idx) => (
@@ -250,6 +296,11 @@ const ClipHistoryBoard: FC = () => {
                     onActiveChange={handleActiveChange}
                   />
                 ))}
+              {loading && (
+                <div className={styles.loadingImg}>
+                  <img style={{ width: '40px' }} src={loadingAnim} alt="loading-alt" />
+                </div>
+              )}
             </div>
           </div>
         ) : null}

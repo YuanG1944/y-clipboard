@@ -145,7 +145,6 @@ where
 
         // push item to history store
         let item: HistoryItem = self.item_collect();
-        // let item2: HistoryItem = self.item_collect();
 
         if self.is_equal(&item) == false {
             let _ = SqliteDB::new().insert_item(item);
@@ -187,6 +186,16 @@ impl ClipboardManager {
 
     pub fn get_history(&self) -> Result<String, String> {
         match SqliteDB::new().find_all() {
+            Ok(arr) => match serde_json::to_string(&arr) {
+                Ok(json_str) => Ok(json_str.clone()),
+                Err(e) => Err(format!("Error serializing VecDeque to JSON: {:?}", e)),
+            },
+            Err(e) => Err(format!("Error get data from database: {:?}", e)),
+        }
+    }
+
+    pub fn get_history_by_page(&self, page: usize, page_size: usize) -> Result<String, String> {
+        match SqliteDB::new().find_history_by_page(page, page_size) {
             Ok(arr) => match serde_json::to_string(&arr) {
                 Ok(json_str) => Ok(json_str.clone()),
                 Err(e) => Err(format!("Error serializing VecDeque to JSON: {:?}", e)),
