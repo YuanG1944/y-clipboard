@@ -10,11 +10,21 @@ pub struct HistoryItem {
     pub html: String,
     pub rtf: String,
     pub image: String,
-    pub favorite: bool,
-    pub tags: Vec<String>,
     pub create_time: u64,
     pub files: Vec<String>,
+    pub md5_text: String,
+    pub md5_html: String,
+    pub md5_rtf: String,
+    pub md5_image: String,
     pub formats: Vec<String>,
+    pub tags: Vec<TagsStruct>,
+}
+
+#[derive(serde::Serialize, serde::Deserialize, Debug, Default, PartialEq)]
+pub struct TagsStruct {
+    pub id: String,
+    pub name: String,
+    pub create_time: u64,
 }
 
 impl HistoryItem {
@@ -30,11 +40,14 @@ impl HistoryItem {
             html: String::from(""),
             rtf: String::from(""),
             image: String::from(""),
-            tags: vec![],
-            favorite: false,
             create_time,
             files: vec![],
+            md5_text: String::from(""),
+            md5_html: String::from(""),
+            md5_image: String::from(""),
+            md5_rtf: String::from(""),
             formats: vec![],
+            tags: vec![],
         }
     }
 
@@ -48,14 +61,6 @@ impl HistoryItem {
 
     pub fn set_text(&mut self, text: String) {
         self.text = text;
-    }
-
-    pub fn get_favorite(&self) -> bool {
-        self.favorite
-    }
-
-    pub fn set_favorite(&mut self, favorite: bool) {
-        self.favorite = favorite;
     }
 
     pub fn get_html(&self) -> &str {
@@ -90,10 +95,6 @@ impl HistoryItem {
         self.files = Vec::from(files);
     }
 
-    pub fn get_tags(&self) -> &Vec<String> {
-        &self.tags
-    }
-
     pub fn get_create_time(&self) -> u64 {
         self.create_time
     }
@@ -108,6 +109,22 @@ impl HistoryItem {
 
     pub fn push_formats(&mut self, format: String) {
         self.formats.push(format);
+    }
+
+    pub fn get_md5_text(&self) -> &str {
+        &self.md5_text
+    }
+
+    pub fn get_md5_html(&self) -> &str {
+        &self.md5_html
+    }
+
+    pub fn get_md5_rtf(&self) -> &str {
+        &self.md5_rtf
+    }
+
+    pub fn get_md5_image(&self) -> &str {
+        &self.md5_image
     }
 }
 

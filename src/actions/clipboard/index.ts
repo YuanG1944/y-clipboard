@@ -133,6 +133,8 @@ export async function writeSelected(historyArr: StorageItem[], currId: string = 
 
   const active = curr?.defaultActive;
 
+  console.info('historyArr---->', curr);
+
   if (active === ActiveEnum.Text && curr?.text) {
     await writeText(curr?.text);
     return;
@@ -179,7 +181,6 @@ export function writeText(text: string): Promise<void> {
 }
 
 export function writeHtml(html: string): Promise<void> {
-  console.info('writeHtml');
   return invoke(WRITE_HTML_COMMAND, { html });
 }
 

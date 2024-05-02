@@ -39,6 +39,7 @@ base64 = "0.21.5"
 image = "0.24.7"
 clipboard-files = "0.1.1"
 clipboard-rs = "0.1.0"
+rust-crypto = { version = "0.2.36" }
 uuid = "1.7.0"
 rdev = "=0.4.6"
 parking_lot = "0.12.1"

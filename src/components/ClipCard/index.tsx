@@ -1,5 +1,5 @@
 import { FC, useEffect, useMemo, useState } from 'react';
-import { Card, Upload, UploadFile } from 'antd';
+import { Button, Card, Upload, UploadFile } from 'antd';
 import styles from './index.module.scss';
 import { ActiveEnum, StorageItem } from '@/actions/clipboard/type';
 import classnames from 'classnames';
@@ -30,7 +30,6 @@ const ClipCard: FC<ICardProps> = ({
   const [active, setActive] = useState(ActiveEnum.Text);
   const [show, setShow] = useState(true);
   const [platform, setPlatform] = useState('');
-
   const focus = useMemo(() => currId === context.id, [currId]);
 
   const getPlatform = () => {
@@ -47,8 +46,16 @@ const ClipCard: FC<ICardProps> = ({
         {urls[1]}
       </a>
     ) : (
-      <div style={{ wordBreak: 'break-word', width: '100%' }}>
+      <div style={{ wordBreak: 'break-word', width: '100%', height: '190px' }}>
         <div dangerouslySetInnerHTML={{ __html: context.html || '' }}></div>
+      </div>
+    );
+  };
+
+  const renderRTF = () => {
+    return (
+      <div style={{ wordBreak: 'break-word', width: '100%', height: '190px' }}>
+        <div dangerouslySetInnerHTML={{ __html: context.rtf || '' }}></div>
       </div>
     );
   };
@@ -70,7 +77,7 @@ const ClipCard: FC<ICardProps> = ({
       case ActiveEnum.Html:
         return renderUrl();
       case ActiveEnum.RTF:
-        return renderUrl();
+        return renderRTF();
       case ActiveEnum.Image:
         return (
           <div className={styles.cover}>

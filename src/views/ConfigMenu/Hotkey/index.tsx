@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Form, Input, Switch, message } from 'antd';
+import { Form, Input, Select, Switch, message } from 'antd';
 import styles from './index.module.scss';
 import { useEventListener } from 'ahooks';
 import {
@@ -11,7 +11,10 @@ import {
 } from '@/utils/keyMap';
 import { os } from '@tauri-apps/api';
 import { getStore, hasKeyStore, setStore } from '@/utils/localStorage';
-import { setPaste } from '@/actions/shortcut';
+import { PasteKey, setPaste } from '@/actions/shortcut';
+import { getWheelDirection, setWheelDirection, WheelEnum, WheelKey } from '@/actions/datamanage';
+
+const { Option } = Select;
 
 export enum StoreKeyEnum {
   KEYCODE = 'KEYCODE',
@@ -21,6 +24,17 @@ export interface FormValue {
   paste: string;
   pasteCode: string;
 }
+
+const scrollOptions = [
+  {
+    label: 'Normal',
+    value: WheelEnum.NORMAL,
+  },
+  {
+    label: 'Reverse',
+    value: WheelEnum.REVERSE,
+  },
+];
 
 const App: React.FC = () => {
   const [monitorVal, setMonitorVal] = useState(false);
@@ -108,7 +122,7 @@ const App: React.FC = () => {
   };
 
   const initFormValue = () => {
-    os.platform().then((platform) => {
+    os.platform().then(async (platform) => {
       let code, value;
       if (hasKeyStore(StoreKeyEnum.KEYCODE)) {
         code = (getStore(StoreKeyEnum.KEYCODE) as IKeyCode).code;
@@ -134,6 +148,10 @@ const App: React.FC = () => {
       });
 
       setPaste(code?.join('+'));
+
+      getWheelDirection().then((wheelVal) => {
+        form.setFieldValue(WheelKey, wheelVal || '1');
+      });
     });
   };
 
@@ -166,6 +184,10 @@ const App: React.FC = () => {
     }
   };
 
+  const changeScrollValue = (val: string) => {
+    setWheelDirection(val);
+  };
+
   useEventListener('keydown', (ev) => {
     if (monitorVal) {
       changeKeyValue(ev);
@@ -180,7 +202,7 @@ const App: React.FC = () => {
     <>
       <div className={styles.hotkey}>
         <Form layout="vertical" form={form}>
-          <Form.Item label="Paste" name="paste" required>
+          <Form.Item label="Paste" name={PasteKey} required>
             <div className={styles.inputGroup}>
               <Input
                 value={keyValue.join('+')}
@@ -196,6 +218,15 @@ const App: React.FC = () => {
                 onChange={handleMonitor}
               />
             </div>
+          </Form.Item>
+          <Form.Item label="Revert Scroll Wheel" name={WheelKey} required>
+            <Select placeholder="Please Select Wheel Scroll Direction" onChange={changeScrollValue}>
+              {scrollOptions.map((item) => (
+                <Option key={item.label} value={item.value}>
+                  {item.label}
+                </Option>
+              ))}
+            </Select>
           </Form.Item>
         </Form>
       </div>

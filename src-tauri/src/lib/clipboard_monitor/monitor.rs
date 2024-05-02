@@ -15,6 +15,7 @@ use tauri::{Manager, Runtime};
 use crate::clipboard_history::HistoryItem;
 use crate::clipboard_history::HistoryStore;
 use crate::db::database::SqliteDB;
+use crate::utils::stringify;
 
 pub struct ClipboardMonitor<R>
 where
@@ -42,19 +43,27 @@ where
         let mut item = HistoryItem::new();
 
         if self.manager.has_text().unwrap() {
-            item.set_text(self.manager.read_text().unwrap());
+            let text = self.manager.read_text().unwrap();
+            item.set_text(text.clone());
+            item.md5_text = stringify::md5(text.as_str().trim());
             item.push_formats(String::from("text"));
         }
         if self.manager.has_html().unwrap() {
-            item.set_html(self.manager.read_html().unwrap());
+            let html = self.manager.read_html().unwrap();
+            item.set_html(html.clone());
+            item.md5_html = stringify::md5(html.as_str().trim());
             item.push_formats(String::from("html"));
         }
         if self.manager.has_rtf().unwrap() {
-            item.set_rtf(self.manager.read_rtf().unwrap());
+            let rtf = self.manager.read_rtf().unwrap();
+            item.set_rtf(rtf.clone());
+            item.md5_rtf = stringify::md5(rtf.as_str().trim());
             item.push_formats(String::from("rtf"));
         }
         if self.manager.has_image().unwrap() {
-            item.set_image(self.manager.read_image_base64().unwrap());
+            let image = self.manager.read_image_base64().unwrap();
+            item.set_image(image.clone());
+            item.md5_image = stringify::md5(image.as_str().trim());
             item.push_formats(String::from("image"));
         }
         if self.manager.has_file_url().unwrap() {
@@ -68,8 +77,9 @@ where
                         path.file_name().unwrap().to_str().unwrap()
                     })
                     .collect();
-
-                item.set_text(files_name.join(" "));
+                let text = files_name.join(" ");
+                item.set_text(text.clone());
+                item.md5_text = stringify::md5(text.as_str());
                 item.push_formats(String::from("text"));
             }
 
@@ -81,49 +91,6 @@ where
         }
 
         item
-    }
-
-    pub fn is_equal(&self, curr_item: &HistoryItem) -> bool {
-        let curr_store = SqliteDB::new().pick_latest_one();
-        match curr_store {
-            Ok(latest_items) => {
-                if latest_items.len() == 0 {
-                    return false;
-                }
-
-                let latest_item_html = latest_items[0].get_html().trim();
-                let curr_item_html = curr_item.get_html().trim();
-
-                if latest_item_html.len() > 0
-                    && curr_item_html.len() > 0
-                    && latest_item_html == curr_item_html
-                {
-                    return true;
-                }
-
-                let latest_item_text = latest_items[0].get_text().trim();
-                let curr_item_text = curr_item.get_text().trim();
-
-                if latest_item_text.len() > 0
-                    && curr_item_text.len() > 0
-                    && latest_item_text == curr_item_text
-                {
-                    return true;
-                }
-
-                let latest_item_image = latest_items[0].get_image();
-                let curr_item_image = curr_item.get_image();
-
-                if latest_item_image.len() > 0
-                    && curr_item_image.len() > 0
-                    && latest_item_image == curr_item_image
-                {
-                    return true;
-                }
-                return false;
-            }
-            Err(_) => false,
-        }
     }
 }
 
@@ -145,10 +112,7 @@ where
 
         // push item to history store
         let item: HistoryItem = self.item_collect();
-
-        if self.is_equal(&item) == false {
-            let _ = SqliteDB::new().insert_item(item);
-        }
+        let _ = SqliteDB::new().insert_item_distinct(item);
 
         CallbackResult::Next
     }
@@ -365,6 +329,7 @@ impl ClipboardManager {
     // Write to Clipboard APIs
     pub fn write_text(&self, text: String) -> Result<(), String> {
         let text = String::from(text.trim());
+        println!("text----->{}", text);
         self.clipboard
             .lock()
             .map_err(|err| err.to_string())?
@@ -373,6 +338,7 @@ impl ClipboardManager {
     }
 
     pub fn write_html(&self, html: String) -> Result<(), String> {
+        println!("html----->{}", html);
         self.clipboard
             .lock()
             .map_err(|err| err.to_string())?
@@ -381,6 +347,7 @@ impl ClipboardManager {
     }
 
     pub fn write_rtf(&self, rtf: String) -> Result<(), String> {
+        println!("rtf----->{}", rtf);
         self.clipboard
             .lock()
             .map_err(|err| err.to_string())?

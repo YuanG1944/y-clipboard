@@ -15,11 +15,14 @@
   }
 
   &Ctx {
+    position: relative;
     word-break: break-all;
     width: 100%;
+
     overflow-y: auto;
     overflow-x: hidden;
     .text {
+      height: 190px;
       color: #000000a6;
       font-size: 14px;
     }

@@ -1,16 +1,24 @@
 use anyhow::Result;
-use std::{
-    fs::{self, File},
-    time::{SystemTime, UNIX_EPOCH},
-};
+use std::time::{SystemTime, UNIX_EPOCH};
+use uuid::Uuid;
 
 use crate::{
-    clipboard_history::HistoryItem,
-    utils::path::{self, create_dir},
+    clipboard_history::{HistoryItem, TagsStruct},
+    utils::{
+        path::{self, create_dir},
+        stringify,
+    },
 };
 use rusqlite::{Connection, OpenFlags, ToSql};
 
 const SQLITE_FILE_NAME: &str = "y-clipboard.db";
+
+pub struct QueryValue {
+    pub key: String,
+    pub tags: Vec<String>,
+    pub page: usize,
+    pub page_size: usize,
+}
 
 #[derive(serde::Serialize, serde::Deserialize, Debug, Default, PartialEq)]
 pub struct Config {
@@ -45,33 +53,38 @@ impl SqliteDB {
                 text        TEXT,
                 html        TEXT,
                 rtf         TEXT,
-            --     image_id    INTEGER,
-            --     file_id     INTEGER,
                 image       TEXT,
                 files       TEXT,
-                favorite    BOOLEAN DEFAULT FALSE,
-                tags         TEXT,
                 create_time INTEGER,
-                formats     TEXT
-            --     foreign key (image_id) REFERENCES image_info (id)
-            --         foreign key (file_id) REFERENCES file_info (id)
+                formats     TEXT,
+                md5_text    VARCHAR(200) DEFAULT '',
+                md5_html    VARCHAR(200) DEFAULT '',
+                md5_rtf     VARCHAR(200) DEFAULT '',
+                md5_image   VARCHAR(200) DEFAULT ''
             );
         "#;
 
-        // create table if not exists image_info
-        // (
-        //     id  integer not null primary key,
-        //     ctx text
-        // )
-        // create table if not exists file_info
-        // (
-        //     id  integer not null primary key,
-        //     paths VARCHAR(255)[]
-        // )
+        let init_favorite_table = r#"
+            CREATE TABLE IF NOT EXISTS tags_table
+            (
+                id          VARCHAR(255) NOT NULL PRIMARY KEY,
+                name        VARCHAR(24)  DEFAULT '',
+                create_time INTEGER
+
+            );
+        "#;
+
+        let init_favorite_connect_history_table = r#"
+            CREATE TABLE IF NOT EXISTS favorite_connect_history_table
+            (
+                tag_id              VARCHAR(255) NOT NULL,
+                history_id          VARCHAR(255) NOT NULL
+            )
+        "#;
 
         let init_config_table = r#"
             CREATE TABLE IF NOT EXISTS config_table(
-                key       VARCHAR(25) NOT NULL PRIMARY KEY,
+                key       VARCHAR(25) NOT NULL PRIMARY KEY, 
                 value     VARCHAR(128)
             );
         "#;
@@ -85,8 +98,11 @@ impl SqliteDB {
         "#;
 
         let _ = conn.execute(init_history_info_table, ());
+        let _ = conn.execute(init_favorite_table, ());
+        let _ = conn.execute(init_favorite_connect_history_table, ());
         let _ = conn.execute(init_config_table, ());
         let _ = conn.execute(init_expire, ());
+        let _ = Self::new().insert_tags(Uuid::new_v4().to_string(), "Favorite".to_string());
     }
 
     pub fn insert_item(&self, insert_item: HistoryItem) -> Result<i64> {
@@ -99,12 +115,16 @@ impl SqliteDB {
                 rtf,
                 image,
                 files,
-                favorite,
-                tags,
                 create_time,
-                formats) 
-            VALUES (?1,?2,?3,?4,?5,?6,?7,?8,?9,?10)
+                formats,
+                md5_text,
+                md5_html,
+                md5_rtf,
+                md5_image
+            ) 
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)
         "#;
+
         match self.conn.execute(
             sql,
             (
@@ -114,16 +134,91 @@ impl SqliteDB {
                 insert_item.get_rtf(),
                 insert_item.get_image(),
                 insert_item.get_files().join(","),
-                insert_item.get_favorite(),
-                insert_item.get_tags().join(","),
                 insert_item.get_create_time(),
                 insert_item.get_formats().join(","),
+                insert_item.get_md5_text(),
+                insert_item.get_md5_html(),
+                insert_item.get_md5_rtf(),
+                insert_item.get_md5_image(),
             ),
         ) {
             Ok(res) => println!("Insert item successfully!"),
             Err(err) => println!("Failed to insert directories: {}", err),
         };
         Ok(self.conn.last_insert_rowid())
+    }
+
+    pub fn insert_tags(&self, id: String, name: String) -> Result<()> {
+        let sql: &str = r#"
+            INSERT INTO tags_table (
+                id, 
+                name,
+                create_time
+            )
+            VALUES (?1, ?2, ?3);
+        "#;
+        match self.conn.execute(
+            sql,
+            (
+                id,
+                name,
+                SystemTime::now()
+                    .duration_since(UNIX_EPOCH)
+                    .unwrap()
+                    .as_secs(),
+            ),
+        ) {
+            Ok(res) => println!("Insert tags successfully!"),
+            Err(err) => println!("Failed to tags directories: {}", err),
+        };
+        Ok(())
+    }
+
+    pub fn insert_item_distinct(&self, mut insert_item: HistoryItem) -> Result<()> {
+        if (insert_item.get_text().trim().is_empty()
+            && insert_item.get_image().trim().is_empty()
+            && insert_item.get_rtf().trim().is_empty())
+        {
+            return Ok(());
+        }
+
+        let mut md5_key: String = "".to_string();
+        let mut md5_value: String = "".to_string();
+
+        if insert_item.get_formats().contains(&"html".to_string()) {
+            md5_key = "md5_html".to_string();
+            md5_value = insert_item.md5_html.clone();
+        }
+
+        if insert_item.get_formats().contains(&"text".to_string()) {
+            md5_key = "md5_text".to_string();
+            md5_value = insert_item.md5_text.clone();
+        }
+
+        if insert_item.get_formats().contains(&"image".to_string()) {
+            md5_key = "md5_image".to_string();
+            md5_value = insert_item.md5_image.clone();
+        }
+
+        match self.find_record_by_md5(md5_key, md5_value) {
+            Ok(id) => {
+                self.update_pasted_create_time(id)?;
+            }
+            Err(_e) => {
+                println!("err-------------> {}", _e);
+                self.insert_item(insert_item)?;
+            }
+        }
+        Ok(())
+    }
+
+    fn find_record_by_md5(&self, md5_key: String, md5_value: String) -> Result<String> {
+        let sql = format!(
+            "SELECT id FROM history_info WHERE {} = '{}'",
+            &md5_key, &md5_value
+        );
+        let res: String = self.conn.query_row(&sql, [], |row| row.get(0))?;
+        Ok(res)
     }
 
     pub fn update_pasted_create_time(&self, id: String) -> Result<()> {
@@ -148,23 +243,18 @@ impl SqliteDB {
                 key = ?1; 
         "#;
 
-        let res: String = self.conn.query_row(sql, [&key], |row| {
-            let a = Config {
-                key: row.get(0)?,
-                value: row.get(1)?,
-            };
-            row.get(1)
-        })?;
+        let res: String = self.conn.query_row(sql, [&key], |row| row.get(1))?;
         Ok(res)
     }
 
     pub fn set_config(&self, key: String, value: String) -> Result<i64> {
         println!("key = {}, value = {}", key, value);
+
         let sql = r#"
-            UPDATE config_table SET 
-                value = ?2 
-            WHERE 
-                key = ?1;
+            INSERT INTO config_table (key, value)
+            VALUES (?1, ?2)
+            ON CONFLICT(key) DO UPDATE SET
+            value = ?2;
         "#;
 
         self.conn.execute(sql, (&key, &value))?;
@@ -204,10 +294,12 @@ impl SqliteDB {
                 rtf, 
                 image, 
                 files, 
-                favorite,
-                tags,
                 create_time, 
-                formats 
+                formats,
+                md5_text,
+                md5_html,
+                md5_rtf,
+                md5_image
             FROM 
                 history_info 
             ORDER BY 
@@ -226,10 +318,13 @@ impl SqliteDB {
             let rtf: String = row.get(3)?;
             let image: String = row.get(4)?;
             let files: String = row.get(5)?;
-            let favorite: bool = row.get(6)?;
-            let tags: String = row.get(7)?;
-            let create_time: u64 = row.get(8)?;
-            let formats: String = row.get(9)?;
+            let create_time: u64 = row.get(6)?;
+            let formats: String = row.get(7)?;
+            let md5_text: String = row.get(8)?;
+            let md5_html: String = row.get(9)?;
+            let md5_rtf: String = row.get(10)?;
+            let md5_image: String = row.get(11)?;
+            let tags = self.get_history_tags(id.clone())?;
             let item = HistoryItem {
                 id,
                 text,
@@ -237,9 +332,12 @@ impl SqliteDB {
                 rtf,
                 image,
                 files: files.split(',').map(|item| item.to_string()).collect(),
-                favorite,
-                tags: tags.split(',').map(|item| item.to_string()).collect(),
                 create_time,
+                md5_text,
+                md5_html,
+                md5_image,
+                md5_rtf,
+                tags,
                 formats: formats.split(',').map(|item| item.to_string()).collect(),
             };
             res.push(item);
@@ -247,27 +345,145 @@ impl SqliteDB {
         Ok(res)
     }
 
+    pub fn get_tags_all(&self) -> Result<Vec<TagsStruct>> {
+        let sql = r#"
+            SELECT
+                id, 
+                name,
+                create_time
+            FROM 
+                tags_table 
+            ORDER BY 
+                create_time 
+            ASC
+         "#;
+
+        let mut stmt = self.conn.prepare(sql)?;
+        let mut rows = stmt.query([])?;
+        let mut res = vec![];
+
+        while let Some(row) = rows.next()? {
+            let id: String = row.get(0)?;
+            let name: String = row.get(1)?;
+            let create_time: u64 = row.get(2)?;
+
+            let item = TagsStruct {
+                id,
+                name,
+                create_time,
+            };
+            res.push(item);
+        }
+        Ok(res)
+    }
+
+    pub fn get_tags_by_id(&self, id: String) -> Result<TagsStruct> {
+        let sql = r#"
+            SELECT
+                id, 
+                name,
+                create_time
+            FROM 
+                tags_table 
+            WHERE
+                id = ?1;
+        "#;
+        let mut stmt = self.conn.prepare(sql)?;
+        let res = self.conn.query_row(sql, [&id], |row| {
+            Ok(TagsStruct {
+                id: row.get(0)?,
+                name: row.get(1)?,
+                create_time: row.get(2)?,
+            })
+        })?;
+        Ok(res)
+    }
+
+    pub fn get_history_tags(&self, history_id: String) -> Result<Vec<TagsStruct>> {
+        let sql = r#"
+            SELECT DISTINCT
+                tag_id
+            FROM 
+                favorite_connect_history_table 
+            WHERE
+                history_id = ?1;
+         "#;
+
+        let mut stmt = self.conn.prepare(sql)?;
+        let mut rows = stmt.query([history_id])?;
+        let mut res = Vec::new();
+
+        while let Some(row) = rows.next()? {
+            let tag_id: String = row.get(0)?;
+            let item = self.get_tags_by_id(tag_id)?;
+            res.push(item);
+        }
+
+        Ok(res)
+    }
+
+    pub fn subscribe_history_to_tags(&self, history_id: String, tag_id: String) -> Result<()> {
+        let sql: &str = r#"
+            INSERT INTO favorite_connect_history_table (
+                history_id,
+                tag_id, 
+            )
+            VALUES (?1, ?2);
+        "#;
+        match self.conn.execute(sql, (history_id, tag_id)) {
+            Ok(res) => println!("Insert tags successfully!"),
+            Err(err) => println!("Failed to tags directories: {}", err),
+        };
+        Ok(())
+    }
+
+    // pub fn query_text(&self, req: QueryValue) -> Result<Vec<HistoryItem>> {
+    //     let offset = req.page.saturating_sub(1) * req.page_size;
+
+    //     let sql = format!(
+    //         r#"
+    //         SELECT
+    //             id,
+    //             text,
+    //             html,
+    //             rtf,
+    //             image,
+    //             files,
+    //             create_time,
+    //             formats,
+    //             md5
+    //         FROM
+    //             history_info
+    //         ORDER BY
+    //             create_time DESC
+    //         LIMIT ?1 OFFSET ?2
+    //         "#
+    //     );
+    // }
+
     pub fn find_history_by_page(&self, page: usize, page_size: usize) -> Result<Vec<HistoryItem>> {
         let offset = page.saturating_sub(1) * page_size;
 
         let sql = format!(
             r#"
-            SELECT
-                id, 
-                text, 
-                html, 
-                rtf, 
-                image, 
-                files, 
-                favorite,
-                tags,
-                create_time, 
-                formats 
-            FROM 
-                history_info 
-            ORDER BY 
-                create_time DESC
-            LIMIT ?1 OFFSET ?2
+                SELECT
+                    id, 
+                    text, 
+                    html, 
+                    rtf, 
+                    image, 
+                    files, 
+                    create_time, 
+                    formats,
+                    md5_text,
+                    md5_html,
+                    md5_rtf,
+                    md5_image
+                FROM 
+                    history_info 
+                ORDER BY 
+                    create_time DESC
+                LIMIT ?1 OFFSET ?2
             "#
         );
 
@@ -282,10 +498,13 @@ impl SqliteDB {
             let rtf: String = row.get(3)?;
             let image: String = row.get(4)?;
             let files: String = row.get(5)?;
-            let favorite: bool = row.get(6)?;
-            let tags: String = row.get(7)?;
-            let create_time: u64 = row.get(8)?;
-            let formats: String = row.get(9)?;
+            let create_time: u64 = row.get(6)?;
+            let formats: String = row.get(7)?;
+            let md5_text: String = row.get(8)?;
+            let md5_html: String = row.get(9)?;
+            let md5_rtf: String = row.get(10)?;
+            let md5_image: String = row.get(11)?;
+            let tags = self.get_history_tags(id.clone())?;
             let item = HistoryItem {
                 id,
                 text,
@@ -293,62 +512,13 @@ impl SqliteDB {
                 rtf,
                 image,
                 files: files.split(',').map(|s| s.to_string()).collect(),
-                favorite,
-                tags: tags.split(',').map(|s| s.to_string()).collect(),
                 create_time,
-                formats: formats.split(',').map(|s| s.to_string()).collect(),
-            };
-            res.push(item);
-        }
-        Ok(res)
-    }
-
-    pub fn pick_latest_one(&self) -> Result<Vec<HistoryItem>> {
-        let sql = r#"
-            SELECT
-                id, 
-                text, 
-                html, 
-                rtf, 
-                image, 
-                files, 
-                favorite,
+                md5_image,
+                md5_html,
+                md5_rtf,
+                md5_text,
                 tags,
-                create_time, 
-                formats 
-            FROM 
-                history_info 
-            ORDER BY 
-                create_time 
-            DESC LIMIT 1
-         "#;
-
-        let mut stmt = self.conn.prepare(sql)?;
-        let mut rows = stmt.query([])?;
-        let mut res = vec![];
-
-        while let Some(row) = rows.next()? {
-            let id: String = row.get(0)?;
-            let text: String = row.get(1)?;
-            let html: String = row.get(2)?;
-            let rtf: String = row.get(3)?;
-            let image: String = row.get(4)?;
-            let files: String = row.get(5)?;
-            let favorite: bool = row.get(6)?;
-            let tags: String = row.get(7)?;
-            let create_time: u64 = row.get(8)?;
-            let formats: String = row.get(9)?;
-            let item = HistoryItem {
-                id,
-                text,
-                html,
-                rtf,
-                image,
-                files: files.split(',').map(|item| item.to_string()).collect(),
-                favorite,
-                tags: tags.split(',').map(|item| item.to_string()).collect(),
-                create_time,
-                formats: formats.split(',').map(|item| item.to_string()).collect(),
+                formats: formats.split(',').map(|s| s.to_string()).collect(),
             };
             res.push(item);
         }

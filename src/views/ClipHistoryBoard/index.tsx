@@ -19,6 +19,7 @@ import {
   writeSelected,
 } from '@/actions/clipboard';
 import loadingAnim from '@/assets/loading-anim.gif';
+import { getWheelDirection, WheelEnum } from '@/actions/datamanage';
 
 const windows = Windows.getInstance();
 
@@ -32,6 +33,7 @@ const ClipHistoryBoard: FC = () => {
   const [loading, setLoading] = useState(false);
   // const [page, setPage] = useState(1);
   const page = useRef(1);
+  const scrollD = useRef(WheelEnum.NORMAL);
   const [pageSize, setPageSize] = useState(10);
   const cardContentRef = useRef<HTMLDivElement>(null);
 
@@ -85,12 +87,19 @@ const ClipHistoryBoard: FC = () => {
     }
   };
 
+  const handleConfig = () => {
+    getWheelDirection().then((wheelVal) => {
+      scrollD.current = wheelVal as WheelEnum;
+    });
+  };
+
   const handleVisibility = () => {
     if (!document.hidden) {
       setTimeout(() => {
         setShow(true);
-      }, 400);
+      }, 150);
       handleBridge();
+      handleConfig();
     }
   };
 
@@ -110,6 +119,15 @@ const ClipHistoryBoard: FC = () => {
     const idx = historyCtx.findIndex((ctx) => ctx.id === currId);
     if (idx !== -1) {
       setCurrIndex(setCurrIndexChange(idx));
+    }
+  };
+
+  const handleWheelScroll = (event: WheelEvent) => {
+    if (scrollD.current === WheelEnum.NORMAL) return;
+    if (!event.ctrlKey && cardContentRef.current) {
+      event.preventDefault();
+      const newScrollPosition = cardContentRef.current.scrollLeft + event.deltaY;
+      cardContentRef.current.scrollLeft = newScrollPosition;
     }
   };
 
@@ -183,7 +201,7 @@ const ClipHistoryBoard: FC = () => {
 
   useKeyPress('rightarrow', () => {
     setCurrIndex((num) => {
-      if (!focus && Number(num) < historyCtx.length - 1) {
+      if (!focus && Number(num) < historyCtx.filter((ctx) => ctx.deleted !== true).length - 1) {
         return Number(num) + 1;
       }
       return setCurrIndexChange(num);
@@ -252,7 +270,7 @@ const ClipHistoryBoard: FC = () => {
   });
 
   useEffect(() => {
-    const id = historyCtx?.[Number(currIndex)]?.id || '';
+    const id = historyCtx.filter((ctx) => ctx.deleted !== true)?.[Number(currIndex)]?.id || '';
     handleAnchor(`clip-${currIndex}`);
     setCurrId(id);
   }, [currIndex]);
@@ -260,6 +278,7 @@ const ClipHistoryBoard: FC = () => {
   useEffect(() => {
     win32VisibilityChange();
     document.addEventListener('visibilitychange', handleVisibility);
+
     return () => {
       document.removeEventListener('visibilitychange', handleVisibility);
     };
@@ -268,9 +287,11 @@ const ClipHistoryBoard: FC = () => {
   useEffect(() => {
     if (cardContentRef.current) {
       cardContentRef.current.addEventListener('scroll', handleScrollingEvent);
+      document.addEventListener('wheel', handleWheelScroll, { passive: false });
     }
     return () => {
       cardContentRef.current?.removeEventListener('scroll', handleScrollingEvent);
+      document.removeEventListener('wheel', handleWheelScroll);
     };
   }, [cardContentRef.current]);
 
