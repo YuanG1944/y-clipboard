@@ -1,42 +1,8 @@
 import { z } from 'zod';
 import { invoke } from '@tauri-apps/api/tauri';
 import { emit, listen, UnlistenFn } from '@tauri-apps/api/event';
-import { ActiveEnum, ActiveMapping, StorageItem } from './type';
+import { ActiveEnum, ActiveMapping, ClipboardEnum, ITag, StorageItem } from './type';
 
-export const PASTE = 'plugin:clipboard|paste';
-export const START_MONITOR_COMMAND = 'plugin:clipboard|start_monitor';
-export const STOP_MONITOR_COMMAND = 'plugin:clipboard|stop_monitor';
-export const TEXT_CHANGED = 'plugin:clipboard://text-changed';
-export const HTML_CHANGED = 'plugin:clipboard://html-changed';
-export const RTF_CHANGED = 'plugin:clipboard://rtf-changed';
-export const FILES_CHANGED = 'plugin:clipboard://files-changed';
-export const IMAGE_CHANGED = 'plugin:clipboard://image-changed';
-export const IS_MONITOR_RUNNING_COMMAND = 'plugin:clipboard|is_monitor_running';
-export const GET_HISTORY = 'plugin:clipboard|get_history';
-export const GET_HISTORY_BY_PAGE = 'plugin:clipboard|get_history_by_page';
-export const SET_HISTORY_STR = 'plugin:clipboard|set_history_str';
-export const UPDATE_CREATE_TIME = 'plugin:clipboard|update_pasted_create_time';
-export const DELETE_HISTORIES = 'plugin:clipboard|delete_items';
-export const HAS_TEXT_COMMAND = 'plugin:clipboard|has_text';
-export const HAS_IMAGE_COMMAND = 'plugin:clipboard|has_image';
-export const HAS_HTML_COMMAND = 'plugin:clipboard|has_html';
-export const HAS_RTF_COMMAND = 'plugin:clipboard|has_rtf';
-export const WRITE_TEXT_COMMAND = 'plugin:clipboard|write_text';
-export const WRITE_HTML_COMMAND = 'plugin:clipboard|write_html';
-export const WRITE_RTF_COMMAND = 'plugin:clipboard|write_rtf';
-export const WRITE_FILES_PATH = 'plugin:clipboard|write_files_path';
-export const OPEN_FILE_COMMAND = 'plugin:clipboard|open_file';
-export const CLEAR_COMMAND = 'plugin:clipboard|clear';
-export const READ_TEXT_COMMAND = 'plugin:clipboard|read_text';
-export const READ_HTML_COMMAND = 'plugin:clipboard|read_html';
-export const READ_RTF_COMMAND = 'plugin:clipboard|read_rtf';
-export const READ_FILES_COMMAND = 'plugin:clipboard|read_files';
-export const READ_IMAGE_BINARY_COMMAND = 'plugin:clipboard|read_image_binary';
-export const READ_IMAGE_BASE64_COMMAND = 'plugin:clipboard|read_image_base64';
-export const WRITE_IMAGE_BINARY_COMMAND = 'plugin:clipboard|write_image_binary';
-export const WRITE_IMAGE_BASE64_COMMAND = 'plugin:clipboard|write_image_base64';
-export const CLIPBOARD_MONITOR_STATUS_UPDATE_EVENT = 'plugin:clipboard://clipboard-monitor/status';
-export const MONITOR_UPDATE_EVENT = 'plugin:clipboard://clipboard-monitor/update';
 export const ClipboardChangedPayloadSchema = z.object({ value: z.string() });
 export const ClipboardChangedFilesPayloadSchema = z.object({
   value: z.string().array(),
@@ -86,7 +52,7 @@ export const safeJsonParse = (str: string) => {
 };
 
 export async function getHistory(): Promise<StorageItem[]> {
-  const clipboardHistoryStr = ((await invoke(GET_HISTORY)) as string) ?? '';
+  const clipboardHistoryStr = ((await invoke(ClipboardEnum.GET_HISTORY)) as string) ?? '';
   const clipboardHistory: StorageItem[] = safeJsonParse(clipboardHistoryStr);
   return clipboardHistory.map((item) => {
     const defaultActive = defaultFormat(item.formats || []);
@@ -99,7 +65,7 @@ export async function getHistory(): Promise<StorageItem[]> {
 
 export async function getHistoryByPage(page: number, pageSize: number): Promise<StorageItem[]> {
   const clipboardHistoryStr =
-    ((await invoke(GET_HISTORY_BY_PAGE, { page, pageSize })) as string) ?? '';
+    ((await invoke(ClipboardEnum.GET_HISTORY_BY_PAGE, { page, pageSize })) as string) ?? '';
   const clipboardHistory: StorageItem[] = safeJsonParse(clipboardHistoryStr);
 
   return clipboardHistory.map((item) => {
@@ -114,18 +80,18 @@ export async function getHistoryByPage(page: number, pageSize: number): Promise<
 export function setHistoryStr(historyArr: StorageItem[], currId: string = ''): Promise<void> {
   const temp = moveToFirst(historyArr, currId);
   const jsonStr = JSON.stringify(temp);
-  return invoke(SET_HISTORY_STR, { jsonStr });
+  return invoke(ClipboardEnum.SET_HISTORY_STR, { jsonStr });
 }
 
 export function updateCreateTime(id: string = ''): Promise<void> {
   if (!id) return Promise.resolve();
-  return invoke(UPDATE_CREATE_TIME, { id });
+  return invoke(ClipboardEnum.UPDATE_CREATE_TIME, { id });
 }
 
 export function deleteItems(ids: string[] = []): Promise<void> {
   if (!ids.length) return Promise.resolve();
   const jsonStr = JSON.stringify(ids);
-  return invoke(DELETE_HISTORIES, { jsonStr });
+  return invoke(ClipboardEnum.DELETE_HISTORIES, { jsonStr });
 }
 
 export async function writeSelected(historyArr: StorageItem[], currId: string = '') {
@@ -160,60 +126,78 @@ export async function writeSelected(historyArr: StorageItem[], currId: string = 
   }
 }
 
+export async function getTagsAll(): Promise<ITag[]> {
+  const tagsStr = ((await invoke(ClipboardEnum.GET_TAGS_ALL)) as string) ?? '';
+  const tags: ITag[] = safeJsonParse(tagsStr);
+  return tags;
+}
+
+export function setTag(id: string, name: string) {
+  return invoke(ClipboardEnum.SET_TAG, { id, name });
+}
+
+export function addTag(name: string) {
+  return invoke(ClipboardEnum.ADD_TAG, { name });
+}
+
+export function deleteTag(id: string) {
+  return invoke(ClipboardEnum.DELETE_TAG, { id });
+}
+
 export function hasText(): Promise<boolean> {
-  return invoke(HAS_TEXT_COMMAND);
+  return invoke(ClipboardEnum.HAS_TEXT_COMMAND);
 }
 
 export function hasHTML(): Promise<boolean> {
-  return invoke(HAS_HTML_COMMAND);
+  return invoke(ClipboardEnum.HAS_HTML_COMMAND);
 }
 
 export function hasRTF(): Promise<boolean> {
-  return invoke(HAS_RTF_COMMAND);
+  return invoke(ClipboardEnum.HAS_RTF_COMMAND);
 }
 
 export function hasImage(): Promise<boolean> {
-  return invoke(HAS_IMAGE_COMMAND);
+  return invoke(ClipboardEnum.HAS_IMAGE_COMMAND);
 }
 
 export function writeText(text: string): Promise<void> {
-  return invoke(WRITE_TEXT_COMMAND, { text });
+  return invoke(ClipboardEnum.WRITE_TEXT_COMMAND, { text });
 }
 
 export function writeHtml(html: string): Promise<void> {
-  return invoke(WRITE_HTML_COMMAND, { html });
+  return invoke(ClipboardEnum.WRITE_HTML_COMMAND, { html });
 }
 
 export function writeRtf(rtf: string): Promise<void> {
-  return invoke(WRITE_RTF_COMMAND, { rtf });
+  return invoke(ClipboardEnum.WRITE_RTF_COMMAND, { rtf });
 }
 
 export function writeFilePath(files: string[]): Promise<void> {
-  return invoke(WRITE_FILES_PATH, { files });
+  return invoke(ClipboardEnum.WRITE_FILES_PATH, { files });
 }
 
 export function openFile(filePath: string): Promise<void> {
-  return invoke(OPEN_FILE_COMMAND, { filePath });
+  return invoke(ClipboardEnum.OPEN_FILE_COMMAND, { filePath });
 }
 
 export function clear(): Promise<void> {
-  return invoke(CLEAR_COMMAND);
+  return invoke(ClipboardEnum.CLEAR_COMMAND);
 }
 
 export function readText(): Promise<string> {
-  return invoke(READ_TEXT_COMMAND);
+  return invoke(ClipboardEnum.READ_TEXT_COMMAND);
 }
 
 export function readHtml(): Promise<string> {
-  return invoke(READ_HTML_COMMAND);
+  return invoke(ClipboardEnum.READ_HTML_COMMAND);
 }
 
 export function readRtf(): Promise<string> {
-  return invoke(READ_RTF_COMMAND);
+  return invoke(ClipboardEnum.READ_RTF_COMMAND);
 }
 
 export function readFiles(): Promise<string[]> {
-  return invoke(READ_FILES_COMMAND);
+  return invoke(ClipboardEnum.READ_FILES_COMMAND);
 }
 
 /**
@@ -221,7 +205,7 @@ export function readFiles(): Promise<string[]> {
  * @returns image in base64 string
  */
 export function readImageBase64(): Promise<string> {
-  return invoke(READ_IMAGE_BASE64_COMMAND);
+  return invoke(ClipboardEnum.READ_IMAGE_BASE64_COMMAND);
 }
 
 // export const readImageBase64 = readImage;
@@ -235,18 +219,20 @@ export function readImageBase64(): Promise<string> {
 export function readImageBinary(
   format: 'int_array' | 'Uint8Array' | 'Blob',
 ): Promise<number[] | Uint8Array | Blob> {
-  return (invoke(READ_IMAGE_BINARY_COMMAND) as Promise<number[]>).then((img_arr: number[]) => {
-    switch (format) {
-      case 'int_array':
-        return img_arr;
-      case 'Uint8Array':
-        return new Uint8Array(img_arr);
-      case 'Blob':
-        return new Blob([new Uint8Array(img_arr)]);
-      default:
-        return img_arr;
-    }
-  });
+  return (invoke(ClipboardEnum.READ_IMAGE_BINARY_COMMAND) as Promise<number[]>).then(
+    (img_arr: number[]) => {
+      switch (format) {
+        case 'int_array':
+          return img_arr;
+        case 'Uint8Array':
+          return new Uint8Array(img_arr);
+        case 'Blob':
+          return new Blob([new Uint8Array(img_arr)]);
+        default:
+          return img_arr;
+      }
+    },
+  );
 }
 
 /**
@@ -267,11 +253,11 @@ export function readImageObjectURL(): Promise<string> {
  * @returns Promise<void>
  */
 export function writeImageBase64(base64: string): Promise<void> {
-  return invoke(WRITE_IMAGE_BASE64_COMMAND, { base64Image: base64 });
+  return invoke(ClipboardEnum.WRITE_IMAGE_BASE64_COMMAND, { base64Image: base64 });
 }
 
 export function writeImageBinary(bytes: number[]): Promise<void> {
-  return invoke(WRITE_IMAGE_BINARY_COMMAND, { bytes: bytes });
+  return invoke(ClipboardEnum.WRITE_IMAGE_BINARY_COMMAND, { bytes: bytes });
 }
 
 /**
@@ -291,7 +277,7 @@ export function startBruteForceTextMonitor(delay: number = 500) {
     try {
       const text = await readText();
       if (prevText !== text) {
-        await emit(TEXT_CHANGED, { value: text });
+        await emit(ClipboardEnum.TEXT_CHANGED, { value: text });
       }
       prevText = text;
     } catch (error) {}
@@ -318,7 +304,7 @@ export function startBruteForceImageMonitor(delay: number = 1000) {
     try {
       const img = await readImageBase64();
       if (prevImg !== img) {
-        await emit(IMAGE_CHANGED, { value: img });
+        await emit(ClipboardEnum.IMAGE_CHANGED, { value: img });
       }
       prevImg = img;
     } catch (error) {
@@ -339,29 +325,29 @@ export function startBruteForceImageMonitor(delay: number = 1000) {
  * @returns unlisten function
  */
 export function listenToClipboard(): Promise<UnlistenFn> {
-  return listen(MONITOR_UPDATE_EVENT, async (e) => {
+  return listen(ClipboardEnum.MONITOR_UPDATE_EVENT, async (e) => {
     if (e.payload === 'clipboard update') {
       // todo: update the file part when clipboard-rs crate supports files
       try {
         const files = await readFiles();
-        await emit(FILES_CHANGED, { value: files });
+        await emit(ClipboardEnum.FILES_CHANGED, { value: files });
       } catch (error) {
         let success = false;
         if (await hasImage()) {
           const img = await readImageBase64();
-          if (img) await emit(IMAGE_CHANGED, { value: img });
+          if (img) await emit(ClipboardEnum.IMAGE_CHANGED, { value: img });
           success = true;
         }
         if (await hasHTML()) {
-          await emit(HTML_CHANGED, { value: await readHtml() });
+          await emit(ClipboardEnum.HTML_CHANGED, { value: await readHtml() });
           success = true;
         }
         if (await hasRTF()) {
-          await emit(RTF_CHANGED, { value: await readRtf() });
+          await emit(ClipboardEnum.RTF_CHANGED, { value: await readRtf() });
           success = true;
         }
         if (await hasText()) {
-          await emit(TEXT_CHANGED, { value: await readText() });
+          await emit(ClipboardEnum.TEXT_CHANGED, { value: await readText() });
           success = true;
         }
         if (!success) {
@@ -380,39 +366,39 @@ export function listenToClipboard(): Promise<UnlistenFn> {
  * @returns unlisten function
  */
 export function onClipboardUpdate(cb: () => void) {
-  return listen(MONITOR_UPDATE_EVENT, cb);
+  return listen(ClipboardEnum.MONITOR_UPDATE_EVENT, cb);
 }
 
 export async function onTextUpdate(cb: (text: string) => void): Promise<UnlistenFn> {
-  return await listen(TEXT_CHANGED, (event) => {
+  return await listen(ClipboardEnum.TEXT_CHANGED, (event) => {
     const text = ClipboardChangedPayloadSchema.parse(event.payload).value;
     cb(text);
   });
 }
 
 export async function onHTMLUpdate(cb: (text: string) => void): Promise<UnlistenFn> {
-  return await listen(HTML_CHANGED, (event) => {
+  return await listen(ClipboardEnum.HTML_CHANGED, (event) => {
     const text = ClipboardChangedPayloadSchema.parse(event.payload).value;
     cb(text);
   });
 }
 
 export async function onRTFUpdate(cb: (text: string) => void): Promise<UnlistenFn> {
-  return await listen(RTF_CHANGED, (event) => {
+  return await listen(ClipboardEnum.RTF_CHANGED, (event) => {
     const text = ClipboardChangedPayloadSchema.parse(event.payload).value;
     cb(text);
   });
 }
 
 export async function onFilesUpdate(cb: (files: string[]) => void): Promise<UnlistenFn> {
-  return await listen(FILES_CHANGED, (event) => {
+  return await listen(ClipboardEnum.FILES_CHANGED, (event) => {
     const files = ClipboardChangedFilesPayloadSchema.parse(event.payload).value;
     cb(files);
   });
 }
 
 export async function onImageUpdate(cb: (base64ImageStr: string) => void): Promise<UnlistenFn> {
-  return await listen(IMAGE_CHANGED, (event) => {
+  return await listen(ClipboardEnum.IMAGE_CHANGED, (event) => {
     const base64ImageStr = ClipboardChangedPayloadSchema.parse(event.payload).value;
     cb(base64ImageStr);
   });
@@ -423,7 +409,7 @@ export async function onImageUpdate(cb: (base64ImageStr: string) => void): Promi
  * @returns Whether the monitor is running
  */
 export function isMonitorRunning(): Promise<boolean> {
-  return invoke(IS_MONITOR_RUNNING_COMMAND).then((res) => z.boolean().parse(res));
+  return invoke(ClipboardEnum.IS_MONITOR_RUNNING_COMMAND).then((res) => z.boolean().parse(res));
 }
 
 /**
@@ -435,14 +421,14 @@ export function isMonitorRunning(): Promise<boolean> {
  * Still have to listen to these events.
  */
 export function startMonitor(): Promise<void> {
-  return invoke(START_MONITOR_COMMAND);
+  return invoke(ClipboardEnum.START_MONITOR_COMMAND);
 }
 
 /**
  * Stop clipboard monitor thread.
  */
 export function stopMonitor(): Promise<void> {
-  return invoke(STOP_MONITOR_COMMAND);
+  return invoke(ClipboardEnum.STOP_MONITOR_COMMAND);
 }
 /**
  * Listen to monitor status update. Instead of calling isMonitorRunning to get status of monitor,
@@ -452,7 +438,7 @@ export function stopMonitor(): Promise<void> {
 export async function listenToMonitorStatusUpdate(
   cb: (running: boolean) => void,
 ): Promise<UnlistenFn> {
-  return await listen(CLIPBOARD_MONITOR_STATUS_UPDATE_EVENT, (event) => {
+  return await listen(ClipboardEnum.CLIPBOARD_MONITOR_STATUS_UPDATE_EVENT, (event) => {
     const newStatus = z.boolean().parse(event.payload);
     cb(newStatus);
   });
@@ -471,5 +457,5 @@ export function startListening(): Promise<() => Promise<void>> {
 }
 
 export async function paste(): Promise<void> {
-  await invoke(PASTE);
+  await invoke(ClipboardEnum.PASTE);
 }

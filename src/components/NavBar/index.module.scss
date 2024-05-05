@@ -1,1 +1,8 @@
-
+.navBar {
+  display: flex;
+  align-items: center;
+  .tags {
+    margin-left: 8px;
+    flex: 1;
+  }
+}

@@ -124,7 +124,7 @@ const ClipHistoryBoard: FC = () => {
 
   const handleWheelScroll = (event: WheelEvent) => {
     if (scrollD.current === WheelEnum.NORMAL) return;
-    if (!event.ctrlKey && cardContentRef.current) {
+    if (!event.ctrlKey && cardContentRef.current && scrollD.current === WheelEnum.REVERSE) {
       event.preventDefault();
       const newScrollPosition = cardContentRef.current.scrollLeft + event.deltaY;
       cardContentRef.current.scrollLeft = newScrollPosition;

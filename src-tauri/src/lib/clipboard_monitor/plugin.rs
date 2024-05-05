@@ -46,6 +46,30 @@ fn delete_items(manager: State<'_, ClipboardManager>, json_str: String) -> Resul
 }
 
 #[tauri::command]
+fn get_tags_all(manager: State<'_, ClipboardManager>) -> Result<String, String> {
+    manager.get_tags_all()
+}
+
+#[tauri::command]
+fn add_tag(manager: State<'_, ClipboardManager>, name: String) -> Result<String, String> {
+    manager.add_tag(name)
+}
+
+#[tauri::command]
+fn set_tag(
+    manager: State<'_, ClipboardManager>,
+    id: String,
+    name: String,
+) -> Result<String, String> {
+    manager.set_tag(id, name)
+}
+
+#[tauri::command]
+fn delete_tag(manager: State<'_, ClipboardManager>, id: String) -> Result<String, String> {
+    manager.delete_tag(id)
+}
+
+#[tauri::command]
 fn has_text(manager: State<'_, ClipboardManager>) -> Result<bool, String> {
     manager.has_text()
 }
@@ -206,6 +230,10 @@ pub fn init<R: Runtime>(open_watch: bool) -> TauriPlugin<R> {
             set_history_str,
             update_pasted_create_time,
             delete_items,
+            set_tag,
+            add_tag,
+            get_tags_all,
+            delete_tag,
             has_text,
             has_image,
             has_html,

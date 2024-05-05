@@ -68,7 +68,7 @@ impl SqliteDB {
             CREATE TABLE IF NOT EXISTS tags_table
             (
                 id          VARCHAR(255) NOT NULL PRIMARY KEY,
-                name        VARCHAR(24)  DEFAULT '',
+                name        VARCHAR(24)  UNIQUE,
                 create_time INTEGER
 
             );
@@ -102,7 +102,7 @@ impl SqliteDB {
         let _ = conn.execute(init_favorite_connect_history_table, ());
         let _ = conn.execute(init_config_table, ());
         let _ = conn.execute(init_expire, ());
-        let _ = Self::new().insert_tags(Uuid::new_v4().to_string(), "Favorite".to_string());
+        let _ = Self::new().insert_tag(Uuid::new_v4().to_string(), "Favorite".to_string());
     }
 
     pub fn insert_item(&self, insert_item: HistoryItem) -> Result<i64> {
@@ -146,32 +146,6 @@ impl SqliteDB {
             Err(err) => println!("Failed to insert directories: {}", err),
         };
         Ok(self.conn.last_insert_rowid())
-    }
-
-    pub fn insert_tags(&self, id: String, name: String) -> Result<()> {
-        let sql: &str = r#"
-            INSERT INTO tags_table (
-                id, 
-                name,
-                create_time
-            )
-            VALUES (?1, ?2, ?3);
-        "#;
-        match self.conn.execute(
-            sql,
-            (
-                id,
-                name,
-                SystemTime::now()
-                    .duration_since(UNIX_EPOCH)
-                    .unwrap()
-                    .as_secs(),
-            ),
-        ) {
-            Ok(res) => println!("Insert tags successfully!"),
-            Err(err) => println!("Failed to tags directories: {}", err),
-        };
-        Ok(())
     }
 
     pub fn insert_item_distinct(&self, mut insert_item: HistoryItem) -> Result<()> {
@@ -420,6 +394,44 @@ impl SqliteDB {
         }
 
         Ok(res)
+    }
+
+    pub fn insert_tag(&self, id: String, name: String) -> Result<()> {
+        let sql: &str = r#"
+            INSERT OR IGNORE INTO tags_table (
+                id, 
+                name,
+                create_time
+            )
+            VALUES (?1, ?2, ?3);
+        "#;
+        match self.conn.execute(
+            sql,
+            (
+                id,
+                name,
+                SystemTime::now()
+                    .duration_since(UNIX_EPOCH)
+                    .unwrap()
+                    .as_secs(),
+            ),
+        ) {
+            Ok(res) => println!("Insert tags successfully!"),
+            Err(err) => println!("Failed to tags directories: {}", err),
+        };
+        Ok(())
+    }
+
+    pub fn delete_tag(&self, id: String) -> Result<()> {
+        let sql = "DELETE FROM tags_table WHERE id = ?1";
+        self.conn.execute(sql, [id.as_str()])?;
+        Ok(())
+    }
+
+    pub fn update_tag(&self, id: String, name: String) -> Result<()> {
+        let sql = "UPDATE tags_table SET name = ?2 WHERE id = ?1";
+        self.conn.execute(sql, (id.as_str(), name.as_str()))?;
+        Ok(())
     }
 
     pub fn subscribe_history_to_tags(&self, history_id: String, tag_id: String) -> Result<()> {

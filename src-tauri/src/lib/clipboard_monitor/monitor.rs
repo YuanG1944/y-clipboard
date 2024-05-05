@@ -5,12 +5,14 @@ use clipboard_rs::{common::RustImage, Clipboard, ClipboardContext, ContentFormat
 use image::EncodableLayout;
 use serde_json;
 use std::collections::VecDeque;
+use std::fmt::format;
 use std::fs;
 use std::path::Path;
 use std::process::Command;
 use std::sync::Arc;
 use std::sync::Mutex;
 use tauri::{Manager, Runtime};
+use uuid::Uuid;
 
 use crate::clipboard_history::HistoryItem;
 use crate::clipboard_history::HistoryStore;
@@ -196,6 +198,37 @@ impl ClipboardManager {
                 Err(e) => Err(format!("{}", e)),
             },
             Err(e) => Err(format!("{}", e)),
+        }
+    }
+
+    pub fn get_tags_all(&self) -> Result<String, String> {
+        match SqliteDB::new().get_tags_all() {
+            Ok(arr) => match serde_json::to_string(&arr) {
+                Ok(json_str) => Ok(json_str.clone()),
+                Err(e) => Err(format!("Error serializing TagsStruct to JSON: {:?}", e)),
+            },
+            Err(e) => Err(format!("Error get tags from database: {:?}", e)),
+        }
+    }
+
+    pub fn add_tag(&self, name: String) -> Result<String, String> {
+        match SqliteDB::new().insert_tag(Uuid::new_v4().to_string(), name) {
+            Ok(_) => Ok(format!("Insert tag succuss!")),
+            Err(e) => Err(format!("Fail to insert tag: {}", e)),
+        }
+    }
+
+    pub fn set_tag(&self, id: String, name: String) -> Result<String, String> {
+        match SqliteDB::new().update_tag(id, name) {
+            Ok(_) => Ok(format!("Update tag success")),
+            Err(e) => Err(format!("Fail to update tag: {}", e)),
+        }
+    }
+
+    pub fn delete_tag(&self, id: String) -> Result<String, String> {
+        match SqliteDB::new().delete_tag(id) {
+            Ok(_) => Ok(format!("Delete tag success")),
+            Err(e) => Err(format!("Fail to delete tag: {}", e)),
         }
     }
 
