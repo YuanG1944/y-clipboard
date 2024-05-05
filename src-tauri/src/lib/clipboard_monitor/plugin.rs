@@ -51,8 +51,12 @@ fn get_tags_all(manager: State<'_, ClipboardManager>) -> Result<String, String> 
 }
 
 #[tauri::command]
-fn add_tag(manager: State<'_, ClipboardManager>, name: String) -> Result<String, String> {
-    manager.add_tag(name)
+fn add_tag(
+    manager: State<'_, ClipboardManager>,
+    name: String,
+    color: String,
+) -> Result<String, String> {
+    manager.add_tag(name, color)
 }
 
 #[tauri::command]
@@ -62,6 +66,24 @@ fn set_tag(
     name: String,
 ) -> Result<String, String> {
     manager.set_tag(id, name)
+}
+
+#[tauri::command]
+fn subscribe_history_to_tags(
+    manager: State<'_, ClipboardManager>,
+    history_id: String,
+    tag_id: String,
+) -> Result<String, String> {
+    manager.subscribe_history_to_tags(history_id, tag_id)
+}
+
+#[tauri::command]
+fn cancel_single_history_to_tags(
+    manager: State<'_, ClipboardManager>,
+    history_id: String,
+    tag_id: String,
+) -> Result<String, String> {
+    manager.cancel_single_history_to_tags(history_id, tag_id)
 }
 
 #[tauri::command]
@@ -234,6 +256,8 @@ pub fn init<R: Runtime>(open_watch: bool) -> TauriPlugin<R> {
             add_tag,
             get_tags_all,
             delete_tag,
+            subscribe_history_to_tags,
+            cancel_single_history_to_tags,
             has_text,
             has_image,
             has_html,

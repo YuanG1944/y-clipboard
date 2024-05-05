@@ -1,22 +1,18 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { PlusOutlined } from '@ant-design/icons';
-import type { InputRef, TagProps } from 'antd';
+import type { InputRef } from 'antd';
 import { Input, Tag, Tooltip } from 'antd';
 import { addTag, deleteTag, getTagsAll, setTag } from '@/actions/clipboard';
 import { ITag } from '@/actions/clipboard/type';
 
-const tagColors: TagProps['color'][] = [
-  'magenta',
-  'green',
-  'cyan',
-  'blue',
-  'red',
-  'gold',
-  'volcano',
-  'purple',
-  'orange',
-  'lime',
-  'geekblue',
+const tagColors: string[] = [
+  '#ff4d4f',
+  '#2db7f5',
+  '#f50',
+  '#87d068',
+  '#108ee9',
+  '#722ed1',
+  '#eb2f96',
 ];
 
 const tagInputStyle: React.CSSProperties = {
@@ -52,9 +48,14 @@ const Tags: React.FC<TagCollectType> = ({ onSelectedTagChange }) => {
     setInputValue(e.target.value);
   };
 
+  const tagColor = (index: number) => {
+    const len = tagColors.length;
+    return tagColors[index % len];
+  };
+
   const handleInputConfirm = () => {
     if (inputValue && !tags.map((t) => t.name).includes(inputValue)) {
-      addTag(inputValue).finally(() => reloadTags());
+      addTag(inputValue, tagColor(tags.length)).finally(() => reloadTags());
     }
     setInputVisible(false);
     setInputValue('');
@@ -88,14 +89,6 @@ const Tags: React.FC<TagCollectType> = ({ onSelectedTagChange }) => {
       return setSelectedTag(null);
     }
     return setSelectedTag(tag);
-  };
-
-  const tagColor = (index: number) => {
-    if (tags?.[index]?.id === selectedTag?.id) {
-      const len = tagColors.length;
-      return tagColors[index % len];
-    }
-    return '';
   };
 
   useEffect(() => {
@@ -136,10 +129,14 @@ const Tags: React.FC<TagCollectType> = ({ onSelectedTagChange }) => {
         const isLongTag = tag.name.length > 20;
         const tagElem = (
           <Tag
-            color={tagColor(index)}
+            color={tag.color}
             key={tag.id}
             closable={index !== 0}
-            style={{ userSelect: 'none', cursor: 'pointer' }}
+            style={{
+              userSelect: 'none',
+              cursor: 'pointer',
+              opacity: selectedTag?.id === tag.id ? '1' : '0.5',
+            }}
             onClose={() => handleClose(tag)}
             onClick={() => handleSelected(tag)}
           >

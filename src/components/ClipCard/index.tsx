@@ -1,21 +1,24 @@
 import { FC, useEffect, useMemo, useState } from 'react';
-import { Button, Card, Upload, UploadFile } from 'antd';
+import { Button, Card, Divider, Popover, Tag, Upload, UploadFile } from 'antd';
 import styles from './index.module.scss';
-import { ActiveEnum, StorageItem } from '@/actions/clipboard/type';
+import { ActiveEnum, ITag, StorageItem } from '@/actions/clipboard/type';
 import classnames from 'classnames';
 import CardTitle from './CardTitle';
 import QueueAnim from 'rc-queue-anim';
-import { openFile } from '@/actions/clipboard';
+import { cancelTag, openFile, subscribeTag } from '@/actions/clipboard';
 import { os } from '@tauri-apps/api';
+import { HeartTwoTone } from '@ant-design/icons';
 
 export interface ICardProps {
   id: string;
   currId: string;
   context: StorageItem;
   navFocus: boolean;
+  tags?: ITag[];
   onClick?: React.MouseEventHandler<HTMLDivElement>;
   onDoubleClick?: React.MouseEventHandler<HTMLDivElement>;
   onActiveChange?: (act: ActiveEnum, id: string) => void;
+  reloadTags?: () => Promise<ITag[]>;
 }
 
 const ClipCard: FC<ICardProps> = ({
@@ -26,11 +29,20 @@ const ClipCard: FC<ICardProps> = ({
   onClick,
   onDoubleClick,
   onActiveChange,
+  reloadTags,
+  tags,
 }) => {
   const [active, setActive] = useState(ActiveEnum.Text);
   const [show, setShow] = useState(true);
   const [platform, setPlatform] = useState('');
+  const [hearts, setHearts] = useState<string[]>([]);
   const focus = useMemo(() => currId === context.id, [currId]);
+
+  const [openTooltip, setTooltip] = useState(false);
+
+  const hide = () => {
+    setTooltip(false);
+  };
 
   const getPlatform = () => {
     os.platform().then((p) => {
@@ -38,16 +50,23 @@ const ClipCard: FC<ICardProps> = ({
     });
   };
 
+  const handleOpenChange = (newOpen: boolean) => {
+    console.info('context.tags----->', context.tags);
+    reloadTags && reloadTags().finally(() => setTooltip(newOpen));
+  };
+
   const renderUrl = () => {
     const urlRegex = /img src="([^"]+)"/;
     const urls = context?.html?.match(urlRegex);
-    return urls?.length === 2 ? (
-      <a href={urls[1]} target="_blank">
-        {urls[1]}
-      </a>
-    ) : (
-      <div style={{ wordBreak: 'break-word', width: '100%', height: '190px' }}>
-        <div dangerouslySetInnerHTML={{ __html: context.html || '' }}></div>
+    return (
+      <div className={styles.text} style={{ wordBreak: 'break-word' }}>
+        {urls?.length === 2 ? (
+          <a href={urls[1]} target="_blank">
+            {urls[1]}
+          </a>
+        ) : (
+          <div dangerouslySetInnerHTML={{ __html: context.html || '' }}></div>
+        )}
       </div>
     );
   };
@@ -120,9 +139,55 @@ const ClipCard: FC<ICardProps> = ({
     }, 300);
   };
 
+  const handleFavorite = async (historyId: string, tagId: string) => {
+    if (historyId && hearts.includes(tagId)) {
+      return cancelTag(historyId, tagId).finally(() => {
+        setHearts((val) => val.filter((t) => t !== tagId));
+        hide();
+      });
+    }
+
+    return subscribeTag(historyId, tagId).finally(() => {
+      setHearts((val) => [...val, tagId]);
+      hide();
+    });
+  };
+
+  const initSelectedTags = () => {
+    setHearts(context?.tags?.map((t) => t.id) ?? []);
+  };
+
   useEffect(() => {
     getPlatform();
+    initSelectedTags();
   }, []);
+
+  const PopoverContext = useMemo(() => {
+    return (
+      <div className={styles.popoverContext}>
+        {tags?.map((tag, index) => (
+          <div key={`${tag.id}${index}`}>
+            <Button
+              type="link"
+              style={{
+                margin: 0,
+                padding: '0 20px',
+                color: hearts.includes(tag.id) ? '#1677ff' : '#000000e0',
+              }}
+              onClick={() => handleFavorite(context.id ?? '', tag.id)}
+            >
+              {tag.name}
+            </Button>
+            {index < tags?.length - 1 && <Divider style={{ margin: '0px' }} />}
+          </div>
+        ))}
+      </div>
+    );
+  }, [tags, hearts]);
+
+  const heartColor = useMemo(() => {
+    return hearts.length ? '#ff4d4f' : '#bfbfbf';
+  }, [hearts]);
 
   return (
     <Card
@@ -142,6 +207,23 @@ const ClipCard: FC<ICardProps> = ({
       onClick={onClick}
       onDoubleClick={onDoubleClick}
       hoverable={!focus}
+      actions={[
+        null,
+        null,
+        <Popover
+          style={{ padding: 0 }}
+          content={PopoverContext}
+          trigger="click"
+          placement="leftTop"
+          arrow={false}
+          open={openTooltip}
+          onOpenChange={handleOpenChange}
+        >
+          <Button shape="circle" disabled={!focus} type="text">
+            <HeartTwoTone twoToneColor={heartColor} key="ellipsis" />
+          </Button>
+        </Popover>,
+      ]}
     >
       <QueueAnim type={'left'} ease={'easeInOutQuart'} key="ani">
         {show ? (

@@ -23,6 +23,8 @@ export enum ClipboardEnum {
   ADD_TAG = base + '|add_tag',
   SET_TAG = base + '|set_tag',
   DELETE_TAG = base + '|delete_tag',
+  SUBSCRIBE_TAG = base + '|subscribe_history_to_tags',
+  CANCEL_TAG = base + '|cancel_single_history_to_tags',
   HAS_TEXT_COMMAND = base + '|has_text',
   HAS_IMAGE_COMMAND = base + '|has_image',
   HAS_HTML_COMMAND = base + '|has_html',
@@ -60,6 +62,7 @@ export interface StorageItem {
   defaultActive?: ActiveEnum;
   deleted?: boolean;
   collect?: boolean;
+  tags?: ITag[];
 }
 
 export interface TempItem {
@@ -95,5 +98,6 @@ export const ActiveMapping = {
 export interface ITag {
   id: string;
   name: string;
+  color: string;
   createTime: number;
 }

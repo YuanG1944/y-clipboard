@@ -3,6 +3,13 @@ import { ShortcutActEnum } from './type';
 
 export const PasteKey = 'paste';
 
-export function setPaste(value: string): Promise<boolean> {
+export function setPasteShortcut(value: string): Promise<boolean> {
   return invoke(ShortcutActEnum.SET_PASTE_SHORTCUT, { value });
+}
+
+export function deletePasteShortcut(value: string): Promise<void> {
+  if (!value) {
+    return Promise.resolve();
+  }
+  return invoke(ShortcutActEnum.DEL_PASTE_SHORTCUT, { value });
 }

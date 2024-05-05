@@ -24,6 +24,7 @@ pub struct HistoryItem {
 pub struct TagsStruct {
     pub id: String,
     pub name: String,
+    pub color: String,
     pub create_time: u64,
 }
 

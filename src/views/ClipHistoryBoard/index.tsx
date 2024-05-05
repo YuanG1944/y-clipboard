@@ -7,13 +7,14 @@ import styles from './index.module.scss';
 import NavBar from '@/components/NavBar';
 import ClipCard from '@/components/ClipCard';
 import Windows from '@/actions/windows';
-import { ActiveEnum, StorageItem } from '@/actions/clipboard/type';
+import { ActiveEnum, ITag, StorageItem } from '@/actions/clipboard/type';
 
 import { os } from '@tauri-apps/api';
 import { appWindow } from '@tauri-apps/api/window';
 import {
   deleteItems,
   getHistoryByPage,
+  getTagsAll,
   paste,
   updateCreateTime,
   writeSelected,
@@ -31,11 +32,12 @@ const ClipHistoryBoard: FC = () => {
   const [focus, setFocus] = useState(false);
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
-  // const [page, setPage] = useState(1);
   const page = useRef(1);
   const scrollD = useRef(WheelEnum.NORMAL);
   const [pageSize, setPageSize] = useState(10);
   const cardContentRef = useRef<HTMLDivElement>(null);
+
+  const [tags, setTags] = useState<ITag[]>([]);
 
   /**
    * Make sure currIndex change to rerender dom
@@ -199,6 +201,16 @@ const ClipHistoryBoard: FC = () => {
     }
   };
 
+  const reloadTags = async () => {
+    try {
+      const t = await getTagsAll();
+      setTags(t);
+      return t;
+    } catch (_) {
+      return tags;
+    }
+  };
+
   useKeyPress('rightarrow', () => {
     setCurrIndex((num) => {
       if (!focus && Number(num) < historyCtx.filter((ctx) => ctx.deleted !== true).length - 1) {
@@ -277,6 +289,7 @@ const ClipHistoryBoard: FC = () => {
 
   useEffect(() => {
     win32VisibilityChange();
+    reloadTags();
     document.addEventListener('visibilitychange', handleVisibility);
 
     return () => {
@@ -311,12 +324,14 @@ const ClipHistoryBoard: FC = () => {
                   <ClipCard
                     currId={currId}
                     context={ctx}
+                    tags={tags}
                     id={`clip-${idx}`}
                     key={ctx.id}
                     navFocus={focus}
                     onClick={handleClick(ctx.id!)}
                     onDoubleClick={handleDoubleClick}
                     onActiveChange={handleActiveChange}
+                    reloadTags={reloadTags}
                   />
                 ))}
               {loading && (

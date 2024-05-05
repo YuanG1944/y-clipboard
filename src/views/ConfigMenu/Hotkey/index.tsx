@@ -11,7 +11,7 @@ import {
 } from '@/utils/keyMap';
 import { os } from '@tauri-apps/api';
 import { getStore, hasKeyStore, setStore } from '@/utils/localStorage';
-import { PasteKey, setPaste } from '@/actions/shortcut';
+import { PasteKey, setPasteShortcut, deletePasteShortcut } from '@/actions/shortcut';
 import { getWheelDirection, setWheelDirection, WheelEnum, WheelKey } from '@/actions/datamanage';
 
 const { Option } = Select;
@@ -45,6 +45,7 @@ const App: React.FC = () => {
   const [messageApi, contextHolder] = message.useMessage();
 
   const resetKeyArr = () => {
+    deletePasteShortcut(keyArr?.join('+'));
     setKeyArr([]);
     setKeyValue([]);
   };
@@ -118,7 +119,8 @@ const App: React.FC = () => {
       code: keyArr,
       value: keyValue,
     });
-    setPaste(keyArr?.join('+'));
+
+    setPasteShortcut(keyArr?.join('+'));
   };
 
   const initFormValue = () => {
@@ -147,7 +149,7 @@ const App: React.FC = () => {
         pasteCode: code?.join('+'),
       });
 
-      setPaste(code?.join('+'));
+      setPasteShortcut(code?.join('+'));
 
       getWheelDirection().then((wheelVal) => {
         form.setFieldValue(WheelKey, wheelVal || '1');

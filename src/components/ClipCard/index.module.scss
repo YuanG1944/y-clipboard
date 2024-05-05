@@ -22,11 +22,12 @@
     overflow-y: auto;
     overflow-x: hidden;
     .text {
-      height: 190px;
+      height: 150px;
       color: #000000a6;
       font-size: 14px;
     }
     .cover {
+      height: 150px;
       display: flex;
       justify-content: center;
       align-items: center;
@@ -99,4 +100,17 @@
       overflow: hidden;
     }
   }
+}
+
+.heart {
+  cursor: pointer;
+  &:hover {
+    opacity: 0.8;
+  }
+}
+
+
+.popoverContext {
+  display: flex;
+  flex-direction: column;
 }

@@ -136,12 +136,20 @@ export function setTag(id: string, name: string) {
   return invoke(ClipboardEnum.SET_TAG, { id, name });
 }
 
-export function addTag(name: string) {
-  return invoke(ClipboardEnum.ADD_TAG, { name });
+export function addTag(name: string, color: string) {
+  return invoke(ClipboardEnum.ADD_TAG, { name, color });
 }
 
 export function deleteTag(id: string) {
   return invoke(ClipboardEnum.DELETE_TAG, { id });
+}
+
+export function subscribeTag(historyId: string, tagId: string) {
+  return invoke(ClipboardEnum.SUBSCRIBE_TAG, { historyId, tagId });
+}
+
+export function cancelTag(historyId: string, tagId: string) {
+  return invoke(ClipboardEnum.CANCEL_TAG, { historyId, tagId });
 }
 
 export function hasText(): Promise<boolean> {

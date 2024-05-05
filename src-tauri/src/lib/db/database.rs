@@ -4,10 +4,7 @@ use uuid::Uuid;
 
 use crate::{
     clipboard_history::{HistoryItem, TagsStruct},
-    utils::{
-        path::{self, create_dir},
-        stringify,
-    },
+    utils::path::{self, create_dir},
 };
 use rusqlite::{Connection, OpenFlags, ToSql};
 
@@ -69,6 +66,7 @@ impl SqliteDB {
             (
                 id          VARCHAR(255) NOT NULL PRIMARY KEY,
                 name        VARCHAR(24)  UNIQUE,
+                color       VARCHAR(24),
                 create_time INTEGER
 
             );
@@ -102,7 +100,11 @@ impl SqliteDB {
         let _ = conn.execute(init_favorite_connect_history_table, ());
         let _ = conn.execute(init_config_table, ());
         let _ = conn.execute(init_expire, ());
-        let _ = Self::new().insert_tag(Uuid::new_v4().to_string(), "Favorite".to_string());
+        let _ = Self::new().insert_tag(
+            Uuid::new_v4().to_string(),
+            "Favorite".to_string(),
+            "#ff4d4f".to_string(),
+        );
     }
 
     pub fn insert_item(&self, insert_item: HistoryItem) -> Result<i64> {
@@ -324,6 +326,7 @@ impl SqliteDB {
             SELECT
                 id, 
                 name,
+                color,
                 create_time
             FROM 
                 tags_table 
@@ -339,11 +342,13 @@ impl SqliteDB {
         while let Some(row) = rows.next()? {
             let id: String = row.get(0)?;
             let name: String = row.get(1)?;
-            let create_time: u64 = row.get(2)?;
+            let color: String = row.get(2)?;
+            let create_time: u64 = row.get(3)?;
 
             let item = TagsStruct {
                 id,
                 name,
+                color,
                 create_time,
             };
             res.push(item);
@@ -356,6 +361,7 @@ impl SqliteDB {
             SELECT
                 id, 
                 name,
+                color,
                 create_time
             FROM 
                 tags_table 
@@ -367,7 +373,8 @@ impl SqliteDB {
             Ok(TagsStruct {
                 id: row.get(0)?,
                 name: row.get(1)?,
-                create_time: row.get(2)?,
+                color: row.get(2)?,
+                create_time: row.get(3)?,
             })
         })?;
         Ok(res)
@@ -396,20 +403,22 @@ impl SqliteDB {
         Ok(res)
     }
 
-    pub fn insert_tag(&self, id: String, name: String) -> Result<()> {
+    pub fn insert_tag(&self, id: String, name: String, color: String) -> Result<()> {
         let sql: &str = r#"
             INSERT OR IGNORE INTO tags_table (
                 id, 
                 name,
+                color,
                 create_time
             )
-            VALUES (?1, ?2, ?3);
+            VALUES (?1, ?2, ?3, ?4);
         "#;
         match self.conn.execute(
             sql,
             (
                 id,
                 name,
+                color,
                 SystemTime::now()
                     .duration_since(UNIX_EPOCH)
                     .unwrap()
@@ -438,12 +447,22 @@ impl SqliteDB {
         let sql: &str = r#"
             INSERT INTO favorite_connect_history_table (
                 history_id,
-                tag_id, 
+                tag_id 
             )
             VALUES (?1, ?2);
         "#;
         match self.conn.execute(sql, (history_id, tag_id)) {
             Ok(res) => println!("Insert tags successfully!"),
+            Err(err) => println!("Failed to tags directories: {}", err),
+        };
+        Ok(())
+    }
+
+    pub fn cancel_single_history_to_tags(&self, history_id: String, tag_id: String) -> Result<()> {
+        let sql: &str =
+            r#"DELETE FROM favorite_connect_history_table WHERE history_id = ?1 and tag_id = ?2"#;
+        match self.conn.execute(sql, (history_id, tag_id)) {
+            Ok(res) => println!("Delete tags successfully!"),
             Err(err) => println!("Failed to tags directories: {}", err),
         };
         Ok(())
@@ -538,8 +557,12 @@ impl SqliteDB {
     }
 
     pub fn clear_history(&self) -> Result<String> {
-        let sql = "DELETE FROM history_info";
-        self.conn.execute(sql, []);
+        let sql_history_info = "DELETE FROM history_info";
+        self.conn.execute(sql_history_info, []);
+
+        let sql_favorite_connect_history_table = "DELETE FROM favorite_connect_history_table";
+        self.conn.execute(sql_favorite_connect_history_table, []);
+
         Ok(format!("All data has been deleted!"))
     }
 
@@ -551,6 +574,22 @@ impl SqliteDB {
             Ok(expire_time) => {
                 let sql = format!(
                     "DELETE FROM history_info WHERE create_time < strftime('%s', 'now', '{}')",
+                    expire_time
+                );
+
+                let sql = format!(
+                    "DELETE FROM 
+                        history_info
+                     WHERE 
+                        create_time < strftime('%s', 'now', '{}') 
+                    AND
+                        id 
+                    NOT IN (
+                        SELECT 
+                            history_id 
+                        FROM 
+                            favorite_connect_history_table
+                        )",
                     expire_time
                 );
 

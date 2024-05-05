@@ -211,8 +211,8 @@ impl ClipboardManager {
         }
     }
 
-    pub fn add_tag(&self, name: String) -> Result<String, String> {
-        match SqliteDB::new().insert_tag(Uuid::new_v4().to_string(), name) {
+    pub fn add_tag(&self, name: String, color: String) -> Result<String, String> {
+        match SqliteDB::new().insert_tag(Uuid::new_v4().to_string(), name, color) {
             Ok(_) => Ok(format!("Insert tag succuss!")),
             Err(e) => Err(format!("Fail to insert tag: {}", e)),
         }
@@ -229,6 +229,28 @@ impl ClipboardManager {
         match SqliteDB::new().delete_tag(id) {
             Ok(_) => Ok(format!("Delete tag success")),
             Err(e) => Err(format!("Fail to delete tag: {}", e)),
+        }
+    }
+
+    pub fn subscribe_history_to_tags(
+        &self,
+        history_id: String,
+        tag_id: String,
+    ) -> Result<String, String> {
+        match SqliteDB::new().subscribe_history_to_tags(history_id, tag_id) {
+            Ok(_) => Ok(format!("subscribe tag success")),
+            Err(e) => Err(format!("Fail to subscribe tag: {}", e)),
+        }
+    }
+
+    pub fn cancel_single_history_to_tags(
+        &self,
+        history_id: String,
+        tag_id: String,
+    ) -> Result<String, String> {
+        match SqliteDB::new().cancel_single_history_to_tags(history_id, tag_id) {
+            Ok(_) => Ok(format!("cancel tag success")),
+            Err(e) => Err(format!("Fail to cancel tag: {}", e)),
         }
     }
 
