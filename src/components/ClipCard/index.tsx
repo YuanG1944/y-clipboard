@@ -58,7 +58,7 @@ const ClipCard: FC<ICardProps> = ({
   };
 
   const renderUrl = () => {
-    const urlRegex = /img src="([^"]+)"/;
+    const urlRegex = /\<img src="([^"]+)"/;
     const urls = context?.html?.match(urlRegex);
     return (
       <div className={styles.text} style={{ wordBreak: 'break-word' }}>
@@ -101,11 +101,14 @@ const ClipCard: FC<ICardProps> = ({
   };
 
   const renderRTF = () => {
-    return (
-      <div style={{ wordBreak: 'break-word', width: '100%', height: '190px' }}>
-        <div dangerouslySetInnerHTML={{ __html: context.rtf || '' }}></div>
-      </div>
-    );
+    if (context.html) {
+      return (
+        <div className={styles.text}>
+          <div dangerouslySetInnerHTML={{ __html: context.html || '' }}></div>
+        </div>
+      );
+    }
+    return <div className={styles.text}>{context.text}</div>;
   };
 
   const handleOpenFile = (file: UploadFile) => {
