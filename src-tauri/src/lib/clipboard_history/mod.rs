@@ -12,6 +12,7 @@ pub struct HistoryItem {
     pub image: String,
     pub create_time: u64,
     pub files: Vec<String>,
+    pub active: String,
     pub md5_text: String,
     pub md5_html: String,
     pub md5_rtf: String,
@@ -42,6 +43,7 @@ impl HistoryItem {
             image: String::from(""),
             create_time,
             files: vec![],
+            active: String::from(""),
             md5_text: String::from(""),
             md5_html: String::from(""),
             md5_image: String::from(""),
@@ -125,6 +127,14 @@ impl HistoryItem {
 
     pub fn get_md5_image(&self) -> &str {
         &self.md5_image
+    }
+
+    pub fn get_active(&self) -> &str {
+        &self.active
+    }
+
+    pub fn set_active(&mut self, active: String) {
+        self.active = active;
     }
 }
 

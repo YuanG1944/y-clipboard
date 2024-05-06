@@ -54,6 +54,7 @@ impl SqliteDB {
                 files       TEXT,
                 create_time INTEGER,
                 formats     TEXT,
+                active      VARCHAR(24),
                 md5_text    VARCHAR(200) DEFAULT '',
                 md5_html    VARCHAR(200) DEFAULT '',
                 md5_rtf     VARCHAR(200) DEFAULT '',
@@ -117,9 +118,10 @@ impl SqliteDB {
                 md5_text,
                 md5_html,
                 md5_rtf,
-                md5_image
+                md5_image,
+                active
             ) 
-            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)
         "#;
 
         match self.conn.execute(
@@ -137,6 +139,7 @@ impl SqliteDB {
                 insert_item.get_md5_html(),
                 insert_item.get_md5_rtf(),
                 insert_item.get_md5_image(),
+                insert_item.get_active(),
             ),
         ) {
             Ok(res) => println!("Insert item successfully!"),
@@ -176,7 +179,7 @@ impl SqliteDB {
                 self.update_pasted_create_time(id)?;
             }
             Err(_e) => {
-                println!("err-------------> {}", _e);
+                println!("{}", _e);
                 self.insert_item(insert_item)?;
             }
         }
@@ -200,6 +203,12 @@ impl SqliteDB {
             .as_secs();
 
         self.conn.execute(sql, (id.as_str(), curr_time))?;
+        Ok(())
+    }
+
+    pub fn update_pasted_active(&self, id: String, active: String) -> Result<()> {
+        let sql = "UPDATE history_info SET active = ?2 WHERE id = ?1";
+        self.conn.execute(sql, (id.as_str(), active.as_str()))?;
         Ok(())
     }
 
@@ -270,7 +279,8 @@ impl SqliteDB {
                 md5_text,
                 md5_html,
                 md5_rtf,
-                md5_image
+                md5_image,
+                active
             FROM 
                 history_info 
             ORDER BY 
@@ -295,6 +305,7 @@ impl SqliteDB {
             let md5_html: String = row.get(9)?;
             let md5_rtf: String = row.get(10)?;
             let md5_image: String = row.get(11)?;
+            let active: String = row.get(12)?;
             let tags = self.get_history_tags(id.clone())?;
             let item = HistoryItem {
                 id,
@@ -303,6 +314,7 @@ impl SqliteDB {
                 rtf,
                 image,
                 files: files.split(',').map(|item| item.to_string()).collect(),
+                active,
                 create_time,
                 md5_text,
                 md5_html,
@@ -473,7 +485,8 @@ impl SqliteDB {
                     md5_text,
                     md5_html,
                     md5_rtf,
-                    md5_image
+                    md5_image,
+                    active
                 FROM 
                     history_info 
                 ORDER BY 
@@ -499,6 +512,8 @@ impl SqliteDB {
             let md5_html: String = row.get(9)?;
             let md5_rtf: String = row.get(10)?;
             let md5_image: String = row.get(11)?;
+            let active: String = row.get(12)?;
+
             let tags = self.get_history_tags(id.clone())?;
             let item = HistoryItem {
                 id,
@@ -507,6 +522,7 @@ impl SqliteDB {
                 rtf,
                 image,
                 files: files.split(',').map(|s| s.to_string()).collect(),
+                active,
                 create_time,
                 md5_image,
                 md5_html,
@@ -538,7 +554,8 @@ impl SqliteDB {
                 md5_text,
                 md5_html,
                 md5_rtf,
-                md5_image
+                md5_image,
+                active
             FROM 
                 history_info h
             LEFT JOIN 
@@ -600,6 +617,7 @@ impl SqliteDB {
             let md5_html: String = row.get(9)?;
             let md5_rtf: String = row.get(10)?;
             let md5_image: String = row.get(11)?;
+            let active: String = row.get(12)?;
             let tags = self.get_history_tags(id.clone())?;
             let item = HistoryItem {
                 id,
@@ -608,6 +626,7 @@ impl SqliteDB {
                 rtf,
                 image,
                 files: files.split(',').map(|s| s.to_string()).collect(),
+                active,
                 create_time,
                 md5_image,
                 md5_html,

@@ -19,6 +19,7 @@ export enum ClipboardEnum {
   FIND_HISTORIES = base + '|find_histories',
   SET_HISTORY_STR = base + '|set_history_str',
   UPDATE_CREATE_TIME = base + '|update_pasted_create_time',
+  UPDATE_ACTIVE = base + '|update_pasted_active',
   DELETE_HISTORIES = base + '|delete_items',
   GET_TAGS_ALL = base + '|get_tags_all',
   ADD_TAG = base + '|add_tag',
@@ -60,7 +61,7 @@ export interface StorageItem {
   image?: string;
   formats?: string[];
   timestamp?: number;
-  defaultActive?: ActiveEnum;
+  active?: ActiveEnum;
   deleted?: boolean;
   collect?: boolean;
   tags?: ITag[];

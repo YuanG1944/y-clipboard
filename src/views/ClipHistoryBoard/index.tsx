@@ -16,6 +16,7 @@ import {
   findHistories,
   getTagsAll,
   paste,
+  updateActive,
   updateCreateTime,
   writeSelected,
 } from '@/actions/clipboard';
@@ -27,6 +28,7 @@ const windows = Windows.getInstance();
 const ClipHistoryBoard: FC = () => {
   const [historyCtx, setHistoryCtx] = useState<StorageItem[]>([]);
   const [preHistoryCtx, setPreviewHistoryCtx] = useState<string[]>([]);
+  const [formatActMap, setFormatActMap] = useState<Record<string, string>>({});
   const [currIndex, setCurrIndex] = useState<number | string>(-1);
   const [currId, setCurrId] = useState<string>('');
   const [focus, setFocus] = useState(false);
@@ -70,6 +72,11 @@ const ClipHistoryBoard: FC = () => {
     setPageSize(10);
   };
 
+  const resetQueryKey = () => {
+    queryKeyRef.current = '';
+    setQueryKey('');
+  };
+
   const handleBridge = async () => {
     resetPage();
     const clipboardHistory =
@@ -97,8 +104,6 @@ const ClipHistoryBoard: FC = () => {
           page_size: pageSize,
         })) ?? [];
 
-      console.info('loadmoer-------->');
-
       if (clipboardHistory.length) {
         setHistoryCtx((arr) => [...arr, ...clipboardHistory]);
         page.current += 1;
@@ -121,6 +126,7 @@ const ClipHistoryBoard: FC = () => {
       setTimeout(() => {
         setShow(true);
       }, 150);
+      resetQueryKey();
       handleBridge();
       handleConfig();
     }
@@ -154,11 +160,25 @@ const ClipHistoryBoard: FC = () => {
     }
   };
 
+  const reloadActive = () => {
+    const keys = Object.keys(formatActMap);
+    if (!keys.length) return;
+
+    const pr = keys.map((key) => {
+      return updateActive(key, formatActMap[key]);
+    });
+
+    Promise.all(pr).finally(() => {
+      setFormatActMap({});
+    });
+  };
+
   const sendingPaste = async () => {
     if (!focus) {
       updateCreateTime(currId);
       deleteItems(preHistoryCtx);
-      writeSelected(historyCtx, currId);
+      writeSelected(historyCtx, currId, formatActMap);
+      reloadActive();
       windows.hide();
       setShow(false);
       setTimeout(async () => {
@@ -175,6 +195,7 @@ const ClipHistoryBoard: FC = () => {
       } else {
         windows.hide();
       }
+      reloadActive();
       deleteItems(preHistoryCtx);
     });
   };
@@ -198,16 +219,7 @@ const ClipHistoryBoard: FC = () => {
   };
 
   const handleActiveChange = (act: ActiveEnum, id: string) => {
-    const ctx = historyCtx.map((it) => {
-      if (it.id === id) {
-        return {
-          ...it,
-          defaultActive: act,
-        };
-      }
-      return it;
-    });
-    setHistoryCtx(ctx);
+    setFormatActMap((f) => ({ ...f, [id]: act }));
   };
 
   const handleScrollingEvent = () => {
@@ -371,6 +383,7 @@ const ClipHistoryBoard: FC = () => {
                     tags={tags}
                     id={`clip-${idx}`}
                     key={ctx.id}
+                    queryText={queryKey}
                     navFocus={focus}
                     onClick={handleClick(ctx.id!)}
                     onDoubleClick={handleDoubleClick}

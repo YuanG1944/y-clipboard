@@ -58,45 +58,11 @@ export const safeJsonParse = (str: string) => {
   }
 };
 
-export async function getHistory(): Promise<StorageItem[]> {
-  const clipboardHistoryStr = ((await invoke(ClipboardEnum.GET_HISTORY)) as string) ?? '';
-  const clipboardHistory: StorageItem[] = safeJsonParse(clipboardHistoryStr);
-  return clipboardHistory.map((item) => {
-    const defaultActive = defaultFormat(item.formats || []);
-    return {
-      ...item,
-      defaultActive,
-    };
-  });
-}
-
-export async function getHistoryByPage(page: number, pageSize: number): Promise<StorageItem[]> {
-  const clipboardHistoryStr =
-    ((await invoke(ClipboardEnum.GET_HISTORY_BY_PAGE, { page, pageSize })) as string) ?? '';
-  const clipboardHistory: StorageItem[] = safeJsonParse(clipboardHistoryStr);
-
-  return clipboardHistory.map((item) => {
-    const defaultActive = defaultFormat(item.formats || []);
-    return {
-      ...item,
-      defaultActive,
-    };
-  });
-}
-
 export async function findHistories(query: FindHistoryReq): Promise<StorageItem[]> {
-  console.info('query-------->', query);
   const clipboardHistoryStr =
     ((await invoke(ClipboardEnum.FIND_HISTORIES, { query })) as string) ?? '';
   const clipboardHistory: StorageItem[] = safeJsonParse(clipboardHistoryStr);
-  console.info('clipboardHistory-------->', clipboardHistory);
-  return clipboardHistory.map((item) => {
-    const defaultActive = defaultFormat(item.formats || []);
-    return {
-      ...item,
-      defaultActive,
-    };
-  });
+  return clipboardHistory;
 }
 
 export function setHistoryStr(historyArr: StorageItem[], currId: string = ''): Promise<void> {
@@ -110,16 +76,27 @@ export function updateCreateTime(id: string = ''): Promise<void> {
   return invoke(ClipboardEnum.UPDATE_CREATE_TIME, { id });
 }
 
+export function updateActive(id: string, active: string): Promise<void> {
+  if (active && active) {
+    return invoke(ClipboardEnum.UPDATE_ACTIVE, { id, active });
+  }
+  return Promise.resolve();
+}
+
 export function deleteItems(ids: string[] = []): Promise<void> {
   if (!ids.length) return Promise.resolve();
   const jsonStr = JSON.stringify(ids);
   return invoke(ClipboardEnum.DELETE_HISTORIES, { jsonStr });
 }
 
-export async function writeSelected(historyArr: StorageItem[], currId: string = '') {
+export async function writeSelected(
+  historyArr: StorageItem[],
+  currId: string = '',
+  switchFormatMap: Record<string, string> = {},
+) {
   const curr = historyArr.find((item) => item.id === currId);
 
-  const active = curr?.defaultActive;
+  const active = switchFormatMap[currId] || curr?.active;
 
   if (active === ActiveEnum.Text && curr?.text) {
     await writeText(curr?.text);

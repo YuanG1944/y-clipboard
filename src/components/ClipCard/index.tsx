@@ -1,11 +1,11 @@
-import { FC, useEffect, useMemo, useState } from 'react';
+import { FC, useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Card, Divider, Popover, Tag, Upload, UploadFile } from 'antd';
 import styles from './index.module.scss';
 import { ActiveEnum, ITag, StorageItem } from '@/actions/clipboard/type';
 import classnames from 'classnames';
 import CardTitle from './CardTitle';
 import QueueAnim from 'rc-queue-anim';
-import { cancelTag, openFile, subscribeTag } from '@/actions/clipboard';
+import { cancelTag, openFile, safeJsonParse, subscribeTag } from '@/actions/clipboard';
 import { os } from '@tauri-apps/api';
 import { HeartTwoTone } from '@ant-design/icons';
 
@@ -15,6 +15,7 @@ export interface ICardProps {
   context: StorageItem;
   navFocus: boolean;
   tags?: ITag[];
+  queryText?: string;
   onClick?: React.MouseEventHandler<HTMLDivElement>;
   onDoubleClick?: React.MouseEventHandler<HTMLDivElement>;
   onActiveChange?: (act: ActiveEnum, id: string) => void;
@@ -31,14 +32,16 @@ const ClipCard: FC<ICardProps> = ({
   onActiveChange,
   reloadTags,
   tags,
+  queryText,
 }) => {
   const [active, setActive] = useState(ActiveEnum.Text);
   const [show, setShow] = useState(true);
   const [platform, setPlatform] = useState('');
   const [hearts, setHearts] = useState<string[]>([]);
-  const focus = useMemo(() => currId === context.id, [currId]);
-
   const [openTooltip, setTooltip] = useState(false);
+  const bRef = useRef<HTMLDivElement>(null);
+
+  const focus = useMemo(() => currId === context.id, [currId]);
 
   const hide = () => {
     setTooltip(false);
@@ -51,7 +54,6 @@ const ClipCard: FC<ICardProps> = ({
   };
 
   const handleOpenChange = (newOpen: boolean) => {
-    console.info('context.tags----->', context.tags);
     reloadTags && reloadTags().finally(() => setTooltip(newOpen));
   };
 
@@ -69,6 +71,33 @@ const ClipCard: FC<ICardProps> = ({
         )}
       </div>
     );
+  };
+
+  const renderText = () => {
+    if (queryText && context.text) {
+      const text = context.text;
+      const index = text.indexOf(queryText);
+      const beforeFocus = index !== -1 ? text.slice(0, index) : '';
+      const afterFocus = index !== -1 ? text.slice(index + queryText.length) : '';
+
+      bRef.current &&
+        bRef.current.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+
+      return (
+        <div className={styles.text}>
+          {beforeFocus}
+          <b
+            ref={bRef}
+            style={{ display: 'inline-block', backgroundColor: '#faad14', color: '#fff' }}
+          >
+            {queryText}
+          </b>
+          {afterFocus}
+        </div>
+      );
+    }
+
+    return <div className={styles.text}>{context.text}</div>;
   };
 
   const renderRTF = () => {
@@ -92,7 +121,7 @@ const ClipCard: FC<ICardProps> = ({
   const contents = useMemo(() => {
     switch (active) {
       case ActiveEnum.Text:
-        return <div className={styles.text}>{context.text}</div>;
+        return renderText();
       case ActiveEnum.Html:
         return renderUrl();
       case ActiveEnum.RTF:
@@ -119,13 +148,13 @@ const ClipCard: FC<ICardProps> = ({
       default:
         return <></>;
     }
-  }, [active, platform]);
+  }, [active, platform, queryText]);
 
   const handleActiveChange = (act: ActiveEnum) => {
     setTimeout(() => {
       setActive(act);
     }, 400);
-    onActiveChange && onActiveChange(act, id);
+    onActiveChange && onActiveChange(act, context.id!);
   };
 
   const handleSwitchChange = () => {

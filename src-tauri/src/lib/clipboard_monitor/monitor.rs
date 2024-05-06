@@ -5,7 +5,6 @@ use clipboard_rs::{common::RustImage, Clipboard, ClipboardContext, ContentFormat
 use image::EncodableLayout;
 use serde_json;
 use std::collections::VecDeque;
-use std::fmt::format;
 use std::fs;
 use std::path::Path;
 use std::process::Command;
@@ -18,6 +17,7 @@ use crate::clipboard_history::FindHistoryReq;
 use crate::clipboard_history::HistoryItem;
 use crate::clipboard_history::HistoryStore;
 use crate::db::database::SqliteDB;
+use crate::utils::active::ActiveEnum;
 use crate::utils::stringify;
 
 pub struct ClipboardMonitor<R>
@@ -69,6 +69,7 @@ where
             item.md5_image = stringify::md5(image.as_str().trim());
             item.push_formats(String::from("image"));
         }
+
         if self.manager.has_file_url().unwrap() {
             let files = self.manager.read_files().unwrap();
 
@@ -91,6 +92,11 @@ where
             //     item.set_files(self.manager.read_files().unwrap());
             //     item.push_formats(String::from("files"));
             // }
+        }
+
+        if item.formats.len() > 0 {
+            let default_active = ActiveEnum::default_format(&item.formats);
+            item.set_active(ActiveEnum::to_str(default_active));
         }
 
         item
@@ -198,7 +204,14 @@ impl ClipboardManager {
     pub fn update_pasted_create_time(&self, id: String) -> Result<String, String> {
         match SqliteDB::new().update_pasted_create_time(id) {
             Ok(_) => Ok(format!("Update create time success")),
-            Err(e) => Err(format!("Error get data from database: {:?}", e)),
+            Err(e) => Err(format!("Error update create time from database: {:?}", e)),
+        }
+    }
+
+    pub fn update_pasted_active(&self, id: String, active: String) -> Result<String, String> {
+        match SqliteDB::new().update_pasted_active(id, active) {
+            Ok(_) => Ok(format!("Update active success")),
+            Err(e) => Err(format!("Error update active from database: {:?}", e)),
         }
     }
 
@@ -395,7 +408,6 @@ impl ClipboardManager {
     // Write to Clipboard APIs
     pub fn write_text(&self, text: String) -> Result<(), String> {
         let text = String::from(text.trim());
-        println!("text----->{}", text);
         self.clipboard
             .lock()
             .map_err(|err| err.to_string())?
@@ -404,7 +416,6 @@ impl ClipboardManager {
     }
 
     pub fn write_html(&self, html: String) -> Result<(), String> {
-        println!("html----->{}", html);
         self.clipboard
             .lock()
             .map_err(|err| err.to_string())?
@@ -413,7 +424,6 @@ impl ClipboardManager {
     }
 
     pub fn write_rtf(&self, rtf: String) -> Result<(), String> {
-        println!("rtf----->{}", rtf);
         self.clipboard
             .lock()
             .map_err(|err| err.to_string())?

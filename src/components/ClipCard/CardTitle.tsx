@@ -34,10 +34,10 @@ const CardTitle: FC<ICardTitle> = ({
   const [activeEnum, setActiveEnum] = useState(ActiveEnum.Text);
 
   const initDefaultTitle = () => {
-    setActiveEnum(context.defaultActive!);
+    setActiveEnum(context.active!);
     const arr = context.formats!.reduce((pre, it) => {
       let item = it as ActiveEnum;
-      const active = context.defaultActive === item;
+      const active = context.active === item;
       if (
         Object.keys(ActiveEnum)
           .map((key) => key.toLowerCase())

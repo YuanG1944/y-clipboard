@@ -52,6 +52,15 @@ fn update_pasted_create_time(
 }
 
 #[tauri::command]
+fn update_pasted_active(
+    manager: State<'_, ClipboardManager>,
+    id: String,
+    active: String,
+) -> Result<String, String> {
+    manager.update_pasted_active(id, active)
+}
+
+#[tauri::command]
 fn delete_items(manager: State<'_, ClipboardManager>, json_str: String) -> Result<String, String> {
     manager.delete_items(json_str)
 }
@@ -149,8 +158,8 @@ fn write_html(manager: State<'_, ClipboardManager>, html: String) -> Result<(), 
 }
 
 #[tauri::command]
-fn write_rtf(manager: State<'_, ClipboardManager>, rtf_content: String) -> Result<(), String> {
-    manager.write_rtf(rtf_content)
+fn write_rtf(manager: State<'_, ClipboardManager>, rtf: String) -> Result<(), String> {
+    manager.write_rtf(rtf)
 }
 
 /// read image from clipboard and return a base64 string
@@ -259,6 +268,7 @@ pub fn init<R: Runtime>(open_watch: bool) -> TauriPlugin<R> {
             find_histories,
             set_history_str,
             update_pasted_create_time,
+            update_pasted_active,
             delete_items,
             set_tag,
             add_tag,
