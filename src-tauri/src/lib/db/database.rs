@@ -3,7 +3,7 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use uuid::Uuid;
 
 use crate::{
-    clipboard_history::{HistoryItem, TagsStruct},
+    clipboard_history::{FindHistoryReq, HistoryItem, TagsStruct},
     utils::path::{self, create_dir},
 };
 use rusqlite::{Connection, OpenFlags, ToSql};
@@ -66,7 +66,6 @@ impl SqliteDB {
             (
                 id          VARCHAR(255) NOT NULL PRIMARY KEY,
                 name        VARCHAR(24)  UNIQUE,
-                color       VARCHAR(24),
                 create_time INTEGER
 
             );
@@ -100,11 +99,7 @@ impl SqliteDB {
         let _ = conn.execute(init_favorite_connect_history_table, ());
         let _ = conn.execute(init_config_table, ());
         let _ = conn.execute(init_expire, ());
-        let _ = Self::new().insert_tag(
-            Uuid::new_v4().to_string(),
-            "Favorite".to_string(),
-            "#ff4d4f".to_string(),
-        );
+        let _ = Self::new().insert_tag(Uuid::new_v4().to_string(), "Favorite".to_string());
     }
 
     pub fn insert_item(&self, insert_item: HistoryItem) -> Result<i64> {
@@ -326,7 +321,6 @@ impl SqliteDB {
             SELECT
                 id, 
                 name,
-                color,
                 create_time
             FROM 
                 tags_table 
@@ -342,13 +336,11 @@ impl SqliteDB {
         while let Some(row) = rows.next()? {
             let id: String = row.get(0)?;
             let name: String = row.get(1)?;
-            let color: String = row.get(2)?;
-            let create_time: u64 = row.get(3)?;
+            let create_time: u64 = row.get(2)?;
 
             let item = TagsStruct {
                 id,
                 name,
-                color,
                 create_time,
             };
             res.push(item);
@@ -361,7 +353,6 @@ impl SqliteDB {
             SELECT
                 id, 
                 name,
-                color,
                 create_time
             FROM 
                 tags_table 
@@ -373,8 +364,7 @@ impl SqliteDB {
             Ok(TagsStruct {
                 id: row.get(0)?,
                 name: row.get(1)?,
-                color: row.get(2)?,
-                create_time: row.get(3)?,
+                create_time: row.get(2)?,
             })
         })?;
         Ok(res)
@@ -403,22 +393,20 @@ impl SqliteDB {
         Ok(res)
     }
 
-    pub fn insert_tag(&self, id: String, name: String, color: String) -> Result<()> {
+    pub fn insert_tag(&self, id: String, name: String) -> Result<()> {
         let sql: &str = r#"
             INSERT OR IGNORE INTO tags_table (
                 id, 
                 name,
-                color,
                 create_time
             )
-            VALUES (?1, ?2, ?3, ?4);
+            VALUES (?1, ?2, ?3);
         "#;
         match self.conn.execute(
             sql,
             (
                 id,
                 name,
-                color,
                 SystemTime::now()
                     .duration_since(UNIX_EPOCH)
                     .unwrap()
@@ -467,30 +455,6 @@ impl SqliteDB {
         };
         Ok(())
     }
-
-    // pub fn query_text(&self, req: QueryValue) -> Result<Vec<HistoryItem>> {
-    //     let offset = req.page.saturating_sub(1) * req.page_size;
-
-    //     let sql = format!(
-    //         r#"
-    //         SELECT
-    //             id,
-    //             text,
-    //             html,
-    //             rtf,
-    //             image,
-    //             files,
-    //             create_time,
-    //             formats,
-    //             md5
-    //         FROM
-    //             history_info
-    //         ORDER BY
-    //             create_time DESC
-    //         LIMIT ?1 OFFSET ?2
-    //         "#
-    //     );
-    // }
 
     pub fn find_history_by_page(&self, page: usize, page_size: usize) -> Result<Vec<HistoryItem>> {
         let offset = page.saturating_sub(1) * page_size;
@@ -556,6 +520,107 @@ impl SqliteDB {
         Ok(res)
     }
 
+    pub fn find_histories(&self, req: FindHistoryReq) -> Result<Vec<HistoryItem>> {
+        let mut sql: String = String::new();
+        let mut params: Vec<String> = vec![];
+
+        sql.push_str(
+            "
+            SELECT 
+                id, 
+                text, 
+                html, 
+                rtf, 
+                image, 
+                files, 
+                create_time, 
+                formats,
+                md5_text,
+                md5_html,
+                md5_rtf,
+                md5_image
+            FROM 
+                history_info h
+            LEFT JOIN 
+                favorite_connect_history_table f 
+            ON 
+                h.id = f.history_id
+            WHERE 
+                1=1
+            ",
+        );
+
+        if let Some(tag) = req.tag {
+            if !tag.is_empty() {
+                params.push(tag.to_string());
+                sql.push_str(format!("AND tag_id = ?{}", params.len()).as_str());
+            }
+        }
+
+        if let Some(k) = &req.key {
+            if !k.is_empty() {
+                params.push(format!("%{}%", k));
+                sql.push_str(format!("AND text LIKE ?{}", params.len()).as_str());
+            }
+        }
+
+        if let (Some(page), Some(page_size)) = (&req.page, &req.page_size) {
+            let offset = page.saturating_sub(1) * page_size;
+            params.push(page_size.to_string());
+            params.push(offset.to_string());
+
+            sql.push_str(
+                format!(
+                    "
+                    ORDER BY
+                       create_time DESC
+                    LIMIT ?{} OFFSET ?{}
+                    ",
+                    params.len() - 1,
+                    params.len()
+                )
+                .as_str(),
+            );
+        }
+
+        let mut stmt = self.conn.prepare(&sql)?;
+        let mut rows = stmt.query(rusqlite::params_from_iter(params))?;
+        let mut res = Vec::new();
+
+        while let Some(row) = rows.next()? {
+            let id: String = row.get(0)?;
+            let text: String = row.get(1)?;
+            let html: String = row.get(2)?;
+            let rtf: String = row.get(3)?;
+            let image: String = row.get(4)?;
+            let files: String = row.get(5)?;
+            let create_time: u64 = row.get(6)?;
+            let formats: String = row.get(7)?;
+            let md5_text: String = row.get(8)?;
+            let md5_html: String = row.get(9)?;
+            let md5_rtf: String = row.get(10)?;
+            let md5_image: String = row.get(11)?;
+            let tags = self.get_history_tags(id.clone())?;
+            let item = HistoryItem {
+                id,
+                text,
+                html,
+                rtf,
+                image,
+                files: files.split(',').map(|s| s.to_string()).collect(),
+                create_time,
+                md5_image,
+                md5_html,
+                md5_rtf,
+                md5_text,
+                tags,
+                formats: formats.split(',').map(|s| s.to_string()).collect(),
+            };
+            res.push(item);
+        }
+        Ok(res)
+    }
+
     pub fn clear_history(&self) -> Result<String> {
         let sql_history_info = "DELETE FROM history_info";
         self.conn.execute(sql_history_info, []);
@@ -573,18 +638,13 @@ impl SqliteDB {
         match expire_time_res {
             Ok(expire_time) => {
                 let sql = format!(
-                    "DELETE FROM history_info WHERE create_time < strftime('%s', 'now', '{}')",
-                    expire_time
-                );
-
-                let sql = format!(
                     "DELETE FROM 
                         history_info
                      WHERE 
                         create_time < strftime('%s', 'now', '{}') 
-                    AND
+                     AND
                         id 
-                    NOT IN (
+                     NOT IN (
                         SELECT 
                             history_id 
                         FROM 
@@ -602,4 +662,19 @@ impl SqliteDB {
             }
         }
     }
+}
+
+#[test]
+fn test_sqlite_query() {
+    SqliteDB::init();
+    let r = FindHistoryReq {
+        key: Some("".to_string()),
+        tag: Some("fcc45fe6-fbe0-455d-bd79-7ff39ebae2be".to_string()),
+        page: Some(1),
+        page_size: Some(1),
+    };
+
+    let res = SqliteDB::new().find_histories(r);
+    println!("info-------> {:?}", res);
+    assert_eq!(true, true)
 }

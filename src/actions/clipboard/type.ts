@@ -16,6 +16,7 @@ export enum ClipboardEnum {
   IS_MONITOR_RUNNING_COMMAND = base + '|is_monitor_running',
   GET_HISTORY = base + '|get_history',
   GET_HISTORY_BY_PAGE = base + '|get_history_by_page',
+  FIND_HISTORIES = base + '|find_histories',
   SET_HISTORY_STR = base + '|set_history_str',
   UPDATE_CREATE_TIME = base + '|update_pasted_create_time',
   DELETE_HISTORIES = base + '|delete_items',
@@ -98,6 +99,12 @@ export const ActiveMapping = {
 export interface ITag {
   id: string;
   name: string;
-  color: string;
   createTime: number;
+}
+
+export interface FindHistoryReq {
+  key?: string;
+  tag?: string;
+  page: number;
+  page_size: number;
 }

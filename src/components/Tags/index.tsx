@@ -55,7 +55,7 @@ const Tags: React.FC<TagCollectType> = ({ onSelectedTagChange }) => {
 
   const handleInputConfirm = () => {
     if (inputValue && !tags.map((t) => t.name).includes(inputValue)) {
-      addTag(inputValue, tagColor(tags.length)).finally(() => reloadTags());
+      addTag(inputValue).finally(() => reloadTags());
     }
     setInputVisible(false);
     setInputValue('');
@@ -129,7 +129,7 @@ const Tags: React.FC<TagCollectType> = ({ onSelectedTagChange }) => {
         const isLongTag = tag.name.length > 20;
         const tagElem = (
           <Tag
-            color={tag.color}
+            color={tagColor(index)}
             key={tag.id}
             closable={index !== 0}
             style={{

@@ -24,7 +24,6 @@ pub struct HistoryItem {
 pub struct TagsStruct {
     pub id: String,
     pub name: String,
-    pub color: String,
     pub create_time: u64,
 }
 
@@ -129,6 +128,13 @@ impl HistoryItem {
     }
 }
 
+#[derive(serde::Serialize, serde::Deserialize, Debug, Default, PartialEq)]
+pub struct FindHistoryReq {
+    pub key: Option<String>,
+    pub tag: Option<String>,
+    pub page: Option<usize>,
+    pub page_size: Option<usize>,
+}
 #[derive(Debug, Serialize, Deserialize)]
 pub struct HistoryStore {
     history: VecDeque<HistoryItem>,

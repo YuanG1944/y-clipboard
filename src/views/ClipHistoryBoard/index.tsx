@@ -13,7 +13,7 @@ import { os } from '@tauri-apps/api';
 import { appWindow } from '@tauri-apps/api/window';
 import {
   deleteItems,
-  getHistoryByPage,
+  findHistories,
   getTagsAll,
   paste,
   updateCreateTime,
@@ -32,7 +32,13 @@ const ClipHistoryBoard: FC = () => {
   const [focus, setFocus] = useState(false);
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
+
   const page = useRef(1);
+  const queryKeyRef = useRef('');
+  const tagIdRef = useRef('');
+  const [queryKey, setQueryKey] = useState('');
+  const [tagId, setTagId] = useState('');
+
   const scrollD = useRef(WheelEnum.NORMAL);
   const [pageSize, setPageSize] = useState(10);
   const cardContentRef = useRef<HTMLDivElement>(null);
@@ -65,10 +71,16 @@ const ClipHistoryBoard: FC = () => {
   };
 
   const handleBridge = async () => {
-    const clipboardHistory = (await getHistoryByPage(1, pageSize)) ?? [];
-    setHistoryCtx(clipboardHistory);
-    setPreviewHistoryCtx([]);
     resetPage();
+    const clipboardHistory =
+      (await findHistories({
+        key: queryKey,
+        tag: tagId,
+        page: 1,
+        page_size: pageSize,
+      })) ?? [];
+    setHistoryCtx([...clipboardHistory]);
+    setPreviewHistoryCtx([]);
     setTimeout(() => {
       setCurrIndex(setCurrIndexChange('0'));
     }, 100);
@@ -77,7 +89,16 @@ const ClipHistoryBoard: FC = () => {
   const loadMoreInfo = async () => {
     setLoading(true);
     try {
-      const clipboardHistory = (await getHistoryByPage(page.current + 1, pageSize)) ?? [];
+      const clipboardHistory =
+        (await findHistories({
+          key: queryKeyRef.current,
+          tag: tagIdRef.current,
+          page: page.current + 1,
+          page_size: pageSize,
+        })) ?? [];
+
+      console.info('loadmoer-------->');
+
       if (clipboardHistory.length) {
         setHistoryCtx((arr) => [...arr, ...clipboardHistory]);
         page.current += 1;
@@ -196,7 +217,8 @@ const ClipHistoryBoard: FC = () => {
     const scrollWidth = cardContentRef.current!.scrollWidth;
     // get view width
     const clientWidth = cardContentRef.current!.clientWidth;
-    if (scrollLeft + clientWidth >= scrollWidth - 20) {
+
+    if (scrollLeft && scrollLeft + clientWidth >= scrollWidth - 20) {
       loadMoreInfo();
     }
   };
@@ -281,11 +303,29 @@ const ClipHistoryBoard: FC = () => {
     }
   });
 
+  const handleSelected = (tag: ITag | null) => {
+    if (tag) {
+      tagIdRef.current = tag.id;
+      return setTagId(tag.id);
+    }
+    tagIdRef.current = '';
+    return setTagId('');
+  };
+
+  const handleSearched = (value: string) => {
+    queryKeyRef.current = value;
+    setQueryKey(value);
+  };
+
   useEffect(() => {
     const id = historyCtx.filter((ctx) => ctx.deleted !== true)?.[Number(currIndex)]?.id || '';
     handleAnchor(`clip-${currIndex}`);
     setCurrId(id);
   }, [currIndex]);
+
+  useEffect(() => {
+    handleBridge();
+  }, [tagId, queryKey]);
 
   useEffect(() => {
     win32VisibilityChange();
@@ -315,7 +355,11 @@ const ClipHistoryBoard: FC = () => {
         {show ? (
           <div className={styles.clipHistoryBoard} key="aniBar">
             <div className={styles.navBar}>
-              <NavBar checkFocus={handleFocus} />
+              <NavBar
+                checkFocus={handleFocus}
+                onSelectedTagChange={handleSelected}
+                onSearchChange={handleSearched}
+              />
             </div>
             <div ref={cardContentRef} className={styles.contents} key="aniCard">
               {historyCtx

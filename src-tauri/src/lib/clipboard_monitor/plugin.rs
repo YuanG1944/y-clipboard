@@ -6,7 +6,10 @@ use tauri::{
     Manager, Runtime, State,
 };
 
-use crate::paste::{key_register, os_paste};
+use crate::{
+    clipboard_history::FindHistoryReq,
+    paste::{key_register, os_paste},
+};
 
 use super::monitor::{ClipboardManager, ClipboardMonitor};
 
@@ -22,6 +25,14 @@ fn get_history_by_page(
     page_size: usize,
 ) -> Result<String, String> {
     manager.get_history_by_page(page, page_size)
+}
+
+#[tauri::command]
+fn find_histories(
+    manager: State<'_, ClipboardManager>,
+    query: FindHistoryReq,
+) -> Result<String, String> {
+    manager.find_histories(query)
 }
 
 #[tauri::command]
@@ -51,12 +62,8 @@ fn get_tags_all(manager: State<'_, ClipboardManager>) -> Result<String, String> 
 }
 
 #[tauri::command]
-fn add_tag(
-    manager: State<'_, ClipboardManager>,
-    name: String,
-    color: String,
-) -> Result<String, String> {
-    manager.add_tag(name, color)
+fn add_tag(manager: State<'_, ClipboardManager>, name: String) -> Result<String, String> {
+    manager.add_tag(name)
 }
 
 #[tauri::command]
@@ -249,6 +256,7 @@ pub fn init<R: Runtime>(open_watch: bool) -> TauriPlugin<R> {
             is_monitor_running,
             get_history,
             get_history_by_page,
+            find_histories,
             set_history_str,
             update_pasted_create_time,
             delete_items,

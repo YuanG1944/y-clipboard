@@ -9,9 +9,11 @@ const { Search } = Input;
 
 export interface INavBarProps {
   checkFocus?: (isFocus: boolean) => void;
+  onSelectedTagChange?: (selectedTag: ITag | null) => void;
+  onSearchChange?: (value: string) => void;
 }
 
-const NavBar: FC<INavBarProps> = ({ checkFocus }) => {
+const NavBar: FC<INavBarProps> = ({ checkFocus, onSelectedTagChange, onSearchChange }) => {
   const handleFocus = () => {
     checkFocus && checkFocus(true);
   };
@@ -20,20 +22,18 @@ const NavBar: FC<INavBarProps> = ({ checkFocus }) => {
     checkFocus && checkFocus(false);
   };
 
-  const handleSearch: SearchProps['onSearch'] = (value, event, info) => {
-    console.info('onSearch--->', info?.source, value);
+  const handleSearch: SearchProps['onSearch'] = (value) => {
+    onSearchChange && onSearchChange(value);
   };
 
   const handleSelected = (tag: ITag | null) => {
-    if (!tag) return;
-    console.info('tag----->', tag);
+    onSelectedTagChange && onSelectedTagChange(tag);
   };
 
   const handleKeyDownSearch: KeyboardEventHandler<HTMLInputElement> = (event) => {
     if (event.key === 'Enter') {
       handleSearch(event.currentTarget.value, event);
     }
-    console.info('event', event);
   };
 
   return (

@@ -1,7 +1,14 @@
 import { z } from 'zod';
 import { invoke } from '@tauri-apps/api/tauri';
 import { emit, listen, UnlistenFn } from '@tauri-apps/api/event';
-import { ActiveEnum, ActiveMapping, ClipboardEnum, ITag, StorageItem } from './type';
+import {
+  ActiveEnum,
+  ActiveMapping,
+  ClipboardEnum,
+  FindHistoryReq,
+  ITag,
+  StorageItem,
+} from './type';
 
 export const ClipboardChangedPayloadSchema = z.object({ value: z.string() });
 export const ClipboardChangedFilesPayloadSchema = z.object({
@@ -77,6 +84,21 @@ export async function getHistoryByPage(page: number, pageSize: number): Promise<
   });
 }
 
+export async function findHistories(query: FindHistoryReq): Promise<StorageItem[]> {
+  console.info('query-------->', query);
+  const clipboardHistoryStr =
+    ((await invoke(ClipboardEnum.FIND_HISTORIES, { query })) as string) ?? '';
+  const clipboardHistory: StorageItem[] = safeJsonParse(clipboardHistoryStr);
+  console.info('clipboardHistory-------->', clipboardHistory);
+  return clipboardHistory.map((item) => {
+    const defaultActive = defaultFormat(item.formats || []);
+    return {
+      ...item,
+      defaultActive,
+    };
+  });
+}
+
 export function setHistoryStr(historyArr: StorageItem[], currId: string = ''): Promise<void> {
   const temp = moveToFirst(historyArr, currId);
   const jsonStr = JSON.stringify(temp);
@@ -98,8 +120,6 @@ export async function writeSelected(historyArr: StorageItem[], currId: string = 
   const curr = historyArr.find((item) => item.id === currId);
 
   const active = curr?.defaultActive;
-
-  console.info('historyArr---->', curr);
 
   if (active === ActiveEnum.Text && curr?.text) {
     await writeText(curr?.text);
@@ -136,8 +156,8 @@ export function setTag(id: string, name: string) {
   return invoke(ClipboardEnum.SET_TAG, { id, name });
 }
 
-export function addTag(name: string, color: string) {
-  return invoke(ClipboardEnum.ADD_TAG, { name, color });
+export function addTag(name: string) {
+  return invoke(ClipboardEnum.ADD_TAG, { name });
 }
 
 export function deleteTag(id: string) {

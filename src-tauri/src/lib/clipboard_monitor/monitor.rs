@@ -14,6 +14,7 @@ use std::sync::Mutex;
 use tauri::{Manager, Runtime};
 use uuid::Uuid;
 
+use crate::clipboard_history::FindHistoryReq;
 use crate::clipboard_history::HistoryItem;
 use crate::clipboard_history::HistoryStore;
 use crate::db::database::SqliteDB;
@@ -170,6 +171,16 @@ impl ClipboardManager {
         }
     }
 
+    pub fn find_histories(&self, req: FindHistoryReq) -> Result<String, String> {
+        match SqliteDB::new().find_histories(req) {
+            Ok(arr) => match serde_json::to_string(&arr) {
+                Ok(json_str) => Ok(json_str.clone()),
+                Err(e) => Err(format!("Error serializing VecDeque to JSON: {:?}", e)),
+            },
+            Err(e) => Err(format!("Error get data from database: {:?}", e)),
+        }
+    }
+
     pub fn set_history_str(&self, history_store_str: String) -> Result<String, String> {
         match serde_json::from_str::<VecDeque<HistoryItem>>(history_store_str.as_str()) {
             Ok(history_store) => {
@@ -211,8 +222,8 @@ impl ClipboardManager {
         }
     }
 
-    pub fn add_tag(&self, name: String, color: String) -> Result<String, String> {
-        match SqliteDB::new().insert_tag(Uuid::new_v4().to_string(), name, color) {
+    pub fn add_tag(&self, name: String) -> Result<String, String> {
+        match SqliteDB::new().insert_tag(Uuid::new_v4().to_string(), name) {
             Ok(_) => Ok(format!("Insert tag succuss!")),
             Err(e) => Err(format!("Fail to insert tag: {}", e)),
         }
