@@ -1,6 +1,5 @@
 import { FC, useEffect, useState } from 'react';
 import { Button } from 'antd';
-
 import styles from './index.module.scss';
 import { ActiveEnum, ActiveTitle, StorageItem } from '@/actions/clipboard/type';
 import { useKeyPress } from 'ahooks';

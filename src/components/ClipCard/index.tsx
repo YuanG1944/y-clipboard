@@ -158,9 +158,9 @@ const ClipCard: FC<ICardProps> = ({
   }, [active, platform, queryText]);
 
   const handleActiveChange = (act: ActiveEnum) => {
-    setTimeout(() => {
-      setActive(act);
-    }, 400);
+    // setTimeout(() => {
+    setActive(act);
+    // });
     onActiveChange && onActiveChange(act, context.id!);
   };
 
@@ -194,8 +194,8 @@ const ClipCard: FC<ICardProps> = ({
   };
 
   useEffect(() => {
-    getPlatform();
     initSelectedTags();
+    getPlatform();
   }, []);
 
   const PopoverContext = useMemo(() => {

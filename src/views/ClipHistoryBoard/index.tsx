@@ -382,7 +382,7 @@ const ClipHistoryBoard: FC = () => {
                     context={ctx}
                     tags={tags}
                     id={`clip-${idx}`}
-                    key={ctx.id}
+                    key={`${ctx.id}clip-${idx}`}
                     queryText={queryKey}
                     navFocus={focus}
                     onClick={handleClick(ctx.id!)}
