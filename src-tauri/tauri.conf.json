@@ -6,8 +6,8 @@
     "distDir": "../dist"
   },
   "package": {
-    "productName": "tauri-learn",
-    "version": "0.0.0"
+    "productName": "y-clip",
+    "version": "0.1.8"
   },
 
   "tauri": {
