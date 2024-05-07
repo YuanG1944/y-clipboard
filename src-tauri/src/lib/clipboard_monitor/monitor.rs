@@ -71,6 +71,7 @@ where
 
         if self.manager.has_file_url().unwrap() {
             let files = self.manager.read_files().unwrap();
+            println!("files--->{:?}", files);
 
             if self.manager.has_text().unwrap() == false {
                 let files_name: Vec<&str> = files
@@ -359,17 +360,16 @@ impl ClipboardManager {
 
     /// read files from clipboard and return a `Vec<String>`
     pub fn read_files(&self) -> Result<Vec<String>, String> {
-        let res = clipboard_files::read();
+        let res = self
+            .clipboard
+            .lock()
+            .map_err(|err| err.to_string())?
+            .get_files()
+            .map_err(|err| err.to_string());
+        println!("res--->{:?}", res);
         match res {
-            Ok(files) => {
-                let files_str = files
-                    .iter()
-                    .map(|file| file.to_str().unwrap().to_string())
-                    .collect::<Vec<_>>();
-                Ok(files_str)
-            }
+            Ok(files) => Ok(files),
             Err(err) => match err {
-                clipboard_files::Error::NoFiles => Err("No files in clipboard".to_string()),
                 _ => Err("Unknown error".to_string()),
             },
         }

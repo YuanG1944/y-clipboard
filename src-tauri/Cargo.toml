@@ -15,13 +15,7 @@ path = "src/lib/mod.rs"
 tauri-build = { version = "1.5", features = [] }
 
 [dependencies]
-tauri = { version = "1.5", features = [
-  "fs-create-dir",
-  "fs-read-file",
-  "fs-write-file",
-  "fs-read-dir",
-  "fs-exists",
-  "fs-copy-file",
+tauri = { version = "1.5", features = [ "fs-all",
   "system-tray",
   "notification-all",
   "window-all",
