@@ -5,7 +5,6 @@ use clipboard_rs::{common::RustImage, Clipboard, ClipboardContext, ContentFormat
 use image::EncodableLayout;
 use serde_json;
 use std::collections::VecDeque;
-use std::fs;
 use std::path::Path;
 use std::process::Command;
 use std::sync::Arc;

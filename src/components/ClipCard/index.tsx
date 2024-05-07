@@ -114,8 +114,7 @@ const ClipCard: FC<ICardProps> = ({
   };
 
   const handleOpenFile = (file: UploadFile) => {
-    file.thumbUrl && openFile(file.thumbUrl);
-    onExit && onExit();
+    file.thumbUrl && openFile(file.thumbUrl).finally(() => onExit && onExit());
   };
 
   const highlightStyles = useMemo(() => {

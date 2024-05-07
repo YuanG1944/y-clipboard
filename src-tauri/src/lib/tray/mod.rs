@@ -1,15 +1,12 @@
 use anyhow::Result;
-use tauri::{
-    api::process, AppHandle, CustomMenuItem, Manager, SystemTrayEvent, SystemTrayMenu,
-    SystemTrayMenuItem,
-};
+use tauri::{AppHandle, CustomMenuItem, SystemTrayEvent, SystemTrayMenu, SystemTrayMenuItem};
 
 use crate::window;
 
 pub struct Tray {}
 
 impl Tray {
-    pub fn tray_menu(app_handle: &AppHandle) -> SystemTrayMenu {
+    pub fn tray_menu(_app_handle: &AppHandle) -> SystemTrayMenu {
         // let version = app_handle.package_info().version.to_string();
         SystemTrayMenu::new()
             .add_item(
