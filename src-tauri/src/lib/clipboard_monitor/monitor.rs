@@ -1,5 +1,4 @@
 use base64::{engine::general_purpose, Engine as _};
-use clipboard_files;
 use clipboard_master::{CallbackResult, ClipboardHandler};
 use clipboard_rs::{common::RustImage, Clipboard, ClipboardContext, ContentFormat, RustImageData};
 use image::EncodableLayout;

@@ -594,20 +594,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "clipboard-files"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2bc2120eaf094b70a9c58bd1f8bb908cb74fbfe0c9793314567f7f8cea0be383"
-dependencies = [
- "clipboard-win 4.5.0",
- "gtk",
- "objc",
- "objc-foundation",
- "objc_id",
- "urlencoding",
-]
-
-[[package]]
 name = "clipboard-master"
 version = "3.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -627,21 +613,10 @@ version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "93c547618248086cfc855d71ccfbf6cc8f64b7866ebb8616e313dedcfc33b1e2"
 dependencies = [
- "clipboard-win 5.3.1",
+ "clipboard-win",
  "cocoa 0.25.0",
  "image 0.25.1",
  "x11rb",
-]
-
-[[package]]
-name = "clipboard-win"
-version = "4.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7191c27c2357d9b7ef96baac1773290d4ca63b24205b82a3fd8a0637afcf0362"
-dependencies = [
- "error-code 2.3.1",
- "str-buf",
- "winapi",
 ]
 
 [[package]]
@@ -650,7 +625,7 @@ version = "5.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "79f4473f5144e20d9aceaf2972478f06ddf687831eafeeb434fbaf0acc4144ad"
 dependencies = [
- "error-code 3.0.0",
+ "error-code",
  "windows-win 3.0.0",
 ]
 
@@ -1156,16 +1131,6 @@ checksum = "a258e46cdc063eb8519c00b9fc845fc47bcfca4130e2f08e88665ceda8474245"
 dependencies = [
  "libc",
  "windows-sys 0.52.0",
-]
-
-[[package]]
-name = "error-code"
-version = "2.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "64f18991e7bf11e7ffee451b5318b5c1a73c52d0d0ada6e5a3017c8c1ced6a21"
-dependencies = [
- "libc",
- "str-buf",
 ]
 
 [[package]]
@@ -3928,12 +3893,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 
 [[package]]
-name = "str-buf"
-version = "1.0.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9e08d8363704e6c71fc928674353e6b7c23dcea9d82d7012c8faf2a3a025f8d0"
-
-[[package]]
 name = "string_cache"
 version = "0.8.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4656,12 +4615,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "urlencoding"
-version = "2.1.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "daf8dba3b7eb870caf1ddeed7bc9d2a049f3cfdfae7cb521b087cc33ae4c49da"
-
-[[package]]
 name = "utf-8"
 version = "0.7.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5176,7 +5129,7 @@ version = "3.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "58e23e33622b3b52f948049acbec9bcc34bf6e26d74176b88941f213c75cf2dc"
 dependencies = [
- "error-code 3.0.0",
+ "error-code",
 ]
 
 [[package]]
@@ -5507,7 +5460,6 @@ version = "0.0.1"
 dependencies = [
  "anyhow",
  "base64 0.22.1",
- "clipboard-files",
  "clipboard-master",
  "clipboard-rs",
  "device_query",
