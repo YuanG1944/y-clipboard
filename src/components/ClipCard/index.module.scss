@@ -89,6 +89,13 @@
       border-radius: unset;
     }
   }
+  .card-background-files {
+    .ant-card-head {
+      background-color: #2f54eb;
+      border-radius: unset;
+    }
+  }
+
   .card-background-image {
     .ant-card-head {
       background-color: #e74c3c;
@@ -109,7 +116,6 @@
     opacity: 0.8;
   }
 }
-
 
 .popoverContext {
   display: flex;

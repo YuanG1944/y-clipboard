@@ -54,6 +54,7 @@ const CardTitle: FC<ICardTitle> = ({
       }
       return pre;
     }, [] as ITitleActive[]);
+
     setTitleList(arr);
   };
 

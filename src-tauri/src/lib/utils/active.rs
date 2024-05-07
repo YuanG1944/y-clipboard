@@ -4,7 +4,7 @@ pub enum ActiveEnum {
     Html,
     RTF,
     Image,
-    File,
+    Files,
 }
 
 impl ActiveEnum {
@@ -14,14 +14,14 @@ impl ActiveEnum {
             "html" => ActiveEnum::Html,
             "rtf" => ActiveEnum::RTF,
             "image" => ActiveEnum::Image,
-            "files" => ActiveEnum::File,
+            "files" => ActiveEnum::Files,
             _ => ActiveEnum::Text,
         }
     }
 
     pub fn to_str(active_code: ActiveEnum) -> String {
         match active_code {
-            ActiveEnum::File => "file",
+            ActiveEnum::Files => "files",
             ActiveEnum::Image => "image",
             ActiveEnum::Text => "text",
             ActiveEnum::RTF => "rtf",
@@ -32,7 +32,7 @@ impl ActiveEnum {
 
     pub fn active_map(active_code: ActiveEnum) -> i32 {
         match active_code {
-            ActiveEnum::File => 0b10000,
+            ActiveEnum::Files => 0b10000,
             ActiveEnum::Image => 0b01000,
             ActiveEnum::Text => 0b00100,
             ActiveEnum::RTF => 0b00010,
@@ -47,7 +47,7 @@ impl ActiveEnum {
             .sum();
 
         if num >> 4 > 0 {
-            return ActiveEnum::File;
+            return ActiveEnum::Files;
         }
         if num >> 3 > 0 {
             return ActiveEnum::Image;

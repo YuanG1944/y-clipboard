@@ -78,7 +78,7 @@ export enum ActiveEnum {
   Html = 'html',
   RTF = 'rtf',
   Image = 'image',
-  File = 'files',
+  Files = 'files',
 }
 
 export const ActiveTitle = {
@@ -86,11 +86,11 @@ export const ActiveTitle = {
   [ActiveEnum.RTF]: 'Format',
   [ActiveEnum.Html]: 'Html',
   [ActiveEnum.Image]: 'Image',
-  [ActiveEnum.File]: 'File',
+  [ActiveEnum.Files]: 'Files',
 };
 
 export const ActiveMapping = {
-  [ActiveEnum.File]: 0b10000,
+  [ActiveEnum.Files]: 0b10000,
   [ActiveEnum.Image]: 0b01000,
   [ActiveEnum.Text]: 0b00100,
   [ActiveEnum.RTF]: 0b00010,

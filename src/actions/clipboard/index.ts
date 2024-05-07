@@ -33,7 +33,7 @@ export const defaultFormat = (format: string[]) => {
   }, 0);
 
   if (num >> 4) {
-    return ActiveEnum.File;
+    return ActiveEnum.Files;
   }
   if (num >> 3) {
     return ActiveEnum.Image;
@@ -118,7 +118,8 @@ export async function writeSelected(
     return;
   }
 
-  if (active === ActiveEnum.File) {
+  if (active === ActiveEnum.Files) {
+    await writeFilePath(curr?.files ?? []);
     return;
   }
 }

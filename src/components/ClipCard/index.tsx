@@ -1,11 +1,11 @@
 import { FC, useEffect, useMemo, useRef, useState } from 'react';
-import { Button, Card, Divider, Popover, Tag, Upload, UploadFile } from 'antd';
+import { Button, Card, Divider, Popover, Upload, UploadFile } from 'antd';
 import styles from './index.module.scss';
 import { ActiveEnum, ITag, StorageItem } from '@/actions/clipboard/type';
 import classnames from 'classnames';
 import CardTitle from './CardTitle';
 import QueueAnim from 'rc-queue-anim';
-import { cancelTag, openFile, safeJsonParse, subscribeTag } from '@/actions/clipboard';
+import { cancelTag, openFile, subscribeTag } from '@/actions/clipboard';
 import { os } from '@tauri-apps/api';
 import { HeartTwoTone } from '@ant-design/icons';
 
@@ -20,6 +20,7 @@ export interface ICardProps {
   onDoubleClick?: React.MouseEventHandler<HTMLDivElement>;
   onActiveChange?: (act: ActiveEnum, id: string) => void;
   reloadTags?: () => Promise<ITag[]>;
+  onExit?: () => void;
 }
 
 const ClipCard: FC<ICardProps> = ({
@@ -33,6 +34,7 @@ const ClipCard: FC<ICardProps> = ({
   reloadTags,
   tags,
   queryText,
+  onExit,
 }) => {
   const [active, setActive] = useState(ActiveEnum.Text);
   const [show, setShow] = useState(true);
@@ -113,6 +115,7 @@ const ClipCard: FC<ICardProps> = ({
 
   const handleOpenFile = (file: UploadFile) => {
     file.thumbUrl && openFile(file.thumbUrl);
+    onExit && onExit();
   };
 
   const highlightStyles = useMemo(() => {
@@ -135,18 +138,20 @@ const ClipCard: FC<ICardProps> = ({
             <img width="100%" src={`data:image/png;base64,${context.image}`} alt="" />
           </div>
         );
-      case ActiveEnum.File:
+      case ActiveEnum.Files:
         const fileList = context?.files?.map((file) => ({
           uid: file,
           name: platform === 'win32' ? file.split('\\').slice(-1)[0] : file.split('/').slice(-1)[0],
           thumbUrl: file,
         }));
         return (
-          <Upload
-            showUploadList={{ showRemoveIcon: false }}
-            fileList={fileList}
-            onPreview={handleOpenFile}
-          />
+          <div className={styles.text}>
+            <Upload
+              showUploadList={{ showRemoveIcon: false }}
+              fileList={fileList}
+              onPreview={handleOpenFile}
+            />
+          </div>
         );
       default:
         return <></>;

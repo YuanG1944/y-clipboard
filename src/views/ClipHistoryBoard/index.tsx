@@ -389,6 +389,7 @@ const ClipHistoryBoard: FC = () => {
                     onDoubleClick={handleDoubleClick}
                     onActiveChange={handleActiveChange}
                     reloadTags={reloadTags}
+                    onExit={sendingExit}
                   />
                 ))}
               {loading && (

@@ -87,11 +87,10 @@ where
                 item.push_formats(String::from("text"));
             }
 
-            // TODO fileUrl write pending
-            // if self.manager.read_files().unwrap().len() > 0 {
-            //     item.set_files(self.manager.read_files().unwrap());
-            //     item.push_formats(String::from("files"));
-            // }
+            if self.manager.read_files().unwrap().len() > 0 {
+                item.set_files(self.manager.read_files().unwrap());
+                item.push_formats(String::from("files"));
+            }
         }
 
         if item.formats.len() > 0 {
@@ -288,16 +287,12 @@ impl ClipboardManager {
 
     #[cfg(target_os = "macos")]
     pub fn has_file_url(&self) -> Result<bool, String> {
-        // println!(
-        //     "avaliable---> {:?}",
-        //     self.clipboard.lock().unwrap().available_formats()
-        // );
         Ok(self
             .clipboard
             .try_lock()
             .map_err(|err| err.to_string())
             .unwrap()
-            .has(ContentFormat::Other("public.file-url")))
+            .has(ContentFormat::Other("public.file-url".to_string())))
     }
 
     #[cfg(target_os = "windows")]
@@ -307,7 +302,7 @@ impl ClipboardManager {
             .try_lock()
             .map_err(|err| err.to_string())
             .unwrap()
-            .has(ContentFormat::Other("FileContents")))
+            .has(ContentFormat::Other("FileContents".to_string())))
     }
 
     #[cfg(target_os = "linux")]
@@ -452,20 +447,11 @@ impl ClipboardManager {
     }
 
     pub fn write_files_path(&self, files: Vec<String>) -> Result<(), String> {
-        let _ = files.iter().for_each(|f| {
-            let _ = match fs::read(f) {
-                Ok(buf) => self
-                    .clipboard
-                    .lock()
-                    .map_err(|err| err.to_string())
-                    .unwrap()
-                    .set_buffer("public.file-url", buf),
-                Err(err) => {
-                    println!("write_files_path err: {}", err);
-                    Ok(())
-                }
-            };
-        });
+        self.clipboard
+            .lock()
+            .map_err(|err| err.to_string())?
+            .set_files(files)
+            .unwrap();
         Ok(())
     }
 
