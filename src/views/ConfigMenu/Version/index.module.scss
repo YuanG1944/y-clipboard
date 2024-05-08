@@ -1,3 +1,28 @@
-.menu {
+.version {
+  position: relative;
   height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .subtitle {
+    display: block;
+  }
+
+  .extra {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  .btn {
+    margin-left: 8px;
+  }
+  :global {
+    .ant-result-icon {
+      height: 150px;
+    }
+    .ant-result-extra {
+      margin: 0;
+    }
+  }
 }

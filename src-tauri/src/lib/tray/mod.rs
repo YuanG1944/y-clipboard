@@ -13,7 +13,7 @@ impl Tray {
                 CustomMenuItem::new("preferences", "Preferences").accelerator("CmdOrControl+,"),
             )
             .add_native_item(SystemTrayMenuItem::Separator)
-            // .add_item(CustomMenuItem::new("restart", "Restart"))
+            .add_item(CustomMenuItem::new("restart", "Restart"))
             .add_item(CustomMenuItem::new("quit", "Quit"))
     }
 
@@ -32,7 +32,7 @@ impl Tray {
                         String::from("config"),
                     ));
                 }
-                // "restart" => app_handle.restart(),
+                "restart" => app_handle.restart(),
                 "quit" => {
                     app_handle.exit(0);
                     std::process::exit(0);
