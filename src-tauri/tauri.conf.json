@@ -74,6 +74,9 @@
       "active": true,
       "targets": "all",
       "identifier": "com.tauri.build",
+      "category": "DeveloperTool",
+      "copyright": "© 2024 YuanG1944 All Rights Reserved",
+      "shortDescription": "Clipboard history manager",
       "icon": [
         "icons/y-32x32.png",
         "icons/y-128x128.png",
