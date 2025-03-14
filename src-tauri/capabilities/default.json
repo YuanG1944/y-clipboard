@@ -2,9 +2,7 @@
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
   "description": "Capability for the main window",
-  "windows": [
-    "main"
-  ],
+  "windows": ["main"],
   "permissions": [
     "core:default",
     "opener:default",
@@ -23,6 +21,7 @@
     "core:webview:allow-webview-close",
     "core:webview:allow-webview-hide",
     "core:window:allow-set-size",
+    "os:default",
     "global-shortcut:allow-is-registered",
     "global-shortcut:allow-register",
     "global-shortcut:allow-unregister"

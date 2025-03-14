@@ -33,12 +33,13 @@
         "url": "/main",
         "decorations": false,
         "fullscreen": false,
-        "resizable": true,
+        "resizable": false,
         "hiddenTitle": true,
         "alwaysOnTop": true,
         "visible": false,
         "transparent": true,
         "skipTaskbar": true,
+        "shadow": false,
         "minimizable": true
       },
       {
@@ -54,7 +55,6 @@
         "alwaysOnTop": false,
         "transparent": false,
         "skipTaskbar": true,
-        "closable": false,
         "useHttpsScheme": true
       }
     ],

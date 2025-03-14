@@ -31,6 +31,7 @@ impl<R: Runtime> WebviewWindowExt for WebviewWindow<R> {
 
                 self.set_position(Position::Logical(pos))
                     .expect("failed to set window position");
+
                 self.set_size(Size::Logical(size))
                     .expect("failed to set window size");
             }

@@ -9,7 +9,6 @@ import ClipCard from '@/components/ClipCard';
 import Windows from '@/actions/windows';
 import { ActiveEnum, ITag, StorageItem } from '@/actions/clipboard/type';
 
-import {} from '@tauri-apps/api';
 import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 import {
   deleteItems,
@@ -24,7 +23,6 @@ import {
 import loadingAnim from '@/assets/loading-anim.gif';
 import { getWheelDirection, WheelEnum } from '@/actions/datamanage';
 import * as os from '@tauri-apps/plugin-os';
-import useEscape from '@/hooks/useEscape';
 const appWindow = getCurrentWebviewWindow();
 
 const windows = Windows.getInstance();
@@ -50,8 +48,6 @@ const ClipHistoryBoard: FC = () => {
   const cardContentRef = useRef<HTMLDivElement>(null);
 
   const [tags, setTags] = useState<ITag[]>([]);
-
-  useEscape();
 
   /**
    * Make sure currIndex change to rerender dom
@@ -131,7 +127,7 @@ const ClipHistoryBoard: FC = () => {
     if (!document.hidden) {
       setTimeout(() => {
         setShow(true);
-      }, 150);
+      }, 190);
       resetQueryKey();
       handleBridge();
       handleConfig();
@@ -142,6 +138,7 @@ const ClipHistoryBoard: FC = () => {
     handleVisibility();
     const platform = os.platform();
     if (platform !== 'windows') return;
+
     appWindow.onFocusChanged((act) => {
       if (act.event === 'tauri://focus' && !show) {
         handleVisibility();

@@ -3,6 +3,8 @@ pub fn show_panel(
     app_handle: tauri::AppHandle,
     window: tauri::WebviewWindow,
 ) -> Result<(), String> {
+    let _ = window.show();
+    let _ = window.set_focus();
     Ok(())
 }
 
@@ -11,5 +13,8 @@ pub fn hide_panel(
     app_handle: tauri::AppHandle,
     window: tauri::WebviewWindow,
 ) -> Result<(), String> {
+    if window.is_visible().unwrap() {
+        let _ = window.hide();
+    }
     Ok(())
 }

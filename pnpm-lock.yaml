@@ -21,7 +21,7 @@ dependencies:
     specifier: ~2
     version: 2.2.2
   '@tauri-apps/plugin-os':
-    specifier: ~2
+    specifier: ~2.2.1
     version: 2.2.1
   '@tauri-apps/plugin-shell':
     specifier: ~2
