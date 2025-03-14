@@ -2,53 +2,46 @@
   "build": {
     "beforeDevCommand": "pnpm dev",
     "beforeBuildCommand": "pnpm build",
-    "devPath": "http://localhost:1420",
-    "distDir": "../dist"
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:1420"
   },
-  "package": {
-    "productName": "y-clip",
-    "version": "0.1.8"
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/y-32x32.png",
+      "icons/y-128x128.png",
+      "icons/y-128x128@2x.png",
+      "icons/y-icon.icns",
+      "icons/y-icon.ico"
+    ]
   },
-
-  "tauri": {
-    "macOSPrivateApi": true,
-    "allowlist": {
-      "shell": {
-        "open": true
-      },
-      "window": {
-        "all": true
-      },
-      "globalShortcut": {
-        "all": true
-      },
-      "notification": {
-        "all": true
-      },
-      "os": {
-        "all": true
-      },
-      "fs": {
-        "all": true
-      }
+  "productName": "y-clip",
+  "version": "0.2.0",
+  "identifier": "com.tauri.build",
+  "plugins": {},
+  "app": {
+    "trayIcon": {
+      "id": "sys-tray",
+      "iconPath": "icons/y-icon.png",
+      "showMenuOnLeftClick": true,
+      "iconAsTemplate": true
     },
     "windows": [
       {
         "label": "main",
         "url": "/main",
-        "decorations": false,
         "fullscreen": false,
+        "height": 250,
+        "width": 800,
         "resizable": true,
-        "hiddenTitle": true,
-        "alwaysOnTop": true,
+        "decorations": false,
+        "center": true,
         "visible": false,
-        "transparent": true,
-        "skipTaskbar": true,
-        "minimizable": true
+        "transparent": true
       },
       {
         "label": "config",
-        "title": "Preferences",
         "url": "/config",
         "visible": false,
         "width": 648.0,
@@ -60,30 +53,13 @@
         "alwaysOnTop": false,
         "transparent": false,
         "skipTaskbar": true,
-        "closable": true
+        "closable": false,
+        "useHttpsScheme": true
       }
     ],
     "security": {
       "csp": null
     },
-    "systemTray": {
-      "iconPath": "icons/y-icon.png",
-      "iconAsTemplate": true
-    },
-    "bundle": {
-      "active": true,
-      "targets": "all",
-      "identifier": "com.tauri.build",
-      "category": "DeveloperTool",
-      "copyright": "© 2024 YuanG1944 All Rights Reserved",
-      "shortDescription": "Clipboard history manager",
-      "icon": [
-        "icons/y-32x32.png",
-        "icons/y-128x128.png",
-        "icons/y-128x128@2x.png",
-        "icons/y-icon.icns",
-        "icons/y-icon.ico"
-      ]
-    }
+    "macOSPrivateApi": true
   }
 }

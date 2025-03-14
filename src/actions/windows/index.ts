@@ -1,6 +1,6 @@
 import { WinActEnum } from './type';
-import { unregisterAll } from '@tauri-apps/api/globalShortcut';
-import { invoke } from '@tauri-apps/api/tauri';
+import { unregisterAll } from '@tauri-apps/plugin-global-shortcut';
+import { invoke } from '@tauri-apps/api/core';
 
 export default class Windows {
   private static instance: Windows;

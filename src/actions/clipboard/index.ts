@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { invoke } from '@tauri-apps/api/tauri';
+import { invoke } from '@tauri-apps/api/core';
 import { emit, listen, UnlistenFn } from '@tauri-apps/api/event';
 import {
   ActiveEnum,
@@ -59,6 +59,8 @@ export const safeJsonParse = (str: string) => {
 };
 
 export async function findHistories(query: FindHistoryReq): Promise<StorageItem[]> {
+  console.info('findHistories-->', query);
+
   const clipboardHistoryStr =
     ((await invoke(ClipboardEnum.FIND_HISTORIES, { query })) as string) ?? '';
   const clipboardHistory: StorageItem[] = safeJsonParse(clipboardHistoryStr);

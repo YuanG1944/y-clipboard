@@ -6,8 +6,9 @@ import classnames from 'classnames';
 import CardTitle from './CardTitle';
 import QueueAnim from 'rc-queue-anim';
 import { cancelTag, openFile, subscribeTag } from '@/actions/clipboard';
-import { os } from '@tauri-apps/api';
+import {} from '@tauri-apps/api';
 import { HeartTwoTone } from '@ant-design/icons';
+import * as os from '@tauri-apps/plugin-os';
 
 export interface ICardProps {
   id: string;
@@ -50,9 +51,7 @@ const ClipCard: FC<ICardProps> = ({
   };
 
   const getPlatform = () => {
-    os.platform().then((p) => {
-      setPlatform(p);
-    });
+    setPlatform(os.platform());
   };
 
   const handleOpenChange = (newOpen: boolean) => {

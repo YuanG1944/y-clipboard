@@ -9,10 +9,11 @@ import {
   UselessKeyArray,
   winDefaultKey,
 } from '@/utils/keyMap';
-import { os } from '@tauri-apps/api';
+import {} from '@tauri-apps/api';
 import { getStore, hasKeyStore, setStore } from '@/utils/localStorage';
 import { PasteKey, setPasteShortcut, deletePasteShortcut } from '@/actions/shortcut';
 import { getWheelDirection, setWheelDirection, WheelEnum, WheelKey } from '@/actions/datamanage';
+import * as os from '@tauri-apps/plugin-os';
 
 const { Option } = Select;
 
@@ -124,36 +125,35 @@ const App: React.FC = () => {
   };
 
   const initFormValue = () => {
-    os.platform().then(async (platform) => {
-      let code, value;
-      if (hasKeyStore(StoreKeyEnum.KEYCODE)) {
-        code = (getStore(StoreKeyEnum.KEYCODE) as IKeyCode).code;
-        value = (getStore(StoreKeyEnum.KEYCODE) as IKeyCode).value;
+    const platform = os.platform();
+    let code, value;
+    if (hasKeyStore(StoreKeyEnum.KEYCODE)) {
+      code = (getStore(StoreKeyEnum.KEYCODE) as IKeyCode).code;
+      value = (getStore(StoreKeyEnum.KEYCODE) as IKeyCode).value;
+    } else {
+      if (platform === 'macos') {
+        code = darwinDefaultKey.code;
+        value = darwinDefaultKey.value;
+        setStore(StoreKeyEnum.KEYCODE, darwinDefaultKey);
       } else {
-        if (platform === 'darwin') {
-          code = darwinDefaultKey.code;
-          value = darwinDefaultKey.value;
-          setStore(StoreKeyEnum.KEYCODE, darwinDefaultKey);
-        } else {
-          code = winDefaultKey.code;
-          value = winDefaultKey.value;
-          setStore(StoreKeyEnum.KEYCODE, winDefaultKey);
-        }
+        code = winDefaultKey.code;
+        value = winDefaultKey.value;
+        setStore(StoreKeyEnum.KEYCODE, winDefaultKey);
       }
+    }
 
-      setKeyArr(code);
-      setKeyValue(value);
+    setKeyArr(code);
+    setKeyValue(value);
 
-      form.setFieldsValue({
-        paste: value?.join('+'),
-        pasteCode: code?.join('+'),
-      });
+    form.setFieldsValue({
+      paste: value?.join('+'),
+      pasteCode: code?.join('+'),
+    });
 
-      setPasteShortcut(code?.join('+'));
+    setPasteShortcut(code?.join('+'));
 
-      getWheelDirection().then((wheelVal) => {
-        form.setFieldValue(WheelKey, wheelVal || '1');
-      });
+    getWheelDirection().then((wheelVal) => {
+      form.setFieldValue(WheelKey, wheelVal || '1');
     });
   };
 

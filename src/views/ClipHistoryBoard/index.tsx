@@ -9,19 +9,23 @@ import ClipCard from '@/components/ClipCard';
 import Windows from '@/actions/windows';
 import { ActiveEnum, ITag, StorageItem } from '@/actions/clipboard/type';
 
-import { os } from '@tauri-apps/api';
-import { appWindow } from '@tauri-apps/api/window';
+import {} from '@tauri-apps/api';
+import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
 import {
   deleteItems,
   findHistories,
   getTagsAll,
   paste,
+  startMonitor,
   updateActive,
   updateCreateTime,
   writeSelected,
 } from '@/actions/clipboard';
 import loadingAnim from '@/assets/loading-anim.gif';
 import { getWheelDirection, WheelEnum } from '@/actions/datamanage';
+import * as os from '@tauri-apps/plugin-os';
+import useEscape from '@/hooks/useEscape';
+const appWindow = getCurrentWebviewWindow();
 
 const windows = Windows.getInstance();
 
@@ -46,6 +50,8 @@ const ClipHistoryBoard: FC = () => {
   const cardContentRef = useRef<HTMLDivElement>(null);
 
   const [tags, setTags] = useState<ITag[]>([]);
+
+  useEscape();
 
   /**
    * Make sure currIndex change to rerender dom
@@ -134,13 +140,12 @@ const ClipHistoryBoard: FC = () => {
 
   const win32VisibilityChange = async () => {
     handleVisibility();
-    os.platform().then((platform) => {
-      if (platform !== 'win32') return;
-      appWindow.onFocusChanged((act) => {
-        if (act.event === 'tauri://focus' && !show) {
-          handleVisibility();
-        }
-      });
+    const platform = os.platform();
+    if (platform !== 'windows') return;
+    appWindow.onFocusChanged((act) => {
+      if (act.event === 'tauri://focus' && !show) {
+        handleVisibility();
+      }
     });
   };
 
@@ -188,16 +193,15 @@ const ClipHistoryBoard: FC = () => {
   };
 
   const hideWindow = () => {
-    os.platform().then((platform) => {
-      setShow(false);
-      if (platform === 'darwin') {
-        windows.hideWithSwitchApp();
-      } else {
-        windows.hide();
-      }
-      reloadActive();
-      deleteItems(preHistoryCtx);
-    });
+    const platform = os.platform();
+    setShow(false);
+    if (platform === 'macos') {
+      windows.hideWithSwitchApp();
+    } else {
+      windows.hide();
+    }
+    reloadActive();
+    deleteItems(preHistoryCtx);
   };
 
   const sendingExit = () => {
@@ -342,6 +346,7 @@ const ClipHistoryBoard: FC = () => {
   useEffect(() => {
     win32VisibilityChange();
     reloadTags();
+    startMonitor();
     document.addEventListener('visibilitychange', handleVisibility);
 
     return () => {
