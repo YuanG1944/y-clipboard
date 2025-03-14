@@ -8,8 +8,10 @@ use crate::constants;
 
 pub mod commands;
 pub mod monitor;
+pub mod screen_detect;
 
 pub fn set_up(handle: &tauri::AppHandle) -> tauri::Result<()> {
+    #[cfg(target_os = "macos")]
     let _ = handle.plugin(tauri_nspanel::init());
 
     let main_window = handle.get_webview_window(constants::MAIN_LABEL).unwrap();
@@ -19,8 +21,4 @@ pub fn set_up(handle: &tauri::AppHandle) -> tauri::Result<()> {
     let _main_panel = main_window.to_spotlight_panel()?;
 
     Ok(())
-}
-
-pub fn init<R: Runtime>() -> TauriPlugin<R> {
-    Builder::new("panels").build()
 }

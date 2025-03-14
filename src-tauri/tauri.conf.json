@@ -31,14 +31,15 @@
       {
         "label": "main",
         "url": "/main",
-        "fullscreen": false,
-        "height": 250,
-        "width": 800,
-        "resizable": true,
         "decorations": false,
-        "center": true,
+        "fullscreen": false,
+        "resizable": true,
+        "hiddenTitle": true,
+        "alwaysOnTop": true,
         "visible": false,
-        "transparent": true
+        "transparent": true,
+        "skipTaskbar": true,
+        "minimizable": true
       },
       {
         "label": "config",
