@@ -108,11 +108,13 @@ const CardTitle: FC<ICardTitle> = ({
   };
 
   useKeyPress('uparrow', () => {
-    !navFocus && handleArrowActive('up');
+    // !navFocus && 
+    handleArrowActive('up');
   });
 
   useKeyPress('downarrow', () => {
-    !navFocus && handleArrowActive('down');
+    // !navFocus && 
+    handleArrowActive('down');
   });
 
   useEffect(() => {

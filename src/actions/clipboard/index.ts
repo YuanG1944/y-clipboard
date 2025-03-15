@@ -59,8 +59,6 @@ export const safeJsonParse = (str: string) => {
 };
 
 export async function findHistories(query: FindHistoryReq): Promise<StorageItem[]> {
-  console.info('findHistories-->', query);
-
   const clipboardHistoryStr =
     ((await invoke(ClipboardEnum.FIND_HISTORIES, { query })) as string) ?? '';
   const clipboardHistory: StorageItem[] = safeJsonParse(clipboardHistoryStr);
@@ -326,47 +324,6 @@ export function startBruteForceImageMonitor(delay: number = 1000) {
 }
 
 /**
- * Listen to "plugin:clipboard://clipboard-monitor/update" from Tauri core.
- * But this event doesn't tell us whether text or image is updated,
- * so this function will detect which is changed and emit the corresponding event
- * Event constant variables: TEXT_CHANGED or IMAGE_CHANGED
- * @returns unlisten function
- */
-export function listenToClipboard(): Promise<UnlistenFn> {
-  return listen(ClipboardEnum.MONITOR_UPDATE_EVENT, async (e) => {
-    if (e.payload === 'clipboard update') {
-      // todo: update the file part when clipboard-rs crate supports files
-      try {
-        const files = await readFiles();
-        await emit(ClipboardEnum.FILES_CHANGED, { value: files });
-      } catch (error) {
-        let success = false;
-        if (await hasImage()) {
-          const img = await readImageBase64();
-          if (img) await emit(ClipboardEnum.IMAGE_CHANGED, { value: img });
-          success = true;
-        }
-        if (await hasHTML()) {
-          await emit(ClipboardEnum.HTML_CHANGED, { value: await readHtml() });
-          success = true;
-        }
-        if (await hasRTF()) {
-          await emit(ClipboardEnum.RTF_CHANGED, { value: await readRtf() });
-          success = true;
-        }
-        if (await hasText()) {
-          await emit(ClipboardEnum.TEXT_CHANGED, { value: await readText() });
-          success = true;
-        }
-        if (!success) {
-          throw new Error('Unexpected Error: No proper clipboard type');
-        }
-      }
-    }
-  });
-}
-
-/**
  * This listen to clipboard monitor update event, and trigger the callback function.
  * However from this event we don't know whether it's text or image, no real data is returned.
  * Use with listenToClipboard function.
@@ -413,32 +370,6 @@ export async function onImageUpdate(cb: (base64ImageStr: string) => void): Promi
 }
 
 /**
- * Used to check the status of clipboard monitor
- * @returns Whether the monitor is running
- */
-export function isMonitorRunning(): Promise<boolean> {
-  return invoke(ClipboardEnum.IS_MONITOR_RUNNING_COMMAND).then((res) => z.boolean().parse(res));
-}
-
-/**
- * Start running mointor thread in Tauri core. This feature is added in v0.5.x.
- * Before v0.5.x, the monitor is started during setup when app starts.
- * After v0.5.x, this function must be called first to start monitor.
- * After monitor is started, events "plugin:clipboard://clipboard-monitor/update" will be emitted when there is clipboard update.
- * "plugin:clipboard://clipboard-monitor/status" event is also emitted when monitor status updates
- * Still have to listen to these events.
- */
-export function startMonitor(): Promise<void> {
-  return invoke(ClipboardEnum.START_MONITOR_COMMAND);
-}
-
-/**
- * Stop clipboard monitor thread.
- */
-export function stopMonitor(): Promise<void> {
-  return invoke(ClipboardEnum.STOP_MONITOR_COMMAND);
-}
-/**
  * Listen to monitor status update. Instead of calling isMonitorRunning to get status of monitor,
  * "plugin:clipboard://clipboard-monitor/status" event is emitted from Tauri core when monitor status updates.
  * @param cb callback to be called when there is monitor status update
@@ -450,18 +381,6 @@ export async function listenToMonitorStatusUpdate(
     const newStatus = z.boolean().parse(event.payload);
     cb(newStatus);
   });
-}
-
-export function startListening(): Promise<() => Promise<void>> {
-  return startMonitor()
-    .then(() => listenToClipboard())
-    .then((unListenClipboard) => {
-      // return an unListen function that stop listening to clipboard update and stop the monitor
-      return async () => {
-        unListenClipboard();
-        await stopMonitor();
-      };
-    });
 }
 
 export async function paste(): Promise<void> {

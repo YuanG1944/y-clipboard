@@ -41,7 +41,7 @@ const NavBar: FC<INavBarProps> = ({ checkFocus, onSelectedTagChange, onSearchCha
       <Search
         allowClear
         size="small"
-        placeholder="Y-Clips"
+        placeholder="Y-Clip"
         onFocus={handleFocus}
         onBlur={handleBlur}
         onSearch={handleSearch}

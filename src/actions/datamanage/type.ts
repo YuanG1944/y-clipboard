@@ -1,4 +1,4 @@
-const base = 'plugin:database|';
+const base = '';
 
 export enum DBManageActEnum {
   CLEAR_HISTORY = base + 'clear_history',

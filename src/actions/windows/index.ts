@@ -2,6 +2,15 @@ import { WinActEnum } from './type';
 import { unregisterAll } from '@tauri-apps/plugin-global-shortcut';
 import { invoke } from '@tauri-apps/api/core';
 
+import {
+  startMonitor,
+  stopMonitor,
+  isMonitorRunning,
+  listenToClipboard,
+  listenToMonitorStatusUpdate,
+  onSomethingUpdate,
+} from '@/actions/clipboard/extra';
+
 export default class Windows {
   private static instance: Windows;
 
@@ -19,7 +28,19 @@ export default class Windows {
     return Windows.instance;
   }
 
-  registerAllListener() {}
+  initStatus() {
+    // console.info('initStatus-------->');
+    // startMonitor();
+  }
+
+  registerAllListener() {
+    // listenToClipboard().then((res) => {
+    //   console.info('listenToClipboard', res());
+    // });
+    // onSomethingUpdate((res) => {
+    //   console.info('onSomethingUpdate-->', res);
+    // });
+  }
 
   hide() {
     setTimeout(() => {
@@ -38,10 +59,12 @@ export default class Windows {
   }
 
   createWindow() {
+    this.initStatus();
     this.registerAllListener();
   }
 
   static async destroyWindows() {
+    // stopMonitor();
     await unregisterAll();
   }
 }

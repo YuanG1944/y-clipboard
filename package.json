@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc && vite build",
     "preview": "vite preview",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "plugin": "./init-plugin.sh"
   },
   "author": {
     "name": "Yuan",
@@ -21,6 +22,7 @@
     "@tauri-apps/plugin-notification": "~2",
     "@tauri-apps/plugin-os": "~2.2.1",
     "@tauri-apps/plugin-shell": "~2",
+    "@tauri-apps/plugin-sql": "~2",
     "ahooks": "^3.8.4",
     "antd": "^5.14.0",
     "classnames": "^2.5.1",
@@ -28,11 +30,13 @@
     "electron-squirrel-startup": "^1.0.0",
     "electron-store": "^8.1.0",
     "rc-queue-anim": "^2.0.0",
+    "lodash-es": "^4.17.21",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-router": "^6.22.3",
     "react-router-dom": "^6.22.3",
     "run-applescript": "^7.0.0",
+    "valibot": "^0.40.0",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
@@ -41,6 +45,7 @@
     "@types/react": "^18.3.1",
     "@types/react-dom": "^18.3.1",
     "@types/uuid": "^9.0.8",
+    "@types/lodash-es": "^4.17.12",
     "@typescript-eslint/eslint-plugin": "^5.0.0",
     "@typescript-eslint/parser": "^5.0.0",
     "@vitejs/plugin-react": "^4.3.4",

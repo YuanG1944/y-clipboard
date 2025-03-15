@@ -96,28 +96,25 @@ impl<R: Runtime> WebviewWindowExt for WebviewWindow<R> {
 
         let window_frame: NSRect = unsafe { window_handle.frame() };
 
-        println!("window_frame: height {}", monitor_size.width);
-        println!("window_frame: width {}", monitor_size.height);
-
         let rect = NSRect {
-            // origin: NSPoint {
-            //     x: (monitor_position.x + (monitor_size.width / 2.0))
-            //         - (window_frame.size.width / 2.0),
-            //     y: (monitor_position.y + (monitor_size.height / 2.0))
-            //         - (window_frame.size.height / 2.0),
-            // },
             origin: NSPoint {
-                x: monitor_position.x,
-                y: monitor_position.y,
+                x: (monitor_position.x + (monitor_size.width / 2.0))
+                    - (window_frame.size.width / 2.0),
+                y: (monitor_position.y + (monitor_size.height / 2.0))
+                    - (window_frame.size.height / 2.0),
             },
-            // size: NSSize {
-            //     width: window_frame.size.width,
-            //     height: window_frame.size.height,
+            // origin: NSPoint {
+            //     x: monitor_position.x,
+            //     y: monitor_position.y,
             // },
             size: NSSize {
-                width: monitor_size.width,
-                height: monitor_size.height,
+                width: window_frame.size.width,
+                height: window_frame.size.height,
             },
+            // size: NSSize {
+            //     width: monitor_size.width,
+            //     height: monitor_size.height,
+            // },
         };
 
         let _: () = unsafe { msg_send![window_handle, setFrame: rect display: YES] };

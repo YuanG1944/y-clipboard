@@ -15,7 +15,6 @@ import {
   findHistories,
   getTagsAll,
   paste,
-  startMonitor,
   updateActive,
   updateCreateTime,
   writeSelected,
@@ -176,17 +175,22 @@ const ClipHistoryBoard: FC = () => {
   };
 
   const sendingPaste = async () => {
-    if (!focus) {
-      updateCreateTime(currId);
-      deleteItems(preHistoryCtx);
-      writeSelected(historyCtx, currId, formatActMap);
-      reloadActive();
+    const platform = os.platform();
+    // if (!focus) {
+    updateCreateTime(currId);
+    deleteItems(preHistoryCtx);
+    writeSelected(historyCtx, currId, formatActMap);
+    reloadActive();
+    if (platform === 'macos') {
+      windows.hideWithSwitchApp();
+    } else {
       windows.hide();
-      setShow(false);
-      setTimeout(async () => {
-        paste();
-      }, 200);
     }
+    setShow(false);
+    setTimeout(async () => {
+      paste();
+    }, 200);
+    // }
   };
 
   const hideWindow = () => {
@@ -202,9 +206,9 @@ const ClipHistoryBoard: FC = () => {
   };
 
   const sendingExit = () => {
-    if (!focus) {
-      hideWindow();
-    }
+    // if (!focus) {
+    hideWindow();
+    // }
   };
 
   const handleDoubleClick = () => {
@@ -218,7 +222,6 @@ const ClipHistoryBoard: FC = () => {
   const handleBlankSpace = () => {
     hideWindow();
   };
-
   const handleActiveChange = (act: ActiveEnum, id: string) => {
     setFormatActMap((f) => ({ ...f, [id]: act }));
   };
@@ -247,8 +250,13 @@ const ClipHistoryBoard: FC = () => {
   };
 
   useKeyPress('rightarrow', () => {
+    console.info('rightarrow---->');
     setCurrIndex((num) => {
-      if (!focus && Number(num) < historyCtx.filter((ctx) => ctx.deleted !== true).length - 1) {
+      if (
+        // !focus &&
+        Number(num) <
+        historyCtx.filter((ctx) => ctx.deleted !== true).length - 1
+      ) {
         return Number(num) + 1;
       }
       return setCurrIndexChange(num);
@@ -257,7 +265,10 @@ const ClipHistoryBoard: FC = () => {
 
   useKeyPress('leftarrow', () => {
     setCurrIndex((num) => {
-      if (!focus && Number(num) > 0) {
+      if (
+        // !focus &&
+        Number(num) > 0
+      ) {
         return Number(num) - 1;
       }
       return setCurrIndexChange(num);
@@ -273,47 +284,47 @@ const ClipHistoryBoard: FC = () => {
   });
 
   useKeyPress('backspace', () => {
-    if (!focus) {
-      setPreviewHistoryCtx((arr) => [...arr, currId]);
-      setHistoryCtx((ctx) =>
-        ctx.map((item) => {
-          if (item.id === currId) {
-            return {
-              ...item,
-              deleted: true,
-            };
-          }
-          return item;
-        }),
-      );
-
-      setCurrIndex((num) => {
-        if (Number(num) > 0) {
-          return Number(num) - 1;
+    // if (!focus) {
+    setPreviewHistoryCtx((arr) => [...arr, currId]);
+    setHistoryCtx((ctx) =>
+      ctx.map((item) => {
+        if (item.id === currId) {
+          return {
+            ...item,
+            deleted: true,
+          };
         }
-        return setCurrIndexChange(num);
-      });
-    }
+        return item;
+      }),
+    );
+
+    setCurrIndex((num) => {
+      if (Number(num) > 0) {
+        return Number(num) - 1;
+      }
+      return setCurrIndexChange(num);
+    });
+    // }
   });
 
   useKeyPress(['meta.z', 'ctrl.z'], () => {
-    if (!focus) {
-      if (!preHistoryCtx.length) return;
-      setHistoryCtx((ctx) =>
-        ctx.map((item) => {
-          const last = preHistoryCtx.length - 1;
-          if (item.id === preHistoryCtx[last]) {
-            return {
-              ...item,
-              deleted: false,
-            };
-          }
-          return item;
-        }),
-      );
+    // if (!focus) {
+    if (!preHistoryCtx.length) return;
+    setHistoryCtx((ctx) =>
+      ctx.map((item) => {
+        const last = preHistoryCtx.length - 1;
+        if (item.id === preHistoryCtx[last]) {
+          return {
+            ...item,
+            deleted: false,
+          };
+        }
+        return item;
+      }),
+    );
 
-      setPreviewHistoryCtx((arr) => arr.slice(0, -1));
-    }
+    setPreviewHistoryCtx((arr) => arr.slice(0, -1));
+    // }
   });
 
   const handleSelected = (tag: ITag | null) => {
@@ -343,7 +354,6 @@ const ClipHistoryBoard: FC = () => {
   useEffect(() => {
     win32VisibilityChange();
     reloadTags();
-    startMonitor();
     document.addEventListener('visibilitychange', handleVisibility);
 
     return () => {

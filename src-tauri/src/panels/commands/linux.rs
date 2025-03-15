@@ -18,3 +18,14 @@ pub fn hide_panel(
     }
     Ok(())
 }
+
+#[tauri::command]
+pub fn hide_with_switch_app(
+    app_handle: tauri::AppHandle,
+    window: tauri::WebviewWindow,
+) -> Result<(), String> {
+    if window.is_visible().unwrap() {
+        let _ = window.hide();
+    }
+    Ok(())
+}

@@ -1,8 +1,7 @@
-use tauri::menu::{Menu, MenuBuilder, MenuItem, MenuItemBuilder, PredefinedMenuItem};
+use tauri::menu::{Menu, MenuItemBuilder, PredefinedMenuItem};
 use tauri::plugin::{Builder, TauriPlugin};
 
-use tauri::tray::{MouseButton, TrayIconBuilder, TrayIconEvent};
-use tauri::{window, AppHandle, EventLoopMessage, Manager, Runtime, Wry};
+use tauri::{Manager, Runtime};
 
 use crate::constants;
 

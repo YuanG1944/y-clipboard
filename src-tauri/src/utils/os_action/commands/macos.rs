@@ -12,7 +12,7 @@ pub fn switch_application_action() {
     key_operate(&EventType::KeyPress(Key::F4));
     key_operate(&EventType::KeyRelease(Key::F4));
     key_operate(&EventType::KeyRelease(Key::ControlLeft));
-    sleep(100);
+    sleep(200);
 }
 
 pub fn paste_action() {

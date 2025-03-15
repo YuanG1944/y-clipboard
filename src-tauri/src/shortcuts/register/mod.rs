@@ -18,6 +18,7 @@ pub use windows::*;
 #[cfg(target_os = "linux")]
 pub use linux::*;
 
+#[allow(unused)]
 pub fn shortcut_register<R: Runtime>(app: &tauri::AppHandle<R>) {
-    os_register(app);
+    // os_register(app);
 }

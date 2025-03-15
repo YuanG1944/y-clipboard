@@ -1,8 +1,8 @@
-import { FC, useMemo, useState } from 'react';
+import { FC, useEffect, useMemo, useState } from 'react';
 import { Flex, Layout, MenuProps } from 'antd';
 import Menu, { getItem } from '@/components/Menu';
 import styles from './index.module.scss';
-// import Hotkey from './Hotkey';
+import Hotkey from './Hotkey';
 import Version from './Version';
 // import History from './History';
 
@@ -15,7 +15,7 @@ export enum MenuEnum {
 }
 
 const items: MenuProps['items'] = [
-  // getItem('Hotkey', MenuEnum.HOTKEY, null),
+  getItem('Hotkey', MenuEnum.HOTKEY, null),
   // getItem('History', MenuEnum.HISTORY, null),
   getItem('Version', MenuEnum.VERSION, null),
 ];
@@ -29,8 +29,8 @@ const ConfigMenu: FC = () => {
 
   const Render = useMemo(() => {
     switch (menuItem) {
-      // case MenuEnum.HOTKEY:
-      //   return Hotkey;
+      case MenuEnum.HOTKEY:
+        return Hotkey;
       // case MenuEnum.HISTORY:
       //   return History;
       case MenuEnum.VERSION:
