@@ -27,8 +27,6 @@
     "global-shortcut:allow-is-registered",
     "global-shortcut:allow-register",
     "global-shortcut:allow-unregister",
-    "sql:default",
-    "sql:allow-execute",
     "fs:default"
   ]
 }

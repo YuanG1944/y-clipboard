@@ -30,7 +30,7 @@ use crate::{constants, panels::monitor::WebviewWindowExt, utils::sleep};
 
 pub fn handle_paste<R: Runtime>(app: &tauri::AppHandle<R>) {
     let window = app.get_webview_window(constants::MAIN_LABEL).unwrap();
-    let _ = window.set_fullscreen(true);
+    // let _ = window.set_fullscreen(true);
 
     if !window.is_visible().unwrap() {
         window.center_at_cursor_monitor().unwrap();

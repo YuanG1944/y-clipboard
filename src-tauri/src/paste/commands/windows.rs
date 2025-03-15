@@ -1,14 +1,16 @@
+use crate::{constants, utils::sleep};
+
 use super::wait;
 use enigo::{
     Direction::{Click, Press, Release},
-    Enigo, Key, Keyboard, Settings,
+    Enigo, Keyboard, Settings,
 };
+use rdev::{simulate, EventType, Key, SimulateError};
 use std::ffi::OsString;
 use std::os::windows::ffi::OsStringExt;
 use std::ptr;
 use std::sync::Mutex;
 use tauri::command;
-use tauri_plugin_eco_window::MAIN_WINDOW_TITLE;
 use winapi::shared::minwindef::DWORD;
 use winapi::shared::windef::{HWINEVENTHOOK, HWND};
 use winapi::um::winuser::{
@@ -18,7 +20,6 @@ use winapi::um::winuser::{
 
 static PREVIOUS_WINDOW: Mutex<Option<isize>> = Mutex::new(None);
 
-// 获取窗口标题
 unsafe fn get_window_title(hwnd: HWND) -> String {
     let length = GetWindowTextLengthW(hwnd);
 
@@ -35,7 +36,6 @@ unsafe fn get_window_title(hwnd: HWND) -> String {
         .into_owned()
 }
 
-// 定义事件钩子回调函数
 unsafe extern "system" fn event_hook_callback(
     _h_win_event_hook: HWINEVENTHOOK,
     event: DWORD,
@@ -48,7 +48,7 @@ unsafe extern "system" fn event_hook_callback(
     if event == EVENT_SYSTEM_FOREGROUND {
         let window_title = get_window_title(hwnd);
 
-        if window_title == MAIN_WINDOW_TITLE {
+        if window_title == constants::MAIN_WINDOW_TITLE {
             return;
         }
 
@@ -57,10 +57,8 @@ unsafe extern "system" fn event_hook_callback(
     }
 }
 
-// 监听窗口切换
 pub fn observe_app() {
     unsafe {
-        // 设置事件钩子
         let hook = SetWinEventHook(
             EVENT_SYSTEM_FOREGROUND,
             EVENT_SYSTEM_FOREGROUND,
@@ -78,12 +76,10 @@ pub fn observe_app() {
     }
 }
 
-// 获取上一个窗口
 pub fn get_previous_window() -> Option<isize> {
     return PREVIOUS_WINDOW.lock().unwrap().clone();
 }
 
-// 聚焦上一个窗口
 fn focus_previous_window() {
     unsafe {
         let hwnd = match get_previous_window() {
@@ -99,17 +95,45 @@ fn focus_previous_window() {
     }
 }
 
-// 粘贴
+fn paste_action() {
+    sleep(300);
+    key_operate(&EventType::KeyPress(Key::ControlLeft));
+    key_operate(&EventType::KeyPress(Key::KeyV));
+    key_operate(&EventType::KeyRelease(Key::KeyV));
+    key_operate(&EventType::KeyRelease(Key::ControlLeft));
+    sleep(100);
+}
+
+#[cfg(target_os = "windows")]
+pub fn os_paste() {
+    std::thread::spawn(move || {
+        paste_action();
+    });
+}
+
+fn key_operate(event_type: &EventType) {
+    match simulate(event_type) {
+        Ok(()) => (),
+        Err(SimulateError) => {
+            println!("We could not key_operate {:?}", event_type);
+        }
+    }
+
+    sleep(20)
+}
+
 #[command]
 pub async fn paste() {
+    // os_paste();
     let mut enigo = Enigo::new(&Settings::default()).unwrap();
 
     focus_previous_window();
 
     wait(100);
 
-    enigo.key(Key::Shift, Press).unwrap();
+    enigo.key(enigo::Key::Shift, Press).unwrap();
     // insert 的微软虚拟键码：https://learn.microsoft.com/en-us/windows/win32/inputdev/virtual-key-codes
-    enigo.key(Key::Other(0x2D), Click).unwrap();
-    enigo.key(Key::Shift, Release).unwrap();
+    enigo.key(enigo::Key::Other(0x2D), Click).unwrap();
+    enigo.key(enigo::Key::Shift, Release).unwrap();
 }
+

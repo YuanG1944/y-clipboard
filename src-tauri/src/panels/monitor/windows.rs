@@ -19,15 +19,12 @@ impl<R: Runtime> WebviewWindowExt for WebviewWindow<R> {
         //repos
         match monitors_res {
             Ok(monitors) => {
-                let cursor_monitor = get_cursor_monitor(&monitors).unwrap();
+                // let cursor_monitor = get_cursor_monitor(&monitors).unwrap();
+                let monitor = &monitors[0];
 
-                let pos = cursor_monitor
-                    .position()
-                    .to_logical(cursor_monitor.scale_factor());
+                let pos = monitor.position().to_logical(monitor.scale_factor());
 
-                let size = cursor_monitor
-                    .size()
-                    .to_logical(cursor_monitor.scale_factor());
+                let size = monitor.size().to_logical(monitor.scale_factor());
 
                 self.set_position(Position::Logical(pos))
                     .expect("failed to set window position");
