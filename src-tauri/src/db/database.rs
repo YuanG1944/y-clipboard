@@ -31,8 +31,10 @@ pub struct SqliteDB {
 impl SqliteDB {
     pub fn new() -> Self {
         let data_dir = path::app_data_dir().unwrap().join(SQLITE_FILE_NAME);
+
         let conn =
             Connection::open_with_flags(data_dir, OpenFlags::SQLITE_OPEN_READ_WRITE).unwrap();
+
         SqliteDB { conn }
     }
 
@@ -43,6 +45,7 @@ impl SqliteDB {
 
         let conn =
             Connection::open_with_flags(data_dir, OpenFlags::SQLITE_OPEN_READ_WRITE).unwrap();
+
         let init_history_info_table = r#"
             CREATE TABLE IF NOT EXISTS history_info
             (
@@ -695,5 +698,15 @@ fn test_sqlite_query() {
 
     let res = SqliteDB::new().find_histories(r);
     println!("info-------> {:?}", res);
+    assert_eq!(true, true)
+}
+
+#[test]
+fn test_path() {
+    let data_dir = path::app_data_dir().unwrap().join(SQLITE_FILE_NAME);
+
+    let _ = create_dir(&data_dir);
+
+    println!("info-------> {:?}", data_dir.to_str());
     assert_eq!(true, true)
 }

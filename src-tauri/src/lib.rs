@@ -17,12 +17,12 @@ mod utils;
 pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_os::init())
+        .plugin(db::plugin::init(86400 as u64))
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())
         .plugin(shortcuts::init())
         .plugin(mod_tray::init())
         .plugin(clipboard_monitor::plugin::init(true))
         // 86400s == 1 day
-        .plugin(db::plugin::init(86400 as u64))
         .plugin(paste::init())
         .invoke_handler(tauri::generate_handler![
             mod_panels::commands::show_panel,
@@ -86,6 +86,7 @@ pub fn run() {
             app.set_activation_policy(tauri::ActivationPolicy::Accessory);
 
             mod_panels::set_up(app.app_handle())?;
+            db::database::SqliteDB::init();
 
             Ok(())
         })

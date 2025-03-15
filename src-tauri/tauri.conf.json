@@ -46,7 +46,7 @@
       {
         "label": "config",
         "url": "/config",
-        "visible": false,
+        "visible": true,
         "width": 648.0,
         "height": 480.0,
         "decorations": true,
