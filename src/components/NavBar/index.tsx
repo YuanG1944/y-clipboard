@@ -4,7 +4,6 @@ import styles from './index.module.scss';
 import { SearchProps } from 'antd/es/input';
 import Tags from '@/components/Tags';
 import { ITag } from '@/actions/clipboard/type';
-import { v4 as uuidv4 } from 'uuid';
 
 const { Search } = Input;
 

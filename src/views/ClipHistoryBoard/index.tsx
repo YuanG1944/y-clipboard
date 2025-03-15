@@ -188,7 +188,6 @@ const ClipHistoryBoard: FC = () => {
   };
 
   const hideWindow = () => {
-    const platform = os.platform();
     setShow(false);
     windows.hide();
     reloadActive();

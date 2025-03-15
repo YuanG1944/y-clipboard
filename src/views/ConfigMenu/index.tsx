@@ -1,4 +1,4 @@
-import { FC, useEffect, useMemo, useState } from 'react';
+import { FC, useMemo, useState } from 'react';
 import { Flex, Layout, MenuProps } from 'antd';
 import Menu, { getItem } from '@/components/Menu';
 import styles from './index.module.scss';

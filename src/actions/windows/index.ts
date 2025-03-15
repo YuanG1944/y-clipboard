@@ -2,15 +2,6 @@ import { WinActEnum } from './type';
 import { unregisterAll } from '@tauri-apps/plugin-global-shortcut';
 import { invoke } from '@tauri-apps/api/core';
 
-import {
-  startMonitor,
-  stopMonitor,
-  isMonitorRunning,
-  listenToClipboard,
-  listenToMonitorStatusUpdate,
-  onSomethingUpdate,
-} from '@/actions/clipboard/extra';
-
 export default class Windows {
   private static instance: Windows;
 
