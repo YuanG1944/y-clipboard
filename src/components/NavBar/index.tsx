@@ -4,6 +4,7 @@ import styles from './index.module.scss';
 import { SearchProps } from 'antd/es/input';
 import Tags from '@/components/Tags';
 import { ITag } from '@/actions/clipboard/type';
+import { v4 as uuidv4 } from 'uuid';
 
 const { Search } = Input;
 
@@ -23,6 +24,7 @@ const NavBar: FC<INavBarProps> = ({ checkFocus, onSelectedTagChange, onSearchCha
   };
 
   const handleSearch: SearchProps['onSearch'] = (value) => {
+    console.info('search-->', value);
     onSearchChange && onSearchChange(value);
   };
 
@@ -42,7 +44,7 @@ const NavBar: FC<INavBarProps> = ({ checkFocus, onSelectedTagChange, onSearchCha
         allowClear
         size="small"
         placeholder="Y-Clip"
-        onFocus={handleFocus}
+        onClick={handleFocus}
         onBlur={handleBlur}
         onSearch={handleSearch}
         onKeyDown={handleKeyDownSearch}

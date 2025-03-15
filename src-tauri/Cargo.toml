@@ -35,7 +35,6 @@ tauri-plugin-os = "2"
 thiserror = "2.0.12"
 rdev = "0.5.3"
 tauri-plugin-sql = { version = "2", features = ["sqlite"] }
-# tauri-plugin-clipboard-manager = { path = "../src-tauri/src/plugins/clipboard_manager" }
 base64 = "0.22.1"
 image = "0.25.1"
 uuid = "1.7.0"
@@ -47,6 +46,8 @@ rusqlite = { version = "0.31.0", features = ["bundled"] }
 tokio = { version = "1.44.1", features = ["full"] }
 
 [target.'cfg(target_os = "macos")'.dependencies]
+cocoa = "0.25.0"
+objc = "0.2.7"
 monitor = { git = "https://github.com/ahkohd/tauri-toolkit", branch = "v2" }
 tauri-nspanel = { git = "https://github.com/ahkohd/tauri-nspanel", branch = "v2" }
 

@@ -8,6 +8,7 @@ mod clipboard_monitor;
 mod constants;
 mod db;
 mod panels;
+mod paste;
 mod shortcuts;
 mod trays;
 mod utils;
@@ -23,10 +24,10 @@ pub fn run() {
         .plugin(clipboard_monitor::plugin::init(true))
         // 86400s == 1 day
         .plugin(db::plugin::init(86400 as u64))
+        .plugin(paste::init())
         .invoke_handler(tauri::generate_handler![
             mod_panels::commands::show_panel,
             mod_panels::commands::hide_panel,
-            mod_panels::commands::hide_with_switch_app,
             shortcuts::commands::set_paste_shortcut,
             shortcuts::commands::del_shortcut,
             shortcuts::commands::get_paste_shortcut,
@@ -63,7 +64,8 @@ pub fn run() {
             clipboard_monitor::plugin::write_image_base64,
             clipboard_monitor::plugin::write_files_path,
             clipboard_monitor::plugin::open_file,
-            clipboard_monitor::plugin::paste,
+            // clipboard_monitor::plugin::paste,
+            paste::paste,
             clipboard_monitor::plugin::clear,
             db::plugin::clear_history,
             db::plugin::set_config,

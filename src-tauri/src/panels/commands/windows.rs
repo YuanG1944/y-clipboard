@@ -1,10 +1,12 @@
+use crate::panels::monitor::{shared_hide_window, shared_show_window};
+
 #[tauri::command]
 pub fn show_panel(
     app_handle: tauri::AppHandle,
     window: tauri::WebviewWindow,
 ) -> Result<(), String> {
-    let _ = window.show();
-    let _ = window.set_focus();
+    shared_show_window(&app_handle, &window);
+
     Ok(())
 }
 
@@ -13,19 +15,7 @@ pub fn hide_panel(
     app_handle: tauri::AppHandle,
     window: tauri::WebviewWindow,
 ) -> Result<(), String> {
-    if window.is_visible().unwrap() {
-        let _ = window.hide();
-    }
-    Ok(())
-}
+    shared_hide_window(&app_handle, &window);
 
-#[tauri::command]
-pub fn hide_with_switch_app(
-    app_handle: tauri::AppHandle,
-    window: tauri::WebviewWindow,
-) -> Result<(), String> {
-    if window.is_visible().unwrap() {
-        let _ = window.hide();
-    }
     Ok(())
 }

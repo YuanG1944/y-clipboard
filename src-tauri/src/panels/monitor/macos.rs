@@ -1,4 +1,4 @@
-use tauri::{Emitter, Manager, Runtime, WebviewWindow};
+use tauri::{AppHandle, Emitter, Manager, Runtime, WebviewWindow};
 use tauri_nspanel::{
     cocoa::{
         appkit::{NSMainMenuWindowLevel, NSView, NSWindowCollectionBehavior},
@@ -6,11 +6,21 @@ use tauri_nspanel::{
         foundation::{NSPoint, NSRect, NSSize},
     },
     objc::{msg_send, sel, sel_impl},
-    panel_delegate, Panel, WebviewWindowExt as PanelWebviewWindowExt,
+    panel_delegate, ManagerExt, Panel, WebviewWindowExt as PanelWebviewWindowExt,
 };
 use thiserror::Error;
 
+use crate::constants;
+
+use super::is_main_window;
+
 type TauriError = tauri::Error;
+
+pub enum MacOSPanelStatus {
+    Show,
+    Hide,
+    Resign,
+}
 
 #[derive(Error, Debug)]
 enum Error {
@@ -97,28 +107,54 @@ impl<R: Runtime> WebviewWindowExt for WebviewWindow<R> {
         let window_frame: NSRect = unsafe { window_handle.frame() };
 
         let rect = NSRect {
-            origin: NSPoint {
-                x: (monitor_position.x + (monitor_size.width / 2.0))
-                    - (window_frame.size.width / 2.0),
-                y: (monitor_position.y + (monitor_size.height / 2.0))
-                    - (window_frame.size.height / 2.0),
-            },
             // origin: NSPoint {
-            //     x: monitor_position.x,
-            //     y: monitor_position.y,
+            //     x: (monitor_position.x + (monitor_size.width / 2.0))
+            //         - (window_frame.size.width / 2.0),
+            //     y: (monitor_position.y + (monitor_size.height / 2.0))
+            //         - (window_frame.size.height / 2.0),
             // },
-            size: NSSize {
-                width: window_frame.size.width,
-                height: window_frame.size.height,
+            origin: NSPoint {
+                x: monitor_position.x,
+                y: monitor_position.y,
             },
             // size: NSSize {
-            //     width: monitor_size.width,
-            //     height: monitor_size.height,
+            //     width: window_frame.size.width,
+            //     height: window_frame.size.height,
             // },
+            size: NSSize {
+                width: monitor_size.width,
+                height: monitor_size.height,
+            },
         };
 
         let _: () = unsafe { msg_send![window_handle, setFrame: rect display: YES] };
 
         Ok(())
+    }
+}
+
+pub fn set_macos_panel<R: Runtime>(
+    app_handle: &AppHandle<R>,
+    window: &WebviewWindow<R>,
+    status: MacOSPanelStatus,
+) {
+    if is_main_window(window) {
+        let app_handle_clone = app_handle.clone();
+
+        let _ = app_handle.run_on_main_thread(move || {
+            if let Ok(panel) = app_handle_clone.get_webview_panel(constants::MAIN_LABEL) {
+                match status {
+                    MacOSPanelStatus::Show => {
+                        panel.show();
+                    }
+                    MacOSPanelStatus::Hide => {
+                        panel.order_out(None);
+                    }
+                    MacOSPanelStatus::Resign => {
+                        panel.resign_key_window();
+                    }
+                }
+            }
+        });
     }
 }

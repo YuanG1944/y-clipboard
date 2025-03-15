@@ -23,7 +23,6 @@ import loadingAnim from '@/assets/loading-anim.gif';
 import { getWheelDirection, WheelEnum } from '@/actions/datamanage';
 import * as os from '@tauri-apps/plugin-os';
 const appWindow = getCurrentWebviewWindow();
-
 const windows = Windows.getInstance();
 
 const ClipHistoryBoard: FC = () => {
@@ -175,40 +174,31 @@ const ClipHistoryBoard: FC = () => {
   };
 
   const sendingPaste = async () => {
-    const platform = os.platform();
-    // if (!focus) {
-    updateCreateTime(currId);
-    deleteItems(preHistoryCtx);
-    writeSelected(historyCtx, currId, formatActMap);
-    reloadActive();
-    if (platform === 'macos') {
-      windows.hideWithSwitchApp();
-    } else {
+    if (!focus) {
+      updateCreateTime(currId);
+      deleteItems(preHistoryCtx);
+      writeSelected(historyCtx, currId, formatActMap);
+      reloadActive();
       windows.hide();
+      setShow(false);
+      setTimeout(async () => {
+        paste();
+      }, 200);
     }
-    setShow(false);
-    setTimeout(async () => {
-      paste();
-    }, 200);
-    // }
   };
 
   const hideWindow = () => {
     const platform = os.platform();
     setShow(false);
-    if (platform === 'macos') {
-      windows.hideWithSwitchApp();
-    } else {
-      windows.hide();
-    }
+    windows.hide();
     reloadActive();
     deleteItems(preHistoryCtx);
   };
 
   const sendingExit = () => {
-    // if (!focus) {
-    hideWindow();
-    // }
+    if (!focus) {
+      hideWindow();
+    }
   };
 
   const handleDoubleClick = () => {
@@ -250,13 +240,8 @@ const ClipHistoryBoard: FC = () => {
   };
 
   useKeyPress('rightarrow', () => {
-    console.info('rightarrow---->');
     setCurrIndex((num) => {
-      if (
-        // !focus &&
-        Number(num) <
-        historyCtx.filter((ctx) => ctx.deleted !== true).length - 1
-      ) {
+      if (!focus && Number(num) < historyCtx.filter((ctx) => ctx.deleted !== true).length - 1) {
         return Number(num) + 1;
       }
       return setCurrIndexChange(num);
@@ -265,10 +250,7 @@ const ClipHistoryBoard: FC = () => {
 
   useKeyPress('leftarrow', () => {
     setCurrIndex((num) => {
-      if (
-        // !focus &&
-        Number(num) > 0
-      ) {
+      if (!focus && Number(num) > 0) {
         return Number(num) - 1;
       }
       return setCurrIndexChange(num);
@@ -284,47 +266,47 @@ const ClipHistoryBoard: FC = () => {
   });
 
   useKeyPress('backspace', () => {
-    // if (!focus) {
-    setPreviewHistoryCtx((arr) => [...arr, currId]);
-    setHistoryCtx((ctx) =>
-      ctx.map((item) => {
-        if (item.id === currId) {
-          return {
-            ...item,
-            deleted: true,
-          };
-        }
-        return item;
-      }),
-    );
+    if (!focus) {
+      setPreviewHistoryCtx((arr) => [...arr, currId]);
+      setHistoryCtx((ctx) =>
+        ctx.map((item) => {
+          if (item.id === currId) {
+            return {
+              ...item,
+              deleted: true,
+            };
+          }
+          return item;
+        }),
+      );
 
-    setCurrIndex((num) => {
-      if (Number(num) > 0) {
-        return Number(num) - 1;
-      }
-      return setCurrIndexChange(num);
-    });
-    // }
+      setCurrIndex((num) => {
+        if (Number(num) > 0) {
+          return Number(num) - 1;
+        }
+        return setCurrIndexChange(num);
+      });
+    }
   });
 
   useKeyPress(['meta.z', 'ctrl.z'], () => {
-    // if (!focus) {
-    if (!preHistoryCtx.length) return;
-    setHistoryCtx((ctx) =>
-      ctx.map((item) => {
-        const last = preHistoryCtx.length - 1;
-        if (item.id === preHistoryCtx[last]) {
-          return {
-            ...item,
-            deleted: false,
-          };
-        }
-        return item;
-      }),
-    );
+    if (!focus) {
+      if (!preHistoryCtx.length) return;
+      setHistoryCtx((ctx) =>
+        ctx.map((item) => {
+          const last = preHistoryCtx.length - 1;
+          if (item.id === preHistoryCtx[last]) {
+            return {
+              ...item,
+              deleted: false,
+            };
+          }
+          return item;
+        }),
+      );
 
-    setPreviewHistoryCtx((arr) => arr.slice(0, -1));
-    // }
+      setPreviewHistoryCtx((arr) => arr.slice(0, -1));
+    }
   });
 
   const handleSelected = (tag: ITag | null) => {
@@ -340,6 +322,12 @@ const ClipHistoryBoard: FC = () => {
     queryKeyRef.current = value;
     setQueryKey(value);
   };
+
+  useEffect(() => {
+    if (!show) {
+      setFocus(false);
+    }
+  }, [show]);
 
   useEffect(() => {
     const id = historyCtx.filter((ctx) => ctx.deleted !== true)?.[Number(currIndex)]?.id || '';

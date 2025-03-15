@@ -6,10 +6,7 @@ use tauri::{
     Emitter, Manager, Runtime, State,
 };
 
-use crate::{
-    clipboard_history::FindHistoryReq,
-    utils::os_action::commands::{key_register, os_paste},
-};
+use crate::clipboard_history::FindHistoryReq;
 
 use super::monitor::{ClipboardManager, ClipboardMonitor};
 
@@ -207,11 +204,6 @@ pub fn open_file(manager: State<'_, ClipboardManager>, file_path: String) -> Res
 }
 
 #[tauri::command]
-pub fn paste() {
-    os_paste();
-}
-
-#[tauri::command]
 pub fn clear(manager: State<'_, ClipboardManager>) -> Result<(), String> {
     manager.clear()
 }
@@ -235,6 +227,11 @@ pub async fn start_monitor(
 
     Ok(())
 }
+
+// #[tauri::command]
+// pub fn paste() {
+//     os_paste();
+// }
 
 pub fn start_monitor_setup<R: Runtime>(app_handle: tauri::AppHandle<R>) {
     let running = Arc::new(Mutex::new(true));
@@ -271,7 +268,6 @@ pub fn init<R: Runtime>(open_watch: bool) -> TauriPlugin<R> {
                 start_monitor_setup(app.clone());
             }
             app.manage(state);
-            key_register();
             Ok(())
         })
         .on_event(

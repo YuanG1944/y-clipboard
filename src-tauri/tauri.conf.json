@@ -30,6 +30,7 @@
     "windows": [
       {
         "label": "main",
+        "title": "Y-CLIP",
         "url": "/main",
         "decorations": false,
         "fullscreen": false,
