@@ -1,3 +1,20 @@
 .menu {
-  height: 100vh;
+  background-color: #f5f6f8;
+  border: none;
+
+  :global {
+    .ant-menu-item-selected {
+      background-color: #ffe58f;
+      color: #141414;
+    }
+
+    .ant-menu-item {
+      padding-left: 24px;
+      display: flex;
+    }
+
+    // .ant-menu-item:not(.ant-menu-item-selected):hover {
+    //   background-color: #fafafa !important;
+    // }
+  }
 }

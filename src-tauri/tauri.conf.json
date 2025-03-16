@@ -46,6 +46,7 @@
       {
         "label": "config",
         "url": "/config",
+        "title": "Y-ClIP Configuration",
         "visible": true,
         "width": 648.0,
         "height": 480.0,
@@ -55,8 +56,11 @@
         "hiddenTitle": false,
         "alwaysOnTop": false,
         "transparent": false,
-        "skipTaskbar": true,
-        "useHttpsScheme": true
+        "useHttpsScheme": true,
+        "minWidth": 648.0,
+        "maxWidth": 940.0,
+        "minHeight": 480.0,
+        "maxHeight": 810
       }
     ],
     "security": {

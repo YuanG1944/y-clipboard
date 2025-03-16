@@ -1,0 +1,38 @@
+{
+  "lan": {
+    "en": "英",
+    "zh": "中"
+  },
+  "hotkey": {
+    "title": "快捷键",
+    "Paste": "粘贴快捷键",
+    "Revert Scroll Wheel": "反转滚轮",
+    "RevertSelect": {
+      "Normal": "正常",
+      "Reverse": "反转"
+    }
+  },
+  "history": {
+    "title": "历史记录",
+    "Expire Time": "过期时间",
+    "ExpireSelect": {
+      "1": "1 天",
+      "7": "7 天",
+      "14": "14 天",
+      "30": "30 天",
+      "60": "60 天"
+    },
+    "Clear History": "清空历史记录",
+    "alert": {
+      "description": "确认要清楚所有历史记录？",
+      "delete": "删除",
+      "cancel": "取消"
+    }
+  },
+  "version": {
+    "title": "版本",
+    "description": "由tauri开发的跨平台微型剪贴板管理工具",
+    "Autostart": "开机自动启动",
+    "Version": "版本号"
+  }
+}

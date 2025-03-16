@@ -14,6 +14,7 @@ import { getStore, hasKeyStore, setStore } from '@/utils/localStorage';
 import { PasteKey, setPasteShortcut, deletePasteShortcut } from '@/actions/shortcut';
 import { getWheelDirection, setWheelDirection, WheelEnum, WheelKey } from '@/actions/datamanage';
 import * as os from '@tauri-apps/plugin-os';
+import { useTranslation } from 'react-i18next';
 
 const { Option } = Select;
 
@@ -26,24 +27,26 @@ export interface FormValue {
   pasteCode: string;
 }
 
-const scrollOptions = [
-  {
-    label: 'Normal',
-    value: WheelEnum.NORMAL,
-  },
-  {
-    label: 'Reverse',
-    value: WheelEnum.REVERSE,
-  },
-];
-
 const App: React.FC = () => {
   const [monitorVal, setMonitorVal] = useState(false);
   const [keyArr, setKeyArr] = useState<number[]>([]);
   const [keyValue, setKeyValue] = useState<string[]>([]);
   const [form] = Form.useForm<FormValue>();
 
+  const { t } = useTranslation();
+
   const [messageApi, contextHolder] = message.useMessage();
+
+  const scrollOptions = [
+    {
+      label: t('hotkey.RevertSelect.Normal'),
+      value: WheelEnum.NORMAL,
+    },
+    {
+      label: t('hotkey.RevertSelect.Reverse'),
+      value: WheelEnum.REVERSE,
+    },
+  ];
 
   const resetKeyArr = () => {
     deletePasteShortcut(keyArr?.join('+'));
@@ -204,7 +207,7 @@ const App: React.FC = () => {
     <>
       <div className={styles.hotkey}>
         <Form layout="vertical" form={form}>
-          <Form.Item label="Paste" name={PasteKey} required>
+          <Form.Item label={t('hotkey.Paste')} name={PasteKey} required>
             <div className={styles.inputGroup}>
               <Input
                 value={keyValue.join('+')}
@@ -221,7 +224,7 @@ const App: React.FC = () => {
               />
             </div>
           </Form.Item>
-          <Form.Item label="Revert Scroll Wheel" name={WheelKey} required>
+          <Form.Item label={t('hotkey.Revert Scroll Wheel')} name={WheelKey} required>
             <Select placeholder="Please Select Wheel Scroll Direction" onChange={changeScrollValue}>
               {scrollOptions.map((item) => (
                 <Option key={item.label} value={item.value}>

@@ -1,0 +1,38 @@
+{
+  "lan": {
+    "en": "En",
+    "zh": "Zh"
+  },
+  "hotkey": {
+    "title": "Hotkey",
+    "Paste": "Paste",
+    "Revert Scroll Wheel": "Revert Scroll Wheel",
+    "RevertSelect": {
+      "Normal": "Normal",
+      "Reverse": "Reverse"
+    }
+  },
+  "history": {
+    "title": "History",
+    "Expire Time": "Expire Time",
+    "ExpireSelect": {
+      "1": "1 Days",
+      "7": "7 Days",
+      "14": "14 Days",
+      "30": "30 Days",
+      "60": "60 Days"
+    },
+    "Clear History": "Clear History",
+    "alert": {
+      "description": "Do you want to delete all your paste history?",
+      "delete": "Delete",
+      "cancel": "Cancel"
+    }
+  },
+  "version": {
+    "title": "Version",
+    "description": "A cross-platform tiny clipboard management tool power by tauri",
+    "Autostart": "Autostart",
+    "Version": "Version"
+  }
+}

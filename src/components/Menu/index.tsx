@@ -30,6 +30,9 @@ const Menu: React.FC<IMenuProps> = ({ defaultSelectedKeys = [], items = [], onSe
     <AntdMenu
       className={styles.menu}
       defaultSelectedKeys={defaultSelectedKeys}
+      style={{
+        borderInlineEnd: 'none',
+      }}
       items={items}
       onSelect={(info) => onSelect && onSelect(info)}
     />

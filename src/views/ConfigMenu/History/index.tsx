@@ -10,41 +10,40 @@ import {
   setExpire,
   restartClearInterval,
 } from '@/actions/datamanage';
+import { useTranslation } from 'react-i18next';
 
 const { Option } = Select;
-
-const expireOptions = [
-  // {
-  //   label: '10 Seconds',
-  //   value: '-10 seconds',
-  // },
-  {
-    label: '1 Day',
-    value: '-1 day',
-  },
-  {
-    label: '7 Days',
-    value: '-7 day',
-  },
-  {
-    label: '14 Days',
-    value: '-14 day',
-  },
-  {
-    label: '30 Days',
-    value: '-30 day',
-  },
-  {
-    label: '60 Days',
-    value: '-60 day',
-  },
-];
 
 const History: FC = () => {
   const [form] = Form.useForm();
   const expireValue = Form.useWatch(ExpireKey, form);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const { t } = useTranslation();
+
+  const expireOptions = [
+    {
+      label: t('history.ExpireSelect.1'),
+      value: '-1 day',
+    },
+    {
+      label: t('history.ExpireSelect.7'),
+      value: '-7 day',
+    },
+    {
+      label: t('history.ExpireSelect.14'),
+      value: '-14 day',
+    },
+    {
+      label: t('history.ExpireSelect.30'),
+      value: '-30 day',
+    },
+    {
+      label: t('history.ExpireSelect.60'),
+      value: '-60 day',
+    },
+  ];
 
   const handleClearHistory = async () => {
     setIsModalOpen(true);
@@ -79,7 +78,7 @@ const History: FC = () => {
   return (
     <div className={styles.hotkey}>
       <Form className={styles.form} layout="vertical" form={form}>
-        <Form.Item label="Expire Time" name={ExpireKey}>
+        <Form.Item label={t('history.Expire Time')} name={ExpireKey}>
           <Select placeholder="Please Select history expire time" onChange={changeExpireTime}>
             {expireOptions.map((item) => (
               <Option key={item.value} value={item.value}>
@@ -90,7 +89,7 @@ const History: FC = () => {
         </Form.Item>
         <Form.Item className={styles.clearButton}>
           <Button type="primary" onClick={handleClearHistory} danger>
-            Clear History
+            {t('history.Clear History')}
           </Button>
         </Form.Item>
       </Form>
@@ -104,13 +103,14 @@ const History: FC = () => {
         }
         open={isModalOpen}
         onOk={handleOk}
-        okText="Delete"
+        okText={t('history.alert.delete')}
+        cancelText={t('history.alert.cancel')}
         okButtonProps={{
           danger: true,
         }}
         onCancel={handleCancel}
       >
-        <p className={styles.modalContents}>Do you want to delete all your paste history?</p>
+        <p className={styles.modalContents}>{t('history.alert.description')}</p>
       </Modal>
     </div>
   );

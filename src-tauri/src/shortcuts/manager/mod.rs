@@ -26,7 +26,6 @@ impl GlobalShortcut {
 
     pub fn register_paste<R: Runtime>(app: &tauri::AppHandle<R>, paste: &str) -> tauri::Result<()> {
         // let window = Arc::new(app.get_webview_window("main").unwrap());
-        println!("This is paste hot key: {}", paste);
 
         let shortcut_manager = app.global_shortcut();
 

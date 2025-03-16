@@ -136,4 +136,3 @@ pub async fn paste() {
     enigo.key(enigo::Key::Other(0x2D), Click).unwrap();
     enigo.key(enigo::Key::Shift, Release).unwrap();
 }
-

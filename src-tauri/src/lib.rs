@@ -1,5 +1,6 @@
 use panels as mod_panels;
 use tauri::Manager;
+use tauri_plugin_autostart::MacosLauncher;
 use tauri_plugin_global_shortcut::{self, GlobalShortcutExt};
 use trays as mod_tray;
 
@@ -16,6 +17,10 @@ mod utils;
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_autostart::init(
+            MacosLauncher::LaunchAgent,
+            Some(vec!["--flag1", "--flag2"]),
+        ))
         .plugin(tauri_plugin_os::init())
         .plugin(db::plugin::init(86400 as u64))
         .plugin(tauri_plugin_global_shortcut::Builder::new().build())

@@ -3,17 +3,55 @@
   height: 100vh;
   width: calc(50% - 8px);
   overflow: hidden;
+  background: #f5f6f8;
+  top: 0;
+  bottom: 0;
+
+  .header {
+    height: 32px;
+    margin: 16px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    img {
+      width: 28px;
+      height: 28px;
+    }
+    .text {
+      font-size: 24px;
+      font-weight: 600;
+    }
+  }
 
   .sider {
     text-align: center;
-    line-height: 120px;
-    background-color: #fff;
+    background: #f5f6f8;
+    max-width: 200px;
+  }
+
+  .top {
+    flex: 1;
+  }
+
+  .bottom {
+    margin: 20px;
   }
 
   .content {
-    width: 100%;
     text-align: center;
     min-height: 120;
     line-height: 120px;
+    background: #fff;
+    border-radius: 12px;
+    margin: 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+
+  :global {
+    .ant-layout-sider-children {
+      display: flex;
+      flex-direction: column;
+    }
   }
 }
