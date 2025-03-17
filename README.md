@@ -62,7 +62,7 @@ Manual download：[Apple Silicon](https://github.com/YuanG1944/y-clipboard/relea
 
   ![paste](./mdImage/paste.gif)
 
-- `⬅️ ➡️ 方向键`：Select clipboard content / `⬆️ ⬇️ 方向键`：Switch paste format
+- `⬅️ ➡️ Arrow keys`：Select clipboard content / `⬆️ ⬇️ Arrow keys`：Switch paste format
 
   ![switch](./mdImage/switch.gif)
 
