@@ -1,15 +1,12 @@
-
-
 # Y-CLIP
 
-A next-generation **cross-platform clipboard enhancement tool** built on the **Tauri framework**, designed for efficiency!
+基于**Tauri 框架**构建的新一代跨平台剪切板增强工具，为效率而生！
 
-
->Note: Linux support is currently under development as I don't have a Linux device for testing.
+>注：由于本人手头没有linux电脑，当前版本暂不支持 Linux系统（开发中）
 
 <div align="center">
   <div>
-      English | <a href="./README.zh.md">简体中文</a> 
+      简体中文 | <a href="./README.md">English</a> 
   </div>
   <br/>
 </div>
@@ -35,61 +32,60 @@ A next-generation **cross-platform clipboard enhancement tool** built on the **T
     />
   </a >
 
-## Features
+## 核心特性
 
-- **Supports All Formats**  
-  Plain text | Rich text | HTML | Images | Files
-- **Privacy-First Design**  
-  Fully local storage | No internet connection | Secure data
-- **Smart Favorites**  
-  Save frequently used content | Organize with custom categories
-- **Lightning-Fast Workflow**  
-  Global hotkeys | Mouse-free operation
+- **全格式支持**  
+  纯文本 | 富文本 | HTML | 图片 | 文件  
+- **隐私至上设计**  
+  完全本地存储 | 永不联网 | 数据安全
+- **智能收藏夹**  
+  收藏高频内容 | 自定义分类管理
+- **极速操作流**  
+  全局快捷键 | 零鼠标工作流 
 
-## Installation
+## 快速安装
 
 ### Windows
 
-Manual download：[x64](https://github.com/YuanG1944/y-clipboard/releases/tag/windows)
+手动下载：[x64](https://github.com/YuanG1944/y-clipboard/releases/tag/windows)
 
 ### MacOS
 
-Manual download：[Apple Silicon](https://github.com/YuanG1944/y-clipboard/releases/tag/macos)
+手动下载：[Apple Silicon](https://github.com/YuanG1944/y-clipboard/releases/tag/macos)
 
-## How to Use
+## 使用指南
 
-### Basic Operations
+### 基础操作
 
-- **`Ctrl/Cmd + Shift + B`**：Open clipboard history
+- **`Ctrl/Cmd + Shift + B`**：唤醒剪贴板历史
 
   ![paste](/Users/u0047610/Desktop/study/tauri/y-clipboard/mdImage/paste.gif)
 
-- `⬅️ ➡️ 方向键`：Select clipboard content  /  `⬆️ ⬇️ 方向键`：Switch paste format 
+- `⬅️ ➡️ 方向键`：**选择粘贴内容**  /  `⬆️ ⬇️ 方向键`：**切换粘贴格式** 
 
   ![switch](/Users/u0047610/Desktop/study/tauri/y-clipboard/mdImage/switch.gif)
 
-- **`Enter`**：Paste the selected content
+- **`Enter`**：**粘贴选中内容**
 
-- **Save current content to Favorites**
+- **收藏当前内容**
 
   ![favorite](/Users/u0047610/Desktop/study/tauri/y-clipboard/mdImage/favorite.gif)
 
-- **Search clipboard history**
+- **搜索**
 
   ![search](/Users/u0047610/Desktop/study/tauri/y-clipboard/mdImage/search.gif)
 
 
-> **First-Time Use Reminder**  
-> Please grant clipboard access permission in your system settings:
->
-> - macOS: System Preferences → Security & Privacy → Privacy → Accessibility
+> **首次使用提示**  
+> 请在系统设置中授予剪贴板访问权限：
+> - macOS: `系统偏好设置 → 安全性与隐私 → 隐私 → 辅助功能`
 >
 >   <img src="/Users/u0047610/Desktop/study/tauri/y-clipboard/mdImage/accessibility.png" alt="accessibility" style="zoom:30%;" />
 >
-> - If you see a “file is damaged” error, run
+> - 如果遇到“文件已损坏“，请执行
 > `xattr -c /Applications/y-clip.app`
 >
 
-> **Encountered an issue?**  
-> Report it on the  [Issues](https://github.com/YuanG1944/y-clipboard/issues)  
-> _Please include: OS version, steps to reproduce, and error screenshots._
+> **遇到问题？**  
+> 欢迎提交至 [Issues 追踪系统](https://github.com/YuanG1944/y-clipboard/issues)  
+> _请附上：系统版本/复现步骤/错误截图_

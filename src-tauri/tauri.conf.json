@@ -47,7 +47,7 @@
         "label": "config",
         "url": "/config",
         "title": "Y-ClIP Configuration",
-        "visible": true,
+        "visible": false,
         "width": 648.0,
         "height": 480.0,
         "decorations": true,
