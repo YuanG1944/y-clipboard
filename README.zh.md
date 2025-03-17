@@ -31,6 +31,7 @@
       src="https://img.shields.io/github/license/EcoPasteHub/EcoPaste?style=flat-square"
     />
   </a >
+</div>
 
 ## 核心特性
 
@@ -59,28 +60,28 @@
 
 - **`Ctrl/Cmd + Shift + B`**：唤醒剪贴板历史
 
-  ![paste](/Users/u0047610/Desktop/study/tauri/y-clipboard/mdImage/paste.gif)
+  ![paste](./mdImage/paste.gif)
 
 - `⬅️ ➡️ 方向键`：**选择粘贴内容**  /  `⬆️ ⬇️ 方向键`：**切换粘贴格式** 
 
-  ![switch](/Users/u0047610/Desktop/study/tauri/y-clipboard/mdImage/switch.gif)
+  ![switch](./mdImage/switch.gif)
 
 - **`Enter`**：**粘贴选中内容**
 
 - **收藏当前内容**
 
-  ![favorite](/Users/u0047610/Desktop/study/tauri/y-clipboard/mdImage/favorite.gif)
+  ![favorite](./mdImage/favorite.gif)
 
 - **搜索**
 
-  ![search](/Users/u0047610/Desktop/study/tauri/y-clipboard/mdImage/search.gif)
+  ![search](./mdImage/search.gif)
 
 
 > **首次使用提示**  
 > 请在系统设置中授予剪贴板访问权限：
 > - macOS: `系统偏好设置 → 安全性与隐私 → 隐私 → 辅助功能`
 >
->   <img src="/Users/u0047610/Desktop/study/tauri/y-clipboard/mdImage/accessibility.png" alt="accessibility" style="zoom:30%;" />
+>   <img src="./mdImage/accessibility.png" alt="accessibility" style="zoom:30%;" />
 >
 > - 如果遇到“文件已损坏“，请执行
 > `xattr -c /Applications/y-clip.app`

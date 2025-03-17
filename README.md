@@ -1,11 +1,8 @@
-
-
 # Y-CLIP
 
 A next-generation **cross-platform clipboard enhancement tool** built on the **Tauri framework**, designed for efficiency!
 
-
->Note: Linux support is currently under development as I don't have a Linux device for testing.
+> Note: Linux support is currently under development as I don't have a Linux device for testing.
 
 <div align="center">
   <div>
@@ -34,6 +31,7 @@ A next-generation **cross-platform clipboard enhancement tool** built on the **T
       src="https://img.shields.io/github/license/EcoPasteHub/EcoPaste?style=flat-square"
     />
   </a >
+</div>
 
 ## Features
 
@@ -62,34 +60,32 @@ Manual download：[Apple Silicon](https://github.com/YuanG1944/y-clipboard/relea
 
 - **`Ctrl/Cmd + Shift + B`**：Open clipboard history
 
-  ![paste](/Users/u0047610/Desktop/study/tauri/y-clipboard/mdImage/paste.gif)
+  ![paste](./mdImage/paste.gif)
 
-- `⬅️ ➡️ 方向键`：Select clipboard content  /  `⬆️ ⬇️ 方向键`：Switch paste format 
+- `⬅️ ➡️ 方向键`：Select clipboard content / `⬆️ ⬇️ 方向键`：Switch paste format
 
-  ![switch](/Users/u0047610/Desktop/study/tauri/y-clipboard/mdImage/switch.gif)
+  ![switch](./mdImage/switch.gif)
 
 - **`Enter`**：Paste the selected content
 
 - **Save current content to Favorites**
 
-  ![favorite](/Users/u0047610/Desktop/study/tauri/y-clipboard/mdImage/favorite.gif)
+  ![favorite](./mdImage/favorite.gif)
 
 - **Search clipboard history**
 
-  ![search](/Users/u0047610/Desktop/study/tauri/y-clipboard/mdImage/search.gif)
-
+  ![search](./mdImage/search.gif)
 
 > **First-Time Use Reminder**  
 > Please grant clipboard access permission in your system settings:
 >
 > - macOS: System Preferences → Security & Privacy → Privacy → Accessibility
 >
->   <img src="/Users/u0047610/Desktop/study/tauri/y-clipboard/mdImage/accessibility.png" alt="accessibility" style="zoom:30%;" />
+>   <img src="./mdImage/accessibility.png" alt="accessibility" style="zoom:30%;" />
 >
 > - If you see a “file is damaged” error, run
-> `xattr -c /Applications/y-clip.app`
->
+>   `xattr -c /Applications/y-clip.app`
 
 > **Encountered an issue?**  
-> Report it on the  [Issues](https://github.com/YuanG1944/y-clipboard/issues)  
+> Report it on the [Issues](https://github.com/YuanG1944/y-clipboard/issues)  
 > _Please include: OS version, steps to reproduce, and error screenshots._
