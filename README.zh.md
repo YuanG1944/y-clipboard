@@ -48,11 +48,11 @@
 
 ### Windows
 
-手动下载：[x64](https://github.com/YuanG1944/y-clipboard/releases/tag/windows)
+下载：[x64](https://github.com/YuanG1944/y-clipboard/releases/tag/windows)
 
 ### MacOS
 
-手动下载：[Apple Silicon](https://github.com/YuanG1944/y-clipboard/releases/tag/macos)
+下载：[Apple Silicon](https://github.com/YuanG1944/y-clipboard/releases/tag/macos) | [Apple Intel](https://github.com/YuanG1944/y-clipboard/releases/tag/macos_intel)
 
 ## 使用指南
 

@@ -48,11 +48,11 @@ A next-generation **cross-platform clipboard enhancement tool** built on the **T
 
 ### Windows
 
-Manual download：[x64](https://github.com/YuanG1944/y-clipboard/releases/tag/windows)
+Download：[x64](https://github.com/YuanG1944/y-clipboard/releases/tag/windows)
 
 ### MacOS
 
-Manual download：[Apple Silicon](https://github.com/YuanG1944/y-clipboard/releases/tag/macos)
+Download：[Apple Silicon](https://github.com/YuanG1944/y-clipboard/releases/tag/macos) | [Apple Intel](https://github.com/YuanG1944/y-clipboard/releases/tag/macos_intel)
 
 ## How to Use
 
