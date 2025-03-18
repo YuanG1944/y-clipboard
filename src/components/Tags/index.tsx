@@ -29,14 +29,14 @@ export interface TagCollectType {
   checkFocus?: (isFocus: boolean) => void;
 }
 
-const Tags: React.FC<TagCollectType> = ({ show, onSelectedTagChange, checkFocus }) => {
+const Tags: React.FC<TagCollectType> = ({ show, onSelectedTagChange }) => {
   const [tags, setTags] = useState<ITag[]>([]);
   const [selectedTag, setSelectedTag] = useState<ITag | null>(null);
   const [inputVisible, setInputVisible] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [editInputIndex, setEditInputIndex] = useState(-1);
   const [editInputValue, setEditInputValue] = useState('');
-  const [tagIdx, setTagIdx] = useState(0);
+  const [_, setTagIdx] = useState(0);
   const inputRef = useRef<InputRef>(null);
   const editInputRef = useRef<InputRef>(null);
 

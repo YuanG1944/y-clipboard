@@ -39,6 +39,10 @@
       margin: 0;
     }
 
+    .ant-switch.ant-switch-checked {
+      background-color: #faad14;
+    }
+
     .ant-switch.ant-switch-checked:hover:not(.ant-switch-disabled) {
       background-color: #faad14;
     }

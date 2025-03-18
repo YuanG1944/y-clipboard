@@ -4,32 +4,38 @@ import { Button, Result, Switch } from 'antd';
 import YIcon from '@/assets/y-icon.png';
 import { Typography } from 'antd';
 import { GithubOutlined } from '@ant-design/icons';
-import { enable, isEnabled, disable } from '@tauri-apps/plugin-autostart';
+import { enable, disable } from '@tauri-apps/plugin-autostart';
 import { useTranslation } from 'react-i18next';
+import { getStore, hasKeyStore, setStore } from '@/utils/localStorage';
 
 const { Title } = Typography;
 
+const STORE_AUTOSTART = '__store_autostart__';
+
 const Version: FC = () => {
-  const [autostart, setAutostart] = useState(true);
+  const [autostart, setAutostart] = useState(getStore(STORE_AUTOSTART) ?? true);
   const { t } = useTranslation();
 
-  const initAutostartStatus = async () => {
-    const flag = await isEnabled();
-    setAutostart(flag);
+  const initAutostart = () => {
+    if (hasKeyStore(STORE_AUTOSTART)) {
+      setAutostart(getStore(STORE_AUTOSTART));
+      return;
+    }
+    setStore(STORE_AUTOSTART, true);
   };
 
   const handleAutostart = (val: boolean) => {
     setAutostart(val);
+    setStore(STORE_AUTOSTART, val);
 
-    if (val) {
-      return enable();
-    }
-    return disable();
+    return val
+      ? enable().then(() => console.info('enable'))
+      : disable().then(() => console.info('disable'));
   };
 
   useEffect(() => {
-    initAutostartStatus();
-  });
+    initAutostart();
+  }, []);
 
   const handleClick = () => {
     const a = window.document.createElement('a');
@@ -57,7 +63,6 @@ const Version: FC = () => {
                 size="small"
                 // checkedChildren={<CheckOutlined />}
                 // unCheckedChildren={<CloseOutlined />}
-                defaultChecked
               />
             </div>
           </div>

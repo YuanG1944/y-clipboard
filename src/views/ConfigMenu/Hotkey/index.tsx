@@ -156,6 +156,7 @@ const App: React.FC = () => {
     setPasteShortcut(code?.join('+'));
 
     getWheelDirection().then((wheelVal) => {
+      //@ts-ignore
       form.setFieldValue(WheelKey, wheelVal || '1');
     });
   };

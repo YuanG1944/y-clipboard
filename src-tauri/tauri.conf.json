@@ -17,7 +17,7 @@
     ]
   },
   "productName": "y-clip",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "identifier": "com.tauri.build",
   "plugins": {},
   "app": {

@@ -15,7 +15,6 @@ const SwitchLang: FC = () => {
 
   const initLang = () => {
     if (hasKeyStore(STORE_LANG)) {
-      console.info('xxxx', getStore(STORE_LANG));
       setLang(getStore(STORE_LANG));
       return;
     }
