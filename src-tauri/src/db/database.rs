@@ -205,7 +205,8 @@ impl SqliteDB {
         let curr_time = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap()
-            .as_secs() * 1000;
+            .as_secs()
+            * 1000;
 
         self.conn.execute(sql, (id.as_str(), curr_time))?;
         Ok(())
@@ -427,7 +428,8 @@ impl SqliteDB {
                 SystemTime::now()
                     .duration_since(UNIX_EPOCH)
                     .unwrap()
-                    .as_secs() * 1000,
+                    .as_secs()
+                    * 1000,
             ),
         ) {
             Ok(res) => println!("Insert tags successfully!"),
@@ -565,7 +567,7 @@ impl SqliteDB {
                 history_info h
             LEFT JOIN 
                 favorite_connect_history_table f 
-            ON 
+            ON ((await invoke(ClipboardEnum.FIND_HISTORIES, { query })) as string) ?? '';
                 h.id = f.history_id
             WHERE 
                 1=1
@@ -573,14 +575,20 @@ impl SqliteDB {
         );
 
         if let Some(tag) = req.tag {
+            println!("tag: {}", tag);
+
             if !tag.is_empty() {
+                println!("tag is_empty: {}", tag);
                 params.push(tag.to_string());
                 sql.push_str(format!("AND tag_id = ?{}", params.len()).as_str());
             }
         }
 
         if let Some(k) = &req.key {
+            println!("key: {}", k);
+
             if !k.is_empty() {
+                println!("key is_empty: {}", k);
                 params.push(format!("%{}%", k));
                 sql.push_str(format!("AND text LIKE ?{}", params.len()).as_str());
             }
@@ -604,6 +612,8 @@ impl SqliteDB {
                 .as_str(),
             );
         }
+
+        println!("params-->{:?}", params);
 
         let mut stmt = self.conn.prepare(&sql)?;
         let mut rows = stmt.query(rusqlite::params_from_iter(params))?;

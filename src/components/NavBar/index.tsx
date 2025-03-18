@@ -10,12 +10,19 @@ const { Search } = Input;
 
 export interface INavBarProps {
   show?: boolean;
+  ctxLen?: number;
   checkFocus?: (isFocus: boolean) => void;
   onSelectedTagChange?: (selectedTag: ITag | null) => void;
   onSearchChange?: (value: string) => void;
 }
 
-const NavBar: FC<INavBarProps> = ({ show, checkFocus, onSelectedTagChange, onSearchChange }) => {
+const NavBar: FC<INavBarProps> = ({
+  show,
+  ctxLen,
+  checkFocus,
+  onSelectedTagChange,
+  onSearchChange,
+}) => {
   const inputRef = useRef<InputRef>(null);
   const handleFocus = () => {
     checkFocus && checkFocus(true);
@@ -37,9 +44,10 @@ const NavBar: FC<INavBarProps> = ({ show, checkFocus, onSelectedTagChange, onSea
     if (event.key === 'Enter') {
       event.preventDefault();
       handleSearch(event.currentTarget.value, event);
-      setTimeout(() => {
-        checkFocus?.(false);
-      }, 400);
+      ctxLen &&
+        setTimeout(() => {
+          checkFocus?.(false);
+        }, 400);
     }
   };
 
@@ -56,6 +64,7 @@ const NavBar: FC<INavBarProps> = ({ show, checkFocus, onSelectedTagChange, onSea
         allowClear
         size="small"
         placeholder="Y-Clip"
+        onChange={handleFocus}
         onClick={handleFocus}
         onBlur={handleBlur}
         onSearch={handleSearch}
