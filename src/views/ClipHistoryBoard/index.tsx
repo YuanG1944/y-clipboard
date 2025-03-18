@@ -367,6 +367,7 @@ const ClipHistoryBoard: FC = () => {
           <div className={styles.clipHistoryBoard} key="aniBar">
             <div className={styles.navBar}>
               <NavBar
+                show={show}
                 checkFocus={handleFocus}
                 onSelectedTagChange={handleSelected}
                 onSearchChange={handleSearched}

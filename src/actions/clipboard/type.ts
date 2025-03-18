@@ -60,7 +60,7 @@ export interface StorageItem {
   files?: string[];
   image?: string;
   formats?: string[];
-  timestamp?: number;
+  create_time?: number;
   active?: ActiveEnum;
   deleted?: boolean;
   collect?: boolean;

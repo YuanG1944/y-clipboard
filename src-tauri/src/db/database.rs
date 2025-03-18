@@ -41,6 +41,8 @@ impl SqliteDB {
     pub fn init() {
         let data_dir = path::app_data_dir().unwrap().join(SQLITE_FILE_NAME);
 
+        println!("data path: {}", data_dir.to_str().unwrap());
+
         let _ = create_dir(&data_dir);
 
         let conn =
@@ -203,7 +205,7 @@ impl SqliteDB {
         let curr_time = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap()
-            .as_secs();
+            .as_secs() * 1000;
 
         self.conn.execute(sql, (id.as_str(), curr_time))?;
         Ok(())
@@ -425,7 +427,7 @@ impl SqliteDB {
                 SystemTime::now()
                     .duration_since(UNIX_EPOCH)
                     .unwrap()
-                    .as_secs(),
+                    .as_secs() * 1000,
             ),
         ) {
             Ok(res) => println!("Insert tags successfully!"),

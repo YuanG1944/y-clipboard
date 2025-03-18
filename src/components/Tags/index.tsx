@@ -4,6 +4,7 @@ import type { InputRef } from 'antd';
 import { Input, Tag, Tooltip } from 'antd';
 import { addTag, deleteTag, getTagsAll, setTag } from '@/actions/clipboard';
 import { ITag } from '@/actions/clipboard/type';
+import { useKeyPress } from 'ahooks';
 
 const tagColors: string[] = [
   '#ff4d4f',
@@ -23,16 +24,19 @@ const tagInputStyle: React.CSSProperties = {
 };
 
 export interface TagCollectType {
+  show?: boolean;
   onSelectedTagChange?: (selectedTag: ITag | null) => void;
+  checkFocus?: (isFocus: boolean) => void;
 }
 
-const Tags: React.FC<TagCollectType> = ({ onSelectedTagChange }) => {
+const Tags: React.FC<TagCollectType> = ({ show, onSelectedTagChange, checkFocus }) => {
   const [tags, setTags] = useState<ITag[]>([]);
   const [selectedTag, setSelectedTag] = useState<ITag | null>(null);
   const [inputVisible, setInputVisible] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [editInputIndex, setEditInputIndex] = useState(-1);
   const [editInputValue, setEditInputValue] = useState('');
+  const [tagIdx, setTagIdx] = useState(0);
   const inputRef = useRef<InputRef>(null);
   const editInputRef = useRef<InputRef>(null);
 
@@ -91,6 +95,15 @@ const Tags: React.FC<TagCollectType> = ({ onSelectedTagChange }) => {
     return setSelectedTag(tag);
   };
 
+  useKeyPress('tab', (evt) => {
+    evt.preventDefault();
+    const len = tags.length + 1;
+    setTagIdx((idx) => {
+      setSelectedTag(tags[idx % len]);
+      return idx + 1;
+    });
+  });
+
   useEffect(() => {
     if (inputVisible) {
       inputRef.current?.focus();
@@ -104,6 +117,12 @@ const Tags: React.FC<TagCollectType> = ({ onSelectedTagChange }) => {
   useEffect(() => {
     onSelectedTagChange && onSelectedTagChange(selectedTag);
   }, [selectedTag]);
+
+  useEffect(() => {
+    if (!show) {
+      setTagIdx(0);
+    }
+  }, [show]);
 
   useEffect(() => {
     reloadTags();

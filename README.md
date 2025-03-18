@@ -67,6 +67,10 @@ Manual download：[Apple Silicon](https://github.com/YuanG1944/y-clipboard/relea
   ![switch](./mdImage/switch.gif)
 
 - **`Enter`**：Paste the selected content
+- **`Backspace`**：Delete the selected content
+- **`tab`**: Switch lab
+- **`ctrl/cmd + z`**: Undo the delete action
+- **`ctrl/cmd + f`**: Focus on search input
 
 - **Save current content to Favorites**
 

@@ -127,7 +127,7 @@ const CardTitle: FC<ICardTitle> = ({
     <div className={styles.title}>
       <div className={styles.ctx}>
         <div className={styles.text}>{titleList.filter((item) => item.active)?.[0]?.title}</div>
-        <div className={styles.time}>{dayjs(context.timestamp).format('YYYY-MM-DD HH:mm')}</div>
+        <div className={styles.time}>{dayjs(context.create_time).format('YYYY-MM-DD HH:mm')}</div>
       </div>
       <div>
         {titleList

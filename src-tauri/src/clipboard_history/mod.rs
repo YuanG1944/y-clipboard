@@ -33,7 +33,8 @@ impl HistoryItem {
         let create_time = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap()
-            .as_secs();
+            .as_secs()
+            * 1000;
 
         Self {
             id: Uuid::new_v4().to_string(),

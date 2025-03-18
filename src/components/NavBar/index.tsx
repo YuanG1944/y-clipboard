@@ -1,19 +1,22 @@
-import { FC, KeyboardEventHandler } from 'react';
+import { FC, KeyboardEventHandler, useRef } from 'react';
 import { Input } from 'antd';
 import styles from './index.module.scss';
-import { SearchProps } from 'antd/es/input';
+import { InputRef, SearchProps } from 'antd/es/input';
 import Tags from '@/components/Tags';
 import { ITag } from '@/actions/clipboard/type';
+import { useKeyPress } from 'ahooks';
 
 const { Search } = Input;
 
 export interface INavBarProps {
+  show?: boolean;
   checkFocus?: (isFocus: boolean) => void;
   onSelectedTagChange?: (selectedTag: ITag | null) => void;
   onSearchChange?: (value: string) => void;
 }
 
-const NavBar: FC<INavBarProps> = ({ checkFocus, onSelectedTagChange, onSearchChange }) => {
+const NavBar: FC<INavBarProps> = ({ show, checkFocus, onSelectedTagChange, onSearchChange }) => {
+  const inputRef = useRef<InputRef>(null);
   const handleFocus = () => {
     checkFocus && checkFocus(true);
   };
@@ -23,7 +26,6 @@ const NavBar: FC<INavBarProps> = ({ checkFocus, onSelectedTagChange, onSearchCha
   };
 
   const handleSearch: SearchProps['onSearch'] = (value) => {
-    console.info('search-->', value);
     onSearchChange && onSearchChange(value);
   };
 
@@ -33,13 +35,24 @@ const NavBar: FC<INavBarProps> = ({ checkFocus, onSelectedTagChange, onSearchCha
 
   const handleKeyDownSearch: KeyboardEventHandler<HTMLInputElement> = (event) => {
     if (event.key === 'Enter') {
+      event.preventDefault();
       handleSearch(event.currentTarget.value, event);
+      setTimeout(() => {
+        checkFocus?.(false);
+      }, 400);
     }
   };
+
+  useKeyPress(['meta.f', 'ctrl.f'], (e) => {
+    checkFocus?.(true);
+    e.preventDefault();
+    inputRef.current!.focus({ cursor: 'end' });
+  });
 
   return (
     <div className={styles.navBar}>
       <Search
+        ref={inputRef}
         allowClear
         size="small"
         placeholder="Y-Clip"
@@ -50,7 +63,7 @@ const NavBar: FC<INavBarProps> = ({ checkFocus, onSelectedTagChange, onSearchCha
         style={{ width: 280 }}
       />
       <div className={styles.tags}>
-        <Tags onSelectedTagChange={handleSelected} />
+        <Tags onSelectedTagChange={handleSelected} show={show} />
       </div>
     </div>
   );
