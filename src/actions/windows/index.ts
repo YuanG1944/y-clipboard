@@ -1,6 +1,7 @@
 import { WinActEnum } from './type';
 import { unregisterAll } from '@tauri-apps/plugin-global-shortcut';
 import { invoke } from '@tauri-apps/api/core';
+import { initPasteHotkey } from '../shortcut';
 
 export default class Windows {
   private static instance: Windows;
@@ -20,18 +21,10 @@ export default class Windows {
   }
 
   initStatus() {
-    // console.info('initStatus-------->');
-    // startMonitor();
+    initPasteHotkey();
   }
 
-  registerAllListener() {
-    // listenToClipboard().then((res) => {
-    //   console.info('listenToClipboard', res());
-    // });
-    // onSomethingUpdate((res) => {
-    //   console.info('onSomethingUpdate-->', res);
-    // });
-  }
+  registerAllListener() {}
 
   hide() {
     setTimeout(() => {

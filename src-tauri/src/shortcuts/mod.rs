@@ -14,7 +14,6 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
     Builder::new("y-shortcut")
         .setup(move |_app, _api| {
             let state = manager::ShortcutManage::default();
-            let _ = manager::GlobalShortcut::register_paste(_app, constants::DEFAULT_PASTE_HOTKEY);
             _app.manage(state);
             Ok(())
         })

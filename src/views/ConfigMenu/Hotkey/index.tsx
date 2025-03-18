@@ -123,7 +123,6 @@ const App: React.FC = () => {
       code: keyArr,
       value: keyValue,
     });
-
     setPasteShortcut(keyArr?.join('+'));
   };
 
