@@ -19,7 +19,7 @@ export enum MenuEnum {
 }
 
 const ConfigMenu: FC = () => {
-  const [menuItem, setMenuItem] = useState<MenuEnum>(MenuEnum.VERSION);
+  const [menuItem, setMenuItem] = useState<MenuEnum>(MenuEnum.HOTKEY);
   const { t } = useTranslation();
 
   const items: MenuProps['items'] = [

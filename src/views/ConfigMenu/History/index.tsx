@@ -2,7 +2,16 @@ import { FC, useEffect, useState } from 'react';
 import { ExclamationCircleFilled } from '@ant-design/icons';
 
 import styles from './index.module.scss';
-import { Button, Form, Modal, Select } from 'antd';
+import {
+  Breadcrumb,
+  Button,
+  Descriptions,
+  DescriptionsProps,
+  Form,
+  Modal,
+  Select,
+  Typography,
+} from 'antd';
 import {
   clearHistory,
   getExpire,
@@ -12,6 +21,7 @@ import {
 } from '@/actions/datamanage';
 import { useTranslation } from 'react-i18next';
 
+const { Title, Text } = Typography;
 const { Option } = Select;
 
 const History: FC = () => {
@@ -75,11 +85,20 @@ const History: FC = () => {
     restartClearInterval();
   }, [expireValue]);
 
-  return (
-    <div className={styles.hotkey}>
-      <Form className={styles.form} layout="vertical" form={form}>
-        <Form.Item label={t('history.Expire Time')} name={ExpireKey}>
-          <Select placeholder="Please Select history expire time" onChange={changeExpireTime}>
+  const items: DescriptionsProps['items'] = [
+    {
+      label: <Text>{t('history.Expire Time')}: </Text>,
+      span: 'filled',
+      children: (
+        <Form.Item
+          // label={t('history.Expire Time')}
+          name={ExpireKey}
+        >
+          <Select
+            style={{ width: 220 }}
+            placeholder="Please Select history expire time"
+            onChange={changeExpireTime}
+          >
             {expireOptions.map((item) => (
               <Option key={item.value} value={item.value}>
                 {item.label}
@@ -87,27 +106,40 @@ const History: FC = () => {
             ))}
           </Select>
         </Form.Item>
-        <Form.Item className={styles.clearButton}>
-          <Button type="primary" onClick={handleClearHistory} danger>
-            {t('history.Clear History')}
-          </Button>
-        </Form.Item>
-      </Form>
+      ),
+    },
+  ];
+
+  return (
+    <div className={styles.hotkey}>
+      <div className={styles.header}>
+        <Breadcrumb separator=">" items={[{ title: 'Y-CLIP' }, { title: t('history.title') }]} />
+        <Title className={styles.title}>{t('history.title')}</Title>
+      </div>
+
+      <div className={styles.form}>
+        <Form layout="vertical" form={form}>
+          <Descriptions bordered items={items} layout="vertical" />
+        </Form>
+
+        <Button
+          className={styles.btn}
+          style={{ width: '100%' }}
+          type="primary"
+          onClick={handleClearHistory}
+        >
+          {t('history.Clear History')}
+        </Button>
+      </div>
 
       <Modal
         centered
-        title={
-          <div className={styles.deleteModalIcon}>
-            <ExclamationCircleFilled />
-          </div>
-        }
+        title={<div className={styles.deleteModalIcon}></div>}
         open={isModalOpen}
         onOk={handleOk}
         okText={t('history.alert.delete')}
         cancelText={t('history.alert.cancel')}
-        okButtonProps={{
-          danger: true,
-        }}
+        okButtonProps={{}}
         onCancel={handleCancel}
       >
         <p className={styles.modalContents}>{t('history.alert.description')}</p>

@@ -1,5 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { Form, Input, Select, Switch, message } from 'antd';
+import {
+  Breadcrumb,
+  Descriptions,
+  DescriptionsProps,
+  Form,
+  Input,
+  Select,
+  Switch,
+  Typography,
+  message,
+} from 'antd';
 import styles from './index.module.scss';
 import { useEventListener } from 'ahooks';
 import {
@@ -16,6 +26,7 @@ import { getWheelDirection, setWheelDirection, WheelEnum, WheelKey } from '@/act
 import * as os from '@tauri-apps/plugin-os';
 import { useTranslation } from 'react-i18next';
 
+const { Title, Text } = Typography;
 const { Option } = Select;
 
 export enum StoreKeyEnum {
@@ -203,36 +214,69 @@ const App: React.FC = () => {
     initFormValue();
   }, []);
 
+  const items: DescriptionsProps['items'] = [
+    {
+      label: <Text>{t('hotkey.Paste')}: </Text>,
+      span: 'filled',
+      children: (
+        <Form.Item
+          // label={<Text style={{ fontSize: '18px' }}>{t('hotkey.Paste')}: </Text>}
+          name={PasteKey}
+          required
+        >
+          <div className={styles.inputGroup}>
+            <Input
+              value={keyValue.join('+')}
+              onChange={handleChange}
+              placeholder="Please input paste hotkey"
+              disabled={!monitorVal}
+              style={{ width: 220 }}
+              allowClear
+            />
+            <Switch
+              style={{ marginLeft: '12px' }}
+              size="small"
+              value={monitorVal}
+              onChange={handleMonitor}
+            />
+          </div>
+        </Form.Item>
+      ),
+    },
+    {
+      label: <Text>{t('hotkey.Revert Scroll Wheel')}: </Text>,
+      span: 'filled', // span will be 3 and warning for span is not align to the end
+      children: (
+        <Form.Item
+          // label={<Text style={{ fontSize: '18px' }}>{t('hotkey.Revert Scroll Wheel')}: </Text>}
+          name={WheelKey}
+          required
+        >
+          <Select
+            style={{ width: 220 }}
+            placeholder="Please Select Wheel Scroll Direction"
+            onChange={changeScrollValue}
+          >
+            {scrollOptions.map((item) => (
+              <Option key={item.label} value={item.value}>
+                {item.label}
+              </Option>
+            ))}
+          </Select>
+        </Form.Item>
+      ),
+    },
+  ];
+
   return (
     <>
       <div className={styles.hotkey}>
+        <div className={styles.header}>
+          <Breadcrumb separator=">" items={[{ title: 'Y-CLIP' }, { title: t('hotkey.title') }]} />
+          <Title className={styles.title}>{t('hotkey.title')}</Title>
+        </div>
         <Form layout="vertical" form={form}>
-          <Form.Item label={t('hotkey.Paste')} name={PasteKey} required>
-            <div className={styles.inputGroup}>
-              <Input
-                value={keyValue.join('+')}
-                onChange={handleChange}
-                placeholder="Please input paste hotkey"
-                disabled={!monitorVal}
-                allowClear
-              />
-              <Switch
-                style={{ marginLeft: '12px' }}
-                size="small"
-                value={monitorVal}
-                onChange={handleMonitor}
-              />
-            </div>
-          </Form.Item>
-          <Form.Item label={t('hotkey.Revert Scroll Wheel')} name={WheelKey} required>
-            <Select placeholder="Please Select Wheel Scroll Direction" onChange={changeScrollValue}>
-              {scrollOptions.map((item) => (
-                <Option key={item.label} value={item.value}>
-                  {item.label}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
+          <Descriptions bordered items={items} layout="vertical" />
         </Form>
       </div>
       {contextHolder}
