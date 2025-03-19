@@ -70,7 +70,7 @@ const Version: FC = () => {
         extra={
           <>
             <div className={styles.extra}>
-              <div>{t('version.Version')}: 0.1.8</div>
+              <div>{t('version.Version')}: 0.2.2</div>
               <Button
                 className={styles.btn}
                 icon={<GithubOutlined />}
