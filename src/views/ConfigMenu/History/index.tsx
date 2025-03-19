@@ -1,5 +1,4 @@
 import { FC, useEffect, useState } from 'react';
-import { ExclamationCircleFilled } from '@ant-design/icons';
 
 import styles from './index.module.scss';
 import {
