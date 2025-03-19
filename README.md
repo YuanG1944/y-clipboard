@@ -93,3 +93,14 @@ Download：[Apple Silicon](https://github.com/YuanG1944/y-clipboard/releases/tag
 > **Encountered an issue?**  
 > Report it on the [Issues](https://github.com/YuanG1944/y-clipboard/issues)  
 > _Please include: OS version, steps to reproduce, and error screenshots._
+
+#### Thanks
+>[🔗](https://github.com/tauri-apps/tauri) Tauri
+>
+>[🔗](https://github.com/ahkohd/tauri-nspanel) tauri-nspanel 
+>
+>[🔗](https://github.com/CrossCopy/tauri-plugin-clipboard) tauri-plugin-clipboard 
+>
+>[🔗](https://github.com/ChurchTao/clipboard-rs) clipboard-rs 
+>
+>[🔗](https://github.com/EcoPasteHub/EcoPaste) Eco-paste

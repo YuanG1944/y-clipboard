@@ -22,6 +22,7 @@ import {
 import loadingAnim from '@/assets/loading-anim.gif';
 import { getWheelDirection, WheelEnum } from '@/actions/datamanage';
 import * as os from '@tauri-apps/plugin-os';
+import { isDev } from '@/utils';
 const appWindow = getCurrentWebviewWindow();
 const windows = Windows.getInstance();
 
@@ -322,6 +323,10 @@ const ClipHistoryBoard: FC = () => {
     setQueryKey(value);
   };
 
+  const handleContextMenu = (evt: MouseEvent) => {
+    !isDev() && evt.preventDefault();
+  };
+
   useEffect(() => {
     if (!show) {
       setFocus(false);
@@ -360,7 +365,7 @@ const ClipHistoryBoard: FC = () => {
   }, [cardContentRef.current]);
 
   return (
-    <div className={styles.clipLayout}>
+    <div className={styles.clipLayout} onContextMenu={handleContextMenu}>
       <div className={styles.blankSpace} onClick={handleBlankSpace}></div>
       <QueueAnim className={styles.animateLayout} type={'bottom'} ease={'easeInOutQuart'} key="ani">
         {show ? (

@@ -68,7 +68,7 @@ const Tags: React.FC<TagCollectType> = ({ show, onSelectedTagChange, reloadCard,
     setInputVisible(false);
     setTimeout(() => {
       checkFocus?.(false);
-    }, 500);
+    }, 400);
     setInputValue('');
   };
 

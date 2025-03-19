@@ -170,7 +170,7 @@ const ClipCard: FC<ICardProps> = ({
     setShow(false);
     setTimeout(() => {
       setShow(true);
-    }, 300);
+    }, 400);
   };
 
   const handleFavorite = async (historyId: string, tagId: string) => {

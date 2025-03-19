@@ -9,6 +9,7 @@ import yicon from '@/assets/y-icon.png';
 import { DesktopOutlined, HistoryOutlined, MacCommandOutlined } from '@ant-design/icons';
 import { useTranslation } from 'react-i18next';
 import SwitchLang from './SwitchLang';
+import { isDev } from '@/utils';
 
 const { Sider, Content } = Layout;
 
@@ -27,6 +28,10 @@ const ConfigMenu: FC = () => {
     getItem(t('history.title'), MenuEnum.HISTORY, <HistoryOutlined />),
     getItem(t('version.title'), MenuEnum.VERSION, <DesktopOutlined />),
   ];
+
+  const handleContextMenu = (evt: any) => {
+    !isDev() && evt.preventDefault();
+  };
 
   const handleOnSelected = (info: { key: string }) => {
     setMenuItem(info.key as MenuEnum);
@@ -55,7 +60,7 @@ const ConfigMenu: FC = () => {
   };
 
   return (
-    <Flex gap="middle" wrap="wrap">
+    <Flex gap="middle" wrap="wrap" onContextMenu={handleContextMenu}>
       <Layout className={styles.configLayout}>
         <Sider className={styles.sider}>
           <div className={styles.top}>

@@ -48,11 +48,11 @@
 
 ### Windows
 
-下载：[x64](https://github.com/YuanG1944/y-clipboard/releases/tag/windows)
+下载：[x64](https://github.com/YuanG1944/y-clipboard/releases)
 
 ### MacOS
 
-下载：[Apple Silicon](https://github.com/YuanG1944/y-clipboard/releases/tag/macos) | [Apple Intel](https://github.com/YuanG1944/y-clipboard/releases/tag/macos_intel)
+下载：[Apple Silicon](https://github.com/YuanG1944/y-clipboard/releases) | [Apple Intel](https://github.com/YuanG1944/y-clipboard/releases)
 
 ## 使用指南
 
@@ -88,8 +88,15 @@
 >   <img src="./mdImage/accessibility.png" alt="accessibility" style="zoom:30%;" />
 >
 > - 如果遇到“文件已损坏“，请执行
->   `xattr -c /Applications/y-clip.app`
+>   `sudo xattr -r -d com.apple.quarantine /Applications/y-clip.app`
 
 > **遇到问题？**  
 > 欢迎提交至 [Issues 追踪系统](https://github.com/YuanG1944/y-clipboard/issues)  
 > _请附上：系统版本/复现步骤/错误截图_
+
+#### 致谢
+>[🔗](https://github.com/tauri-apps/tauri) Tauri
+>[🔗](https://github.com/ahkohd/tauri-nspanel) tauri-nspanel 
+>[🔗](https://github.com/CrossCopy/tauri-plugin-clipboard) tauri-plugin-clipboard 
+>[🔗](https://github.com/ChurchTao/clipboard-rs) clipboard-rs 
+>[🔗](https://github.com/EcoPasteHub/EcoPaste) Eco-paste
