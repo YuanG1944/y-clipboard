@@ -579,7 +579,6 @@ impl SqliteDB {
 
         if let Some(tag) = req.tag {
             if !tag.is_empty() {
-                println!("tag is_empty: {}", tag);
                 params.push(tag.to_string());
                 sql.push_str(format!("AND f.tag_id = ?{}", params.len()).as_str());
             }
@@ -587,7 +586,6 @@ impl SqliteDB {
 
         if let Some(k) = &req.key {
             if !k.is_empty() {
-                println!("key is_empty: {}", k);
                 params.push(format!("%{}%", k));
                 sql.push_str(format!("AND text LIKE ?{}", params.len()).as_str());
             }

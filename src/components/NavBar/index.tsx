@@ -74,7 +74,12 @@ const NavBar: FC<INavBarProps> = ({
         style={{ width: 280 }}
       />
       <div className={styles.tags}>
-        <Tags onSelectedTagChange={handleSelected} reloadCard={reloadCard} show={show} />
+        <Tags
+          onSelectedTagChange={handleSelected}
+          reloadCard={reloadCard}
+          show={show}
+          checkFocus={checkFocus}
+        />
       </div>
     </div>
   );

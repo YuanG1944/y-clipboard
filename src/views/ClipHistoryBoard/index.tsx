@@ -372,6 +372,7 @@ const ClipHistoryBoard: FC = () => {
                 onSelectedTagChange={handleSelected}
                 onSearchChange={handleSearched}
                 reloadCard={handleBridge}
+                ctxLen={historyCtx.length}
               />
             </div>
             <div ref={cardContentRef} className={styles.contents} key="aniCard">

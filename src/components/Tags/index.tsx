@@ -30,7 +30,7 @@ export interface TagCollectType {
   checkFocus?: (isFocus: boolean) => void;
 }
 
-const Tags: React.FC<TagCollectType> = ({ show, onSelectedTagChange, reloadCard }) => {
+const Tags: React.FC<TagCollectType> = ({ show, onSelectedTagChange, reloadCard, checkFocus }) => {
   const [tags, setTags] = useState<ITag[]>([]);
   const [selectedTag, setSelectedTag] = useState<ITag | null>(null);
   const [inputVisible, setInputVisible] = useState(false);
@@ -49,6 +49,7 @@ const Tags: React.FC<TagCollectType> = ({ show, onSelectedTagChange, reloadCard 
 
   const showInput = () => {
     setInputVisible(true);
+    checkFocus?.(true);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -65,6 +66,9 @@ const Tags: React.FC<TagCollectType> = ({ show, onSelectedTagChange, reloadCard 
       addTag(inputValue).finally(() => reloadTags());
     }
     setInputVisible(false);
+    setTimeout(() => {
+      checkFocus?.(false);
+    }, 500);
     setInputValue('');
   };
 
