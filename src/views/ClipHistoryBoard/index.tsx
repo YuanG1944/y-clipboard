@@ -175,7 +175,7 @@ const ClipHistoryBoard: FC = () => {
   };
 
   const sendingPaste = async () => {
-    if (!focus) {
+    if (!focus && historyCtx.length) {
       updateCreateTime(currId);
       deleteItems(preHistoryCtx);
       writeSelected(historyCtx, currId, formatActMap);
