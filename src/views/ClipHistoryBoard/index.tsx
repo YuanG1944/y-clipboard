@@ -323,7 +323,7 @@ const ClipHistoryBoard: FC = () => {
     setQueryKey(value);
   };
 
-  const handleContextMenu = (evt: MouseEvent) => {
+  const handleContextMenu = (evt: any) => {
     !isDev() && evt.preventDefault();
   };
 
