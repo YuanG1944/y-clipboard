@@ -72,6 +72,7 @@ impl SqliteDB {
             (
                 id          VARCHAR(255) NOT NULL PRIMARY KEY,
                 name        VARCHAR(24)  UNIQUE,
+                is_delete   BOOLEAN DEFAULT FALSE,
                 create_time INTEGER
 
             );
@@ -342,6 +343,8 @@ impl SqliteDB {
                 create_time
             FROM 
                 tags_table 
+            WHERE
+                is_delete = FALSE
             ORDER BY 
                 create_time 
             ASC
@@ -439,7 +442,7 @@ impl SqliteDB {
     }
 
     pub fn delete_tag(&self, id: String) -> Result<()> {
-        let sql = "DELETE FROM tags_table WHERE id = ?1";
+        let sql = "UPDATE tags_table SET is_delete = TRUE WHERE id = ?1";
         self.conn.execute(sql, [id.as_str()])?;
         Ok(())
     }
@@ -549,7 +552,7 @@ impl SqliteDB {
 
         sql.push_str(
             "
-            SELECT 
+            SELECT DISTINCT
                 id, 
                 text, 
                 html, 
@@ -567,7 +570,7 @@ impl SqliteDB {
                 history_info h
             LEFT JOIN 
                 favorite_connect_history_table f 
-            ON ((await invoke(ClipboardEnum.FIND_HISTORIES, { query })) as string) ?? '';
+            ON
                 h.id = f.history_id
             WHERE 
                 1=1
@@ -575,18 +578,14 @@ impl SqliteDB {
         );
 
         if let Some(tag) = req.tag {
-            println!("tag: {}", tag);
-
             if !tag.is_empty() {
                 println!("tag is_empty: {}", tag);
                 params.push(tag.to_string());
-                sql.push_str(format!("AND tag_id = ?{}", params.len()).as_str());
+                sql.push_str(format!("AND f.tag_id = ?{}", params.len()).as_str());
             }
         }
 
         if let Some(k) = &req.key {
-            println!("key: {}", k);
-
             if !k.is_empty() {
                 println!("key is_empty: {}", k);
                 params.push(format!("%{}%", k));
@@ -612,8 +611,6 @@ impl SqliteDB {
                 .as_str(),
             );
         }
-
-        println!("params-->{:?}", params);
 
         let mut stmt = self.conn.prepare(&sql)?;
         let mut rows = stmt.query(rusqlite::params_from_iter(params))?;

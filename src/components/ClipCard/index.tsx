@@ -6,7 +6,6 @@ import classnames from 'classnames';
 import CardTitle from './CardTitle';
 import QueueAnim from 'rc-queue-anim';
 import { cancelTag, openFile, subscribeTag } from '@/actions/clipboard';
-import {} from '@tauri-apps/api';
 import { HeartTwoTone } from '@ant-design/icons';
 import * as os from '@tauri-apps/plugin-os';
 
@@ -221,7 +220,8 @@ const ClipCard: FC<ICardProps> = ({
   }, [tags, hearts]);
 
   const heartColor = useMemo(() => {
-    return hearts.length ? '#ff4d4f' : '#bfbfbf';
+    const hasHeart = hearts.some((h) => tags?.map((t) => t.id).includes(h));
+    return hasHeart ? '#ff4d4f' : '#bfbfbf';
   }, [hearts]);
 
   return (

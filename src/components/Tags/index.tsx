@@ -25,11 +25,12 @@ const tagInputStyle: React.CSSProperties = {
 
 export interface TagCollectType {
   show?: boolean;
+  reloadCard?: () => Promise<void>;
   onSelectedTagChange?: (selectedTag: ITag | null) => void;
   checkFocus?: (isFocus: boolean) => void;
 }
 
-const Tags: React.FC<TagCollectType> = ({ show, onSelectedTagChange }) => {
+const Tags: React.FC<TagCollectType> = ({ show, onSelectedTagChange, reloadCard }) => {
   const [tags, setTags] = useState<ITag[]>([]);
   const [selectedTag, setSelectedTag] = useState<ITag | null>(null);
   const [inputVisible, setInputVisible] = useState(false);
@@ -41,6 +42,8 @@ const Tags: React.FC<TagCollectType> = ({ show, onSelectedTagChange }) => {
   const editInputRef = useRef<InputRef>(null);
 
   const handleClose = (removedTag: ITag) => {
+    setSelectedTag(null);
+    reloadCard?.();
     deleteTag(removedTag.id).finally(() => reloadTags());
   };
 

@@ -14,11 +14,13 @@ export interface INavBarProps {
   checkFocus?: (isFocus: boolean) => void;
   onSelectedTagChange?: (selectedTag: ITag | null) => void;
   onSearchChange?: (value: string) => void;
+  reloadCard?: () => Promise<void>;
 }
 
 const NavBar: FC<INavBarProps> = ({
   show,
   ctxLen,
+  reloadCard,
   checkFocus,
   onSelectedTagChange,
   onSearchChange,
@@ -72,7 +74,7 @@ const NavBar: FC<INavBarProps> = ({
         style={{ width: 280 }}
       />
       <div className={styles.tags}>
-        <Tags onSelectedTagChange={handleSelected} show={show} />
+        <Tags onSelectedTagChange={handleSelected} reloadCard={reloadCard} show={show} />
       </div>
     </div>
   );
