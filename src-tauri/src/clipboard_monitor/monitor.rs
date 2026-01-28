@@ -11,6 +11,7 @@ use std::sync::Mutex;
 use tauri::Emitter;
 use tauri::{Manager, Runtime};
 use uuid::Uuid;
+use log::{info, warn, error};
 
 use crate::clipboard_history::FindHistoryReq;
 use crate::clipboard_history::HistoryItem;
@@ -44,62 +45,114 @@ where
     pub fn item_collect(&self) -> HistoryItem {
         let mut item = HistoryItem::new();
 
-        if self.manager.has_text().unwrap() {
-            let text = self.manager.read_text().unwrap();
-            item.set_text(text.clone());
-            item.md5_text = stringify::md5(text.as_str().trim());
-            item.push_formats(String::from("text"));
-        }
-        if self.manager.has_html().unwrap() {
-            let html = self.manager.read_html().unwrap();
-            item.set_html(html.clone());
-            item.md5_html = stringify::md5(html.as_str().trim());
-            item.push_formats(String::from("html"));
-        }
-        if self.manager.has_rtf().unwrap() {
-            let rtf = self.manager.read_rtf().unwrap();
-            item.set_rtf(rtf.clone());
-            item.md5_rtf = stringify::md5(rtf.as_str().trim());
-            item.push_formats(String::from("rtf"));
-        }
-        if self.manager.has_image().unwrap() {
-            let image = self.manager.read_image_base64().unwrap();
-            item.set_image(image.clone());
-            item.md5_image = stringify::md5(image.as_str().trim());
-            item.push_formats(String::from("image"));
-        }
-
-        if self.manager.has_file_url().unwrap() {
-            let files = self.manager.read_files().unwrap();
-            println!("files--->{:?}", files);
-
-            if self.manager.has_text().unwrap() == false {
-                let files_name: Vec<&str> = files
-                    .iter()
-                    .map(|f| {
-                        let path = Path::new(f);
-                        path.file_name().unwrap().to_str().unwrap()
-                    })
-                    .collect();
-                let text = files_name.join(" ");
-                item.set_text(text.clone());
-                item.md5_text = stringify::md5(text.as_str());
-                item.push_formats(String::from("text"));
-            }
-
-            if self.manager.read_files().unwrap().len() > 0 {
-                item.set_files(self.manager.read_files().unwrap());
-                item.push_formats(String::from("files"));
+        if let Ok(has_text) = self.manager.has_text() {
+            if has_text {
+                match self.manager.read_text() {
+                    Ok(text) => {
+                        item.set_text(text.clone());
+                        item.md5_text = stringify::md5(text.as_str().trim());
+                        item.push_formats(String::from("text"));
+                        info!("Text format collected");
+                    }
+                    Err(e) => {
+                        error!("Failed to read text from clipboard: {}", e);
+                    }
+                }
             }
         }
 
-        if item.formats.len() > 0 {
+        if let Ok(has_html) = self.manager.has_html() {
+            if has_html {
+                match self.manager.read_html() {
+                    Ok(html) => {
+                        item.set_html(html.clone());
+                        item.md5_html = stringify::md5(html.as_str().trim());
+                        item.push_formats(String::from("html"));
+                        info!("HTML format collected");
+                    }
+                    Err(e) => {
+                        error!("Failed to read HTML from clipboard: {}", e);
+                    }
+                }
+            }
+        }
+
+        if let Ok(has_rtf) = self.manager.has_rtf() {
+            if has_rtf {
+                match self.manager.read_rtf() {
+                    Ok(rtf) => {
+                        item.set_rtf(rtf.clone());
+                        item.md5_rtf = stringify::md5(rtf.as_str().trim());
+                        item.push_formats(String::from("rtf"));
+                        info!("RTF format collected");
+                    }
+                    Err(e) => {
+                        error!("Failed to read RTF from clipboard: {}", e);
+                    }
+                }
+            }
+        }
+
+        if let Ok(has_image) = self.manager.has_image() {
+            if has_image {
+                match self.manager.read_image_base64() {
+                    Ok(image) => {
+                        item.set_image(image.clone());
+                        item.md5_image = stringify::md5(image.as_str().trim());
+                        item.push_formats(String::from("image"));
+                        info!("Image format collected");
+                    }
+                    Err(e) => {
+                        error!("Failed to read image from clipboard: {}", e);
+                    }
+                }
+            }
+        }
+
+        if let Ok(has_file_url) = self.manager.has_file_url() {
+            if has_file_url {
+                match self.manager.read_files() {
+                    Ok(files) => {
+                        info!("Files in clipboard: {:?}", files);
+
+                        if !self.manager.has_text().unwrap_or(false) {
+                            let files_name: Vec<&str> = files
+                                .iter()
+                                .map(|f| {
+                                    let path = Path::new(f);
+                                    path.file_name().unwrap().to_str().unwrap()
+                                })
+                                .collect();
+                            let text = files_name.join(" ");
+                            item.set_text(text.clone());
+                            item.md5_text = stringify::md5(text.as_str());
+                            item.push_formats(String::from("text"));
+                        }
+
+                        if !files.is_empty() {
+                            item.set_files(files);
+                            item.push_formats(String::from("files"));
+                            info!("File format collected");
+                        }
+                    }
+                    Err(e) => {
+                        error!("Failed to read files from clipboard: {}", e);
+                    }
+                }
+            }
+        }
+
+        if !item.formats.is_empty() {
             let default_active = ActiveEnum::default_format(&item.formats);
             item.set_active(ActiveEnum::to_str(default_active));
+            info!("Collected clipboard item with formats: {:?}", item.formats);
+        } else {
+            warn!("No content found in clipboard");
         }
 
         item
     }
+
 }
 
 impl<R> ClipboardHandler for ClipboardMonitor<R>
@@ -108,11 +161,14 @@ where
 {
     fn on_clipboard_change(&mut self) -> CallbackResult {
         if !*self.running.lock().unwrap() {
+            warn!("Clipboard monitor is not running");
             let _ = self
                 .app_handle
                 .emit("plugin:clipboard://clipboard-monitor/status", false);
             return CallbackResult::Stop;
         }
+        
+        info!("Clipboard content changed");
         let _ = self.app_handle.emit(
             "plugin:clipboard://clipboard-monitor/update",
             format!("clipboard update"),
@@ -120,23 +176,32 @@ where
 
         // push item to history store
         let item: HistoryItem = self.item_collect();
-        let _ = SqliteDB::new().insert_item_distinct(item);
+        
+        match SqliteDB::new().insert_item_distinct(item.clone()) {
+            Ok(_) => {
+                info!("Successfully saved clipboard item with id: {}", item.id);
+            }
+            Err(e) => {
+                error!("Failed to save clipboard item: {}", e);
+            }
+        }
 
         CallbackResult::Next
     }
 
     fn on_clipboard_error(&mut self, error: std::io::Error) -> CallbackResult {
+        error!("Clipboard error occurred: {}", error);
         let _ = self.app_handle.emit(
             "plugin:clipboard://clipboard-monitor/error",
             error.to_string(),
         );
         if !*self.running.lock().unwrap() {
+            warn!("Clipboard monitor is not running, stopping");
             let _ = self
                 .app_handle
                 .emit("plugin:clipboard://clipboard-monitor/status", false);
             return CallbackResult::Stop;
         }
-        eprintln!("Error: {}", error);
         CallbackResult::Next
     }
 }

@@ -5,6 +5,7 @@ use tauri::{
     plugin::{Builder, TauriPlugin},
     Emitter, Manager, Runtime, State,
 };
+use log::{info, error};
 
 use crate::clipboard_history::FindHistoryReq;
 
@@ -216,13 +217,18 @@ pub async fn start_monitor(
     let _ = app.emit("plugin:clipboard://clipboard-monitor/status", true);
     let mut running = state.running.lock().unwrap();
     if *running {
+        info!("Clipboard monitor is already running");
         return Ok(());
     }
+    info!("Starting clipboard monitor");
     *running = true;
     let running = state.running.clone();
 
     std::thread::spawn(move || {
-        let _ = Master::new(ClipboardMonitor::new(app, running)).run();
+        match Master::new(ClipboardMonitor::new(app, running)).run() {
+            Ok(_) => info!("Clipboard monitor started successfully"),
+            Err(e) => error!("Clipboard monitor encountered an error: {}", e),
+        }
     });
 
     Ok(())
@@ -237,7 +243,10 @@ pub fn start_monitor_setup<R: Runtime>(app_handle: tauri::AppHandle<R>) {
     let running = Arc::new(Mutex::new(true));
 
     std::thread::spawn(move || {
-        let _ = Master::new(ClipboardMonitor::new(app_handle, running)).run();
+        match Master::new(ClipboardMonitor::new(app_handle, running)).run() {
+            Ok(_) => info!("Clipboard monitor setup completed"),
+            Err(e) => error!("Clipboard monitor setup error: {}", e),
+        }
     });
 }
 
@@ -246,28 +255,35 @@ pub async fn stop_monitor(
     app: tauri::AppHandle,
     state: tauri::State<'_, ClipboardManager>,
 ) -> Result<(), String> {
+    info!("Stopping clipboard monitor");
     *state.running.lock().unwrap() = false;
     let _ = app.emit("plugin:clipboard://clipboard-monitor/status", false);
     Ok(())
 }
 
 pub fn stop_monitor_exit(state: &tauri::State<'_, ClipboardManager>) {
+    info!("Clipboard monitor is being stopped on application exit");
     *state.running.lock().unwrap() = false;
 }
 
 #[tauri::command]
 pub fn is_monitor_running(state: tauri::State<'_, ClipboardManager>) -> bool {
-    *state.running.lock().unwrap()
+    let running = *state.running.lock().unwrap();
+    info!("Clipboard monitor status: {}", if running { "running" } else { "stopped" });
+    running
 }
 
 pub fn init<R: Runtime>(open_watch: bool) -> TauriPlugin<R> {
     Builder::new("clipboard")
         .setup(move |app, _api| {
+            info!("Initializing clipboard plugin");
             let state = ClipboardManager::default();
             if open_watch {
+                info!("Auto-starting clipboard monitor");
                 start_monitor_setup(app.clone());
             }
             app.manage(state);
+            info!("Clipboard plugin initialized successfully");
             Ok(())
         })
         .on_event(

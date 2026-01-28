@@ -1,6 +1,7 @@
 use anyhow::Result;
 use std::time::{SystemTime, UNIX_EPOCH};
 use uuid::Uuid;
+use log::{info, warn, error};
 
 use crate::{
     clipboard_history::{FindHistoryReq, HistoryItem, TagsStruct},
@@ -32,8 +33,11 @@ impl SqliteDB {
     pub fn new() -> Self {
         let data_dir = path::app_data_dir().unwrap().join(SQLITE_FILE_NAME);
 
-        let conn =
-            Connection::open_with_flags(data_dir, OpenFlags::SQLITE_OPEN_READ_WRITE).unwrap();
+        let conn = Connection::open_with_flags(
+            data_dir,
+            OpenFlags::SQLITE_OPEN_READ_WRITE | OpenFlags::SQLITE_OPEN_CREATE,
+        )
+        .unwrap();
 
         SqliteDB { conn }
     }
@@ -41,7 +45,7 @@ impl SqliteDB {
     pub fn init() {
         let data_dir = path::app_data_dir().unwrap().join(SQLITE_FILE_NAME);
 
-        println!("data path: {}", data_dir.to_str().unwrap());
+        info!("Initializing database at: {}", data_dir.to_str().unwrap());
 
         let _ = create_dir(&data_dir);
 
@@ -101,12 +105,30 @@ impl SqliteDB {
             VALUES ('expire', '-7 day');
         "#;
 
-        let _ = conn.execute(init_history_info_table, ());
-        let _ = conn.execute(init_favorite_table, ());
-        let _ = conn.execute(init_favorite_connect_history_table, ());
-        let _ = conn.execute(init_config_table, ());
-        let _ = conn.execute(init_expire, ());
-        let _ = Self::new().insert_tag(Uuid::new_v4().to_string(), "Favorite".to_string());
+        match conn.execute(init_history_info_table, ()) {
+            Ok(_) => info!("Created history_info table"),
+            Err(e) => error!("Failed to create history_info table: {}", e),
+        }
+        match conn.execute(init_favorite_table, ()) {
+            Ok(_) => info!("Created tags_table"),
+            Err(e) => error!("Failed to create tags_table: {}", e),
+        }
+        match conn.execute(init_favorite_connect_history_table, ()) {
+            Ok(_) => info!("Created favorite_connect_history_table"),
+            Err(e) => error!("Failed to create favorite_connect_history_table: {}", e),
+        }
+        match conn.execute(init_config_table, ()) {
+            Ok(_) => info!("Created config_table"),
+            Err(e) => error!("Failed to create config_table: {}", e),
+        }
+        match conn.execute(init_expire, ()) {
+            Ok(_) => info!("Set expire config"),
+            Err(e) => warn!("Expire config might already exist: {}", e),
+        }
+        match Self::new().insert_tag(Uuid::new_v4().to_string(), "Favorite".to_string()) {
+            Ok(_) => info!("Created default Favorite tag"),
+            Err(e) => warn!("Default Favorite tag might already exist: {}", e),
+        }
     }
 
     pub fn insert_item(&self, insert_item: HistoryItem) -> Result<i64> {
@@ -148,8 +170,12 @@ impl SqliteDB {
                 insert_item.get_active(),
             ),
         ) {
-            Ok(res) => println!("Insert item successfully!"),
-            Err(err) => println!("Failed to insert directories: {}", err),
+            Ok(_) => {
+                info!("Successfully inserted clipboard item with id: {}", insert_item.get_id());
+            }
+            Err(err) => {
+                error!("Failed to insert clipboard item: {}", err);
+            }
         };
         Ok(self.conn.last_insert_rowid())
     }
@@ -159,6 +185,7 @@ impl SqliteDB {
             && insert_item.get_image().trim().is_empty()
             && insert_item.get_rtf().trim().is_empty())
         {
+            info!("Skipping empty clipboard item");
             return Ok(());
         }
 
@@ -180,12 +207,13 @@ impl SqliteDB {
             md5_value = insert_item.md5_image.clone();
         }
 
-        match self.find_record_by_md5(md5_key, md5_value) {
+        match self.find_record_by_md5(md5_key.clone(), md5_value.clone()) {
             Ok(id) => {
+                info!("Found duplicate clipboard item with id: {}. Updating timestamp.", id);
                 self.update_pasted_create_time(id)?;
             }
-            Err(_e) => {
-                println!("{}", _e);
+            Err(e) => {
+                info!("New clipboard item, inserting to database. Error from duplicate check: {}", e);
                 self.insert_item(insert_item)?;
             }
         }
@@ -193,11 +221,14 @@ impl SqliteDB {
     }
 
     fn find_record_by_md5(&self, md5_key: String, md5_value: String) -> Result<String> {
-        let sql = format!(
-            "SELECT id FROM history_info WHERE {} = '{}'",
-            &md5_key, &md5_value
-        );
-        let res: String = self.conn.query_row(&sql, [], |row| row.get(0))?;
+        // 验证 md5_key 以防止 SQL 注入
+        let valid_keys = ["md5_text", "md5_html", "md5_rtf", "md5_image"];
+        if !valid_keys.contains(&md5_key.as_str()) {
+            return Err(anyhow::anyhow!("Invalid md5 key: {}", md5_key));
+        }
+
+        let sql = format!("SELECT id FROM history_info WHERE {} = ?1", &md5_key);
+        let res: String = self.conn.query_row(&sql, [&md5_value], |row| row.get(0))?;
         Ok(res)
     }
 
@@ -209,14 +240,30 @@ impl SqliteDB {
             .as_secs()
             * 1000;
 
-        self.conn.execute(sql, (id.as_str(), curr_time))?;
-        Ok(())
+        match self.conn.execute(sql, (id.as_str(), curr_time)) {
+            Ok(_) => {
+                info!("Updated clipboard item timestamp for id: {}", id);
+                Ok(())
+            }
+            Err(e) => {
+                error!("Failed to update clipboard item timestamp for id: {}: {}", id, e);
+                Err(e.into())
+            }
+        }
     }
 
     pub fn update_pasted_active(&self, id: String, active: String) -> Result<()> {
         let sql = "UPDATE history_info SET active = ?2 WHERE id = ?1";
-        self.conn.execute(sql, (id.as_str(), active.as_str()))?;
-        Ok(())
+        match self.conn.execute(sql, (id.as_str(), active.as_str())) {
+            Ok(_) => {
+                info!("Updated clipboard item active format to: {} for id: {}", active, id);
+                Ok(())
+            }
+            Err(e) => {
+                error!("Failed to update active format for id: {}: {}", id, e);
+                Err(e.into())
+            }
+        }
     }
 
     pub fn get_config(&self, key: String) -> Result<String> {

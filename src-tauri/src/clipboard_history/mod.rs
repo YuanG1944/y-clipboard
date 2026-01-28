@@ -3,7 +3,16 @@ use std::collections::VecDeque;
 use std::time::{SystemTime, UNIX_EPOCH};
 use uuid::Uuid;
 
-#[derive(serde::Serialize, serde::Deserialize, Debug, Default, PartialEq)]
+#[derive(
+    serde::Serialize,
+    serde::Deserialize,
+    Debug,
+    Default,
+    PartialEq,
+    Clone,
+    Eq,
+    Hash,
+)]
 pub struct HistoryItem {
     pub id: String,
     pub text: String,
@@ -21,7 +30,7 @@ pub struct HistoryItem {
     pub tags: Vec<TagsStruct>,
 }
 
-#[derive(serde::Serialize, serde::Deserialize, Debug, Default, PartialEq)]
+#[derive(serde::Serialize, serde::Deserialize, Debug, Default, PartialEq, Eq, Hash, Clone)]
 pub struct TagsStruct {
     pub id: String,
     pub name: String,
